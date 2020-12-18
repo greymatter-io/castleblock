@@ -49,7 +49,7 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-      return "Homepage";
+      return h.file("./src/mf-ui.html");
     },
   });
 
@@ -108,14 +108,14 @@ const init = async () => {
     },
   });
 
-  const onRequest = function (request, h) {
-    if (request.path.includes("/latest")) {
-      const v = latestVersion(`.${request.path.replace("/latest", "")}`);
-      request.setUrl(`${request.path.replace("latest", v)}`);
-    }
-    return h.continue;
-  };
-  server.ext("onRequest", onRequest);
+  server.route({
+    method: "GET",
+    path: "/package/{file}/latest/{end*}",
+    handler: (request, reply) => {
+      const v = latestVersion(`.${request.path.split("/latest")[0]}`);
+      return reply.redirect(`${request.path.replace("latest", v)}`).permanent();
+    },
+  });
 
   await server.start();
   console.log("Server running on %s", server.info.uri);
