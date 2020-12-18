@@ -6,13 +6,21 @@ import Inert from "@hapi/inert";
 import Path from "path";
 import { exec } from "child_process";
 
-import { latestVersion, nextVersion } from "./versioning.js";
+import {
+  versions,
+  latestVersion,
+  nextVersion,
+  getDirectories,
+} from "./versioning.js";
+
+const port = 3000;
+const host = "localhost";
 
 async function extract(path, name) {
   return new Promise((resolve, reject) => {
     console.log("Extracting...", `tar -xf ${path}${name}.tar.gz -C ${path}`);
     exec(
-      `tar -xf ${path}${name}.tar.gz -C ${name} .`,
+      `tar -xf ${path}${name}.tar.gz -C ${path}`,
       function callback(error, stdout, stderr) {
         console.log(stdout);
         console.log(stderr);
@@ -24,10 +32,16 @@ async function extract(path, name) {
     );
   });
 }
+
+function createPath(p) {
+  fs.mkdirSync(p, { recursive: true });
+  return p;
+}
+
 const init = async () => {
   const server = Hapi.server({
-    port: 3000,
-    host: "localhost",
+    port,
+    host,
   });
 
   await server.register([require("@hapi/inert")]);
@@ -51,16 +65,14 @@ const init = async () => {
       },
     },
     handler: (req, h) => {
-      let dir = `./packages/${req.payload.name}/`;
+      console.log("Creating Package");
+      let dir = `./package/${req.payload.name}/`;
       let next = nextVersion(latestVersion(dir), req.payload.version);
+      console.log("Version:", next);
       //add the version to the dir path
-      dir = `./packages/${req.payload.name}/${next}/`;
-      if (!fs.existsSync(dir)) {
-        fs.mkdirSync(dir);
-      } else {
-        fs.rmdirSync(dir, { recursive: true });
-        fs.mkdirSync(dir);
-      }
+      dir = createPath(`./package/${req.payload.name}/${next}/`);
+      console.log("dir", dir);
+
       const stream = req.payload.file.pipe(
         fs.createWriteStream(`${dir}${req.payload.name}.tar.gz`)
       );
@@ -68,7 +80,7 @@ const init = async () => {
         extract(dir, req.payload.name);
       });
 
-      return "DONE";
+      return `Deployed: http://${host}:${port}/package/${req.payload.name}/${next}/`;
     },
   });
 
@@ -77,11 +89,33 @@ const init = async () => {
     path: "/package/{file*}",
     handler: {
       directory: {
-        path: "packages",
+        path: "package",
         listing: true,
       },
     },
   });
+
+  server.route({
+    method: "GET",
+    path: "/packages",
+    handler: () => {
+      return getDirectories("./package/").map((pack) => {
+        return {
+          name: pack,
+          versions: versions(`./package/${pack}`),
+        };
+      });
+    },
+  });
+
+  const onRequest = function (request, h) {
+    if (request.path.includes("/latest")) {
+      const v = latestVersion(`.${request.path.replace("/latest", "")}`);
+      request.setUrl(`${request.path.replace("latest", v)}`);
+    }
+    return h.continue;
+  };
+  server.ext("onRequest", onRequest);
 
   await server.start();
   console.log("Server running on %s", server.info.uri);

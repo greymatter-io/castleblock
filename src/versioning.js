@@ -9,10 +9,18 @@ import semverPatch from "semver/functions/patch";
 import semverInc from "semver/functions/inc";
 
 export function getDirectories(source) {
+  if (!fs.existsSync(source)) {
+    return [];
+  }
   return fs
     .readdirSync(source, { withFileTypes: true })
     .filter((dirent) => dirent.isDirectory())
     .map((dirent) => dirent.name);
+}
+
+export function versions(path) {
+  const v = semverSort(getDirectories(path));
+  return v ? v : [];
 }
 
 export function latestVersion(path) {
