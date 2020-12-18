@@ -4,9 +4,26 @@ import Hapi from "@hapi/hapi";
 import Joi from "@hapi/joi";
 import Inert from "@hapi/inert";
 import Path from "path";
+import { exec } from "child_process";
 
 import { latestVersion, nextVersion } from "./versioning.js";
 
+async function extract(path, name) {
+  return new Promise((resolve, reject) => {
+    console.log("Extracting...", `tar -xf ${path}${name}.tar.gz -C ${path}`);
+    exec(
+      `tar -xf ${path}${name}.tar.gz -C ${name} .`,
+      function callback(error, stdout, stderr) {
+        console.log(stdout);
+        console.log(stderr);
+        if (error) {
+          reject();
+        }
+        resolve();
+      }
+    );
+  });
+}
 const init = async () => {
   const server = Hapi.server({
     port: 3000,
@@ -44,9 +61,12 @@ const init = async () => {
         fs.rmdirSync(dir, { recursive: true });
         fs.mkdirSync(dir);
       }
-      req.payload.file.pipe(
+      const stream = req.payload.file.pipe(
         fs.createWriteStream(`${dir}${req.payload.name}.tar.gz`)
       );
+      stream.on("finish", function () {
+        extract(dir, req.payload.name);
+      });
 
       return "DONE";
     },
@@ -54,11 +74,11 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: "/package/{param*}",
+    path: "/package/{file*}",
     handler: {
       directory: {
-        path: "./packages/{param*}",
-        index: ["index.html", "default.html"],
+        path: "packages",
+        listing: true,
       },
     },
   });
