@@ -22,9 +22,14 @@ WORKDIR /service
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
 COPY package*.json ./
-
 COPY . .
-RUN npm install
+ARG NPM_TOKEN
+COPY .docker-npmrc .npmrc
+RUN cat .npmrc
+RUN echo $NPM_TOKEN
+
+RUN npm ci --only=production && rm -f .npmrc
+
 # If you are building your code for production
 # RUN npm ci --only=production
 
