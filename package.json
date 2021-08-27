@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon --ignore './package/' --exec babel-node src/index.js"
+    "dev": "nodemon --ignore './package/' --exec babel-node src/index.js",
+    "start": "babel-node src/index.js",
+    "docker-build":"docker build . -t mf-service",
+    "docker-run":"docker run  -p 3000:3000 --net=host mf-service"
   },
   "author": "",
   "license": "ISC",

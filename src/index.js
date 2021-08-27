@@ -13,8 +13,12 @@ import {
   getDirectories,
 } from "./versioning.js";
 
-const port = 3000;
-const host = "localhost";
+const port = process.env.PORT || 3000;
+const host = process.env.HOST || "localhost";
+
+//This is just used in the path when requesting a microfrontend
+//Examples: package, ui, mf, app
+const assetName = process.env.ASSETNAME || "package";
 
 async function extract(path, name) {
   return new Promise((resolve, reject) => {
@@ -55,7 +59,7 @@ const init = async () => {
 
   server.route({
     method: "POST",
-    path: "/package",
+    path: `/${assetName}`,
     options: {
       payload: {
         output: "stream",
@@ -80,16 +84,16 @@ const init = async () => {
         extract(dir, req.payload.name);
       });
 
-      return `Deployed: http://${host}:${port}/package/${req.payload.name}/${next}/`;
+      return `Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`;
     },
   });
 
   server.route({
     method: "GET",
-    path: "/package/{file*}",
+    path: `/${assetName}/{file*}`,
     handler: {
       directory: {
-        path: "package",
+        path: `package`,
         listing: true,
       },
     },
@@ -97,9 +101,9 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: "/packages",
+    path: `/${assetName}`,
     handler: () => {
-      return getDirectories("./package/").map((pack) => {
+      return getDirectories(`./package/`).map((pack) => {
         return {
           name: pack,
           versions: versions(`./package/${pack}`),
@@ -110,7 +114,7 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: "/package/{file}/latest/{end*}",
+    path: `/${assetName}/{file}/latest/{end*}`,
     handler: (request, reply) => {
       const v = latestVersion(`.${request.path.split("/latest")[0]}`);
       return reply.redirect(`${request.path.replace("latest", v)}`).permanent();
