@@ -1,4 +1,4 @@
-FROM docker-di2e.di2e.net/adx-base-images/adx-image-alpine-3-base-ccp:latest
+FROM alpine:latest
 USER root
 RUN mv /etc/apk/repositories /tmp/repositories && \
     echo "http://dl-cdn.alpinelinux.org/alpine/latest-stable/main" >> /etc/apk/repositories && \
