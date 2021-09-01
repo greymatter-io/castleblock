@@ -55,6 +55,7 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
+
       return `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -95,6 +96,7 @@ const init = async () => {
       console.log("Version:", next);
       //add the version to the dir path
       dir = createPath(`${directory}/${req.payload.name}/${next}/`);
+
       console.log("dir", dir);
 
       const stream = req.payload.file.pipe(
