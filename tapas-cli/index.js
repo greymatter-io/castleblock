@@ -5,7 +5,7 @@ var cli = require("cli");
 var chalk = require("chalk");
 var fs = require("fs");
 
-console.log(chalk.bold(chalk.cyan("Welcome to the mf-cli")));
+console.log(chalk.bold(chalk.cyan("Welcome to the tapas-cli")));
 cli.info("Type --help for list of parameters");
 
 const args = cli.parse({

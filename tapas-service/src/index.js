@@ -53,7 +53,7 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-      return h.file("./src/mf-ui.html");
+      return h.file("./src/tapas-ui.html");
     },
   });
 

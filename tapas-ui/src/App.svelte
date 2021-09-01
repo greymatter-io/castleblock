@@ -11,7 +11,7 @@
 <svelte:head>
   <title>MFE</title>
 </svelte:head>
-<svelte:options tag="mf-ui"></svelte:options>
+<svelte:options tag="tapas-ui"></svelte:options>
 <main>
 	<h1>Microfrontend Catalog</h1>
     <p>
@@ -21,7 +21,7 @@
     <h3>Deploying a Microfrontend</h3>
     <p>
     Deploying couldn't be simpler. Just build your application and transpile it to minified static assets and run the following command.
-    <code class="block">mf-cli -n cool-calculator -d ./build/</code>
+    <code class="block">tapas-cli -n cool-calculator -d ./build/</code>
     </p>
     {#await packages}
       <div>Loading</div>

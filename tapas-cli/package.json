@@ -1,5 +1,5 @@
 {
-  "name": "mf-cli",
+  "name": "tapas-cli",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -15,6 +15,6 @@
     "tar": "^6.0.5"
   },
   "bin": {
-    "mf-cli": "index.js"
+    "tapas-cli": "index.js"
   }
 }
