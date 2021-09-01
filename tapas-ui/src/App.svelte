@@ -3,7 +3,7 @@
   import axios from "axios";
   
   let packages = new Promise((resolve, reject)=>{
-    return axios.get('http://localhost:3000/package').then(results=>resolve(results.data));
+    return axios.get('http://localhost:3000/deployments').then(results=>resolve(results.data));
   });
 
 </script>
@@ -28,11 +28,11 @@
     {:then results}
       {#each results as pack}
         <details>
-          <summary><a target="_blank" href={`/package/${pack.name}/latest/`}>{pack.name}</a></summary>
+          <summary><a target="_blank" href={`${pack.path}/latest/`}>{pack.name}</a></summary>
           <p>
             {#each pack.versions.reverse() as version,i}
               <div>
-                <a target="_blank" href={`/package/${pack.name}/${version}/`}>
+                <a target="_blank" href={`${pack.path}/${version}/`}>
                   {pack.name} - {version} {i==0 ? '(latest)':''}
                 </a>
               </div>

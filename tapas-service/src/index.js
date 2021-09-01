@@ -20,6 +20,7 @@ const host = process.env.HOST || "localhost";
 //Examples: package, ui, mf, app
 //Example path: /<assetName>/my-app/2.3.4/
 const assetName = process.env.ASSETNAME || "ui";
+const directory = "./assets";
 
 async function extract(path, name) {
   return new Promise((resolve, reject) => {
@@ -54,22 +55,8 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-      if (!fs.existsSync("./homepage")) {
-        return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset='utf-8'>
-          <meta name='viewport' content='width=device-width,initial-scale=1'>
-          <title>Tapas</title>
-        </head>
-        <body>
-        <h3>Homepage application not installed yet. </h3>
-        <p>Install a web app to serve as your landing page, this can be your own portal site or the <a href="https://github.com/greymatter-io/tapas/tree/master/tapas-ui">tapas-ui</a>. See here for <a href="https://github.com/greymatter-io/tapas/tree/master/tapas-service">instructions</a>.</p>
-        </body>
-        </html>
-        `;
-      } else {
-        return `<!DOCTYPE html>
+
+      return `<!DOCTYPE html>
         <html lang="en">
         <head>
           <meta charset='utf-8'>
@@ -85,13 +72,12 @@ const init = async () => {
         </body>
         </html>
         `;
-      }
     },
   });
 
   server.route({
     method: "POST",
-    path: `/${assetName}`,
+    path: `/deployment`,
     options: {
       payload: {
         output: "stream",
@@ -102,11 +88,15 @@ const init = async () => {
     },
     handler: (req, h) => {
       console.log("Creating Package");
-      let dir = `./assets/${req.payload.name}/`;
-      let next = nextVersion(latestVersion(dir), req.payload.version);
+      let dir = `${directory}/${req.payload.name}/`;
+      let next = nextVersion(
+        latestVersion(req.payload.name, directory),
+        req.payload.version
+      );
       console.log("Version:", next);
       //add the version to the dir path
-      dir = createPath(`./assets/${req.payload.name}/${next}/`);
+      dir = createPath(`${directory}/${req.payload.name}/${next}/`);
+
       console.log("dir", dir);
 
       const stream = req.payload.file.pipe(
@@ -125,7 +115,7 @@ const init = async () => {
     path: `/${assetName}/{file*}`,
     handler: {
       directory: {
-        path: `assets`,
+        path: `${directory}`,
         listing: true,
       },
     },
@@ -133,12 +123,13 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: `/${assetName}`,
+    path: `/deployments`,
     handler: () => {
-      return getDirectories(`./assets/`).map((pack) => {
+      return getDirectories(`${directory}/`).map((deployment) => {
         return {
-          name: pack,
-          versions: versions(`./assets/${pack}`),
+          name: deployment,
+          versions: versions(deployment, directory),
+          path: `./${assetName}/${deployment}`,
         };
       });
     },
@@ -147,9 +138,20 @@ const init = async () => {
   server.route({
     method: "GET",
     path: `/${assetName}/{file}/latest/{end*}`,
-    handler: (request, reply) => {
-      const v = latestVersion(`.${request.path.split("/latest")[0]}`);
-      return reply.redirect(`${request.path.replace("latest", v)}`).permanent();
+    handler: (request, h) => {
+      const v = latestVersion(request.path.split("/")[2], directory);
+      let pathToFile = request.path
+        .substring(1)
+        .replace(assetName, directory)
+        .replace("latest", v);
+
+      //if a directory is requested append index.html
+      pathToFile = pathToFile.endsWith("/")
+        ? pathToFile + "index.html"
+        : pathToFile;
+
+      return h.file(pathToFile);
+      return h.redirect(`${request.path.replace("latest", v)}`).permanent();
     },
   });
 

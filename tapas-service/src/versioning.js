@@ -18,13 +18,13 @@ export function getDirectories(source) {
     .map((dirent) => dirent.name);
 }
 
-export function versions(path) {
-  const v = semverSort(getDirectories(path));
+export function versions(appName, path) {
+  const v = semverSort(getDirectories(`${path}/${appName}`));
   return v ? v : [];
 }
 
-export function latestVersion(path) {
-  const v = _.last(semverSort(getDirectories(path)));
+export function latestVersion(appName, path) {
+  const v = _.last(semverSort(getDirectories(`${path}/${appName}`)));
   return v ? v : "0.0.0";
 }
 

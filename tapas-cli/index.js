@@ -10,7 +10,7 @@ cli.info("Type --help for list of parameters");
 
 const args = cli.parse({
   directory: ["d", "Directory containing your built assets", "file"],
-  name: ["n", "Name of package", "string"],
+  name: ["n", "Name of deployment", "string"],
   url: ["u", "URL to tapas service", "string", "localhost:3000"],
   version: ["v", "Increment Version", "string"],
 });
@@ -18,7 +18,9 @@ const args = cli.parse({
 //Check for required variables
 
 if (!args.name) {
-  cli.error('Please include a name for your package. i.e. --name "my-package"');
+  cli.error(
+    'Please include a name for your deployment. i.e. --name "my-deployment"'
+  );
   process.exit(1);
 }
 if (!args.directory) {
@@ -47,7 +49,7 @@ async function bundle() {
 async function upload() {
   console.log(chalk.cyan("Uploading..."));
   exec(
-    `curl -X POST -F 'name=${args.name}' -F 'version=${args.version}' -F 'file=@./${args.name}.tar.gz' ${args.url}/package`,
+    `curl -X POST -F 'name=${args.name}' -F 'version=${args.version}' -F 'file=@./${args.name}.tar.gz' ${args.url}/deployment`,
     function callback(error, stdout, stderr) {
       cli.info(stdout);
     }
