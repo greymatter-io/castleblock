@@ -24,7 +24,7 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 tapas-cli -n my-app -d ./dist
 ```
 
-![diagram of tapas](./tapas-highlevel-diagram.png "Tapas high-level diagram")
+![diagram of how to use tapas](./tapas-usage-diagram.png "Tapas usage diagram")
 
 ## Comming Soon!
 
