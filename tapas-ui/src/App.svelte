@@ -1,7 +1,11 @@
 <script>
   import {onMount} from "svelte";
   import axios from "axios";
-  
+   let env= new Promise((resolve, reject)=>{
+    return axios.get('./env.json').then(results=>resolve(results.data));
+  });
+
+ 
   let packages = new Promise((resolve, reject)=>{
     return axios.get('http://localhost:3000/deployments').then(results=>resolve(results.data));
   });

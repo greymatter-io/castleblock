@@ -13,6 +13,11 @@ const args = cli.parse({
   name: ["n", "Name of deployment", "string"],
   url: ["u", "URL to tapas service", "string", "localhost:3000"],
   version: ["v", "Increment Version", "string"],
+  env: [
+    "e",
+    "Include env file in deployment (accessible from ./env.json when deployed)",
+    "file",
+  ],
 });
 
 //Check for required variables
@@ -49,7 +54,7 @@ async function bundle() {
 async function upload() {
   console.log(chalk.cyan("Uploading..."));
   exec(
-    `curl -X POST -F 'name=${args.name}' -F 'version=${args.version}' -F 'file=@./${args.name}.tar.gz' ${args.url}/deployment`,
+    `curl -X POST -F 'name=${args.name}' -F 'version=${args.version}' -F 'file=@./${args.name}.tar.gz' -F 'env=@./${args.env}' ${args.url}/deployment`,
     function callback(error, stdout, stderr) {
       cli.info(stdout);
     }
