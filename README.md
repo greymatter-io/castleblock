@@ -6,6 +6,14 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 
 ![diagram of tapas high level concept](./tapas-concept.png "Tapas high-level concept")
 
+## Features:
+
+- CLI for manual deployments or continuous delivery
+- Deployment versioning
+- Environmental Variable Support
+- Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
+- Share Web Components, microfrontends accross multiple SPAs
+
 ## Quick Start
 
 - Bundle your project
@@ -17,14 +25,6 @@ tapas-cli -n my-app -d ./dist
 ```
 
 ![diagram of tapas](./tapas-highlevel-diagram.png "Tapas high-level diagram")
-
-## Features:
-
-- CLI for manual deployments or continuous delivery
-- Deployment versioning
-- Environmental Variable Support
-- Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
-- Share Web Components, microfrontends accross multiple SPAs
 
 ## Comming Soon!
 
