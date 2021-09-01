@@ -19,7 +19,7 @@ const host = process.env.HOST || "localhost";
 //This is just used in the path when requesting a microfrontend
 //Examples: package, ui, mf, app
 //Example path: /<assetName>/my-app/2.3.4/
-const assetName = process.env.ASSETNAME || "package";
+const assetName = process.env.ASSETNAME || "ui";
 const directory = "./assets";
 
 async function extract(path, name) {
@@ -76,7 +76,7 @@ const init = async () => {
 
   server.route({
     method: "POST",
-    path: `/package`,
+    path: `/deployment`,
     options: {
       payload: {
         output: "stream",
@@ -121,12 +121,13 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: `/package`,
+    path: `/deployments`,
     handler: () => {
-      return getDirectories(`${directory}/`).map((pack) => {
+      return getDirectories(`${directory}/`).map((deployment) => {
         return {
-          name: pack,
-          versions: versions(pack, directory),
+          name: deployment,
+          versions: versions(deployment, directory),
+          path: `./${assetName}/${deployment}`,
         };
       });
     },
