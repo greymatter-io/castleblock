@@ -47,7 +47,7 @@ async function bundle() {
 async function upload() {
   console.log(chalk.cyan("Uploading..."));
   exec(
-    `curl -X POST -F 'name=${args.name}' -F 'version=${args.version}' -F 'file=@./${args.name}.tar.gz' ${args.url}/package`,
+    `curl -X POST -F 'name=${args.name}' -F 'version=${args.version}' -F 'file=@./${args.name}.tar.gz' ${args.url}/deployment`,
     function callback(error, stdout, stderr) {
       cli.info(stdout);
     }
