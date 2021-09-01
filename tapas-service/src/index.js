@@ -53,7 +53,22 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-      return h.file("./src/tapas-ui.html");
+      return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset='utf-8'>
+  <meta name='viewport' content='width=device-width,initial-scale=1'>
+  <link rel='icon' type='image/png' href='./${assetName}/tapas-ui/latest/favicon.png'>
+  <link rel='stylesheet' href='./${assetName}/tapas-ui/latest/global.css'>
+  <link rel='stylesheet' href='./${assetName}/tapas-ui/latest/build/bundle.css'>
+  <script defer src='./${assetName}/tapas-ui/latest/build/bundle.js'></script>
+</head>
+
+<body>
+<tapas-ui></tapas-ui>
+</body>
+</html>
+`;
     },
   });
 
