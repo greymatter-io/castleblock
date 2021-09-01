@@ -11,7 +11,7 @@ cli.info("Type --help for list of parameters");
 const args = cli.parse({
   directory: ["d", "Directory containing your built assets", "file"],
   name: ["n", "Name of package", "string"],
-  url: ["u", "URL to mf service", "string", "localhost:3000"],
+  url: ["u", "URL to tapas service", "string", "localhost:3000"],
   version: ["v", "Increment Version", "string"],
 });
 

@@ -4,6 +4,8 @@ Build it. Deploy it. Share it.
 
 Deploy your Web Components, Microfrontends, and Single Page Apps all in one place. Ideal for UIs, with no dedicated backends, that leverage existing microservices and APIs. Share WebComponents and Microfrontends across all of your SPAs. Updates to UIs are delivered automatically to downstream SPAs without the need to rebuild or redeploy any of your SPAs.
 
+![diagram of tapas high level concept](./tapas-concept.png "Tapas high-level concept")
+
 ## Features:
 
 - CLI for manual deployments or continuous delivery
@@ -11,6 +13,18 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 - Environmental Variable Support
 - Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
 - Share Web Components, microfrontends accross multiple SPAs
+
+## Quick Start
+
+- Bundle your project
+- Run [tapas-service](./tapas-service)
+- Deploy your project with [tapas-cli](./tapas-ui)
+
+```
+tapas-cli -n my-app -d ./dist
+```
+
+![diagram of tapas](./tapas-highlevel-diagram.png "Tapas high-level diagram")
 
 ## Comming Soon!
 
