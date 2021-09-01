@@ -135,7 +135,7 @@ const init = async () => {
         return {
           name: deployment,
           versions: versions(deployment, directory),
-          path: `./${assetName}/${deployment}`,
+          path: `/${assetName}/${deployment}`,
         };
       });
     },
