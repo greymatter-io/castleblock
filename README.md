@@ -12,7 +12,7 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 - Deployment versioning
 - Environmental Variable Support
 - Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
-- Share Web Components, microfrontends accross multiple SPAs
+- Tapas UI for browsing deployed Apps, Microfrontends, and SPAs
 
 ## Quick Start
 
@@ -28,4 +28,4 @@ tapas-cli -n my-app -d ./dist
 
 ## Comming Soon!
 
-- Check out the backlog of issues https://github.com/greymatter-io/tapas/issues
+- Check out the backlog of [planned features](https://github.com/greymatter-io/tapas/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
