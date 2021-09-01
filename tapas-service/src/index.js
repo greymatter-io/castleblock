@@ -55,7 +55,6 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-
       return `<!DOCTYPE html>
         <html lang="en">
         <head>
@@ -104,6 +103,13 @@ const init = async () => {
       );
       stream.on("finish", function () {
         extract(dir, req.payload.name);
+      });
+
+      const envStream = req.payload.env.pipe(
+        fs.createWriteStream(`${dir}env.json`)
+      );
+      envStream.on("finish", function () {
+        console.log("done writing env");
       });
 
       return `Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`;
