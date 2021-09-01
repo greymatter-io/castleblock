@@ -18,7 +18,8 @@ const host = process.env.HOST || "localhost";
 
 //This is just used in the path when requesting a microfrontend
 //Examples: package, ui, mf, app
-const assetName = process.env.ASSETNAME || "package";
+//Example path: /<assetName>/my-app/2.3.4/
+const assetName = process.env.ASSETNAME || "ui";
 
 async function extract(path, name) {
   return new Promise((resolve, reject) => {
@@ -53,22 +54,38 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-      return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset='utf-8'>
-  <meta name='viewport' content='width=device-width,initial-scale=1'>
-  <link rel='icon' type='image/png' href='./${assetName}/tapas-ui/latest/favicon.png'>
-  <link rel='stylesheet' href='./${assetName}/tapas-ui/latest/global.css'>
-  <link rel='stylesheet' href='./${assetName}/tapas-ui/latest/build/bundle.css'>
-  <script defer src='./${assetName}/tapas-ui/latest/build/bundle.js'></script>
-</head>
+      if (!fs.existsSync("./homepage")) {
+        return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset='utf-8'>
+          <meta name='viewport' content='width=device-width,initial-scale=1'>
+          <title>Tapas</title>
+        </head>
+        <body>
+        <h3>Homepage application not installed yet. </h3>
+        <p>Install a web app to serve as your landing page, this can be your own portal site or the <a href="https://github.com/greymatter-io/tapas/tree/master/tapas-ui">tapas-ui</a>. See here for <a href="https://github.com/greymatter-io/tapas/tree/master/tapas-service">instructions</a>.</p>
+        </body>
+        </html>
+        `;
+      } else {
+        return `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+          <meta charset='utf-8'>
+          <meta name='viewport' content='width=device-width,initial-scale=1'>
+          <link rel='icon' type='image/png' href='./${assetName}/tapas-ui/latest/favicon.png'>
+          <link rel='stylesheet' href='./${assetName}/tapas-ui/latest/global.css'>
+          <link rel='stylesheet' href='./${assetName}/tapas-ui/latest/build/bundle.css'>
+          <script defer src='./${assetName}/tapas-ui/latest/build/bundle.js'></script>
+        </head>
 
-<body>
-<tapas-ui></tapas-ui>
-</body>
-</html>
-`;
+        <body>
+        <tapas-ui></tapas-ui>
+        </body>
+        </html>
+        `;
+      }
     },
   });
 
@@ -85,11 +102,11 @@ const init = async () => {
     },
     handler: (req, h) => {
       console.log("Creating Package");
-      let dir = `./package/${req.payload.name}/`;
+      let dir = `./assets/${req.payload.name}/`;
       let next = nextVersion(latestVersion(dir), req.payload.version);
       console.log("Version:", next);
       //add the version to the dir path
-      dir = createPath(`./package/${req.payload.name}/${next}/`);
+      dir = createPath(`./assets/${req.payload.name}/${next}/`);
       console.log("dir", dir);
 
       const stream = req.payload.file.pipe(
@@ -108,7 +125,7 @@ const init = async () => {
     path: `/${assetName}/{file*}`,
     handler: {
       directory: {
-        path: `package`,
+        path: `assets`,
         listing: true,
       },
     },
@@ -118,10 +135,10 @@ const init = async () => {
     method: "GET",
     path: `/${assetName}`,
     handler: () => {
-      return getDirectories(`./package/`).map((pack) => {
+      return getDirectories(`./assets/`).map((pack) => {
         return {
           name: pack,
-          versions: versions(`./package/${pack}`),
+          versions: versions(`./assets/${pack}`),
         };
       });
     },

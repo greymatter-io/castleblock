@@ -26,6 +26,10 @@ tapas-cli -n my-app -d ./dist
 
 ![diagram of how to use tapas](./tapas-usage-diagram.png "Tapas usage diagram")
 
+## Development Environment
+
+Spin up the [nix](https://nixos.org/guides/install-nix.html) shell by running `nix-shell` in the root of the project.
+
 ## Comming Soon!
 
 - Check out the backlog of [planned features](https://github.com/greymatter-io/tapas/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
