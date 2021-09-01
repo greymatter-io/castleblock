@@ -1,13 +1,13 @@
 {
-  "name": "mf-service",
+  "name": "tapas-service",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon --ignore './package/' --exec babel-node src/index.js",
     "start": "babel-node src/index.js",
-    "build": "docker build . --build-arg NPM_TOKEN=${NPM_TOKEN} --no-cache -t mf-service",
-    "docker": "docker run  -p 3000:3000 --net=host mf-service "
+    "build": "docker build . --build-arg NPM_TOKEN=${NPM_TOKEN} --no-cache -t tapas-service",
+    "docker": "docker run  -p 3000:3000 --net=host tapas-service "
   },
   "author": "",
   "license": "ISC",

@@ -1,10 +1,17 @@
-# mf-service
+# Tapas
 
-A mircofrontend service that hosts SPAs and Microfrontends in a uniform way designed to encourage reuse and full versioning of deployments.
+Build it. Deploy it. Share it.
 
-## Getting Started
+Deploy your Web Components, Microfrontends, and Single Page Apps all in one place. Ideal for UIs, with no dedicated backends, that leverage existing microservices and APIs. Share WebComponents and Microfrontends across all of your SPAs. Updates to UIs are delivered automatically to downstream SPAs without the need to rebuild or redeploy any of your SPAs.
 
-```
-npm install
-npm run dev
-```
+## Features:
+
+- CLI for manual deployments or continuous delivery
+- Deployment versioning
+- Environmental Variable Support
+- Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
+- Share Web Components, microfrontends accross multiple SPAs
+
+## Comming Soon!
+
+- Check out the backlog of issues https://github.com/greymatter-io/tapas/issues
