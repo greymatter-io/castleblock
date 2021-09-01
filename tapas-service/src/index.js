@@ -64,7 +64,7 @@ const init = async () => {
         </head>
         <body>
         <h3>Homepage application not installed yet. </h3>
-        <p>Install a web app to serve as your landing page, this can be your own portal site or the <a href="https://github.com/greymatter-io/tapas/tree/master/tapas-ui">tapas-ui</a>. See here for <a href="">instructions</a>.</p>
+        <p>Install a web app to serve as your landing page, this can be your own portal site or the <a href="https://github.com/greymatter-io/tapas/tree/master/tapas-ui">tapas-ui</a>. See here for <a href="https://github.com/greymatter-io/tapas/tree/master/tapas-service">instructions</a>.</p>
         </body>
         </html>
         `;
