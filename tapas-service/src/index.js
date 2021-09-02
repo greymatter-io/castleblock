@@ -17,10 +17,14 @@ import {
   getDirectories,
 } from "./versioning.js";
 
+// Options
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || "localhost";
+const originWhitelist = process.env.ORIGIN_WHITELIST
+  ? JSON.parse(process.env.ORIGIN_WHITELIST)
+  : []; //[ "https://google.com", "https://reddit.com"] is an example whitelist
 
-//This is just used in the path when requesting a microfrontend
+//This is just used in the path when requesting a UI
 //Examples: package, ui, mf, app
 //Example path: /<assetName>/my-app/2.3.4/
 const assetName = process.env.ASSETNAME || "ui";
@@ -55,14 +59,6 @@ const init = async () => {
   });
   await server.register(H2o2);
 
-  const whitelist = [
-    "https://api.coindesk.com",
-    "https://www.boredapi.com",
-    "https://api.agify.io",
-    "https://dog.ceo",
-    "https://google.com",
-  ];
-
   //Allow proxying to other services
   server.route({
     method: "*",
@@ -71,7 +67,7 @@ const init = async () => {
       validate: {
         params: async (value, options, next) => {
           const url = new URL(value.url);
-          if (whitelist.includes(url.origin)) {
+          if (originWhitelist.includes(url.origin)) {
             return value;
           } else {
             throw Boom.badRequest(
