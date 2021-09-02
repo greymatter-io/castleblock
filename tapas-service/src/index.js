@@ -3,10 +3,11 @@ import fs from "fs";
 import Hapi from "@hapi/hapi";
 import H2o2 from "@hapi/h2o2";
 import Boom from "@hapi/boom";
-import axios from "axios";
-
-import Joi from "@hapi/joi";
 import Inert from "@hapi/inert";
+import Joi from "@hapi/joi";
+import Vision from "@hapi/vision";
+import HapiSwagger from "hapi-swagger";
+
 import Path from "path";
 import { exec } from "child_process";
 
@@ -57,12 +58,26 @@ const init = async () => {
     port,
     host,
   });
-  await server.register(H2o2);
+
+  await server.register([
+    Inert,
+    H2o2,
+    Vision,
+    {
+      plugin: HapiSwagger,
+      options: {
+        info: {
+          title: "API Documentation",
+          version: "0.0.1",
+        },
+      },
+    },
+  ]);
 
   //Allow proxying to other services
   server.route({
     method: "*",
-    path: `/api/{url*}`,
+    path: `/proxy/{url*}`,
     options: {
       validate: {
         params: async (value, options, next) => {
@@ -76,6 +91,12 @@ const init = async () => {
           }
         },
       },
+
+      description: "CORS Proxy",
+      notes: `Make requests to other origins. The current whitelist includes the following origins: ${originWhitelist.join(
+        ", "
+      )}`,
+      tags: ["api"],
     },
     handler: {
       proxy: {
@@ -90,15 +111,6 @@ const init = async () => {
     },
   });
 
-  server.route({
-    method: "GET",
-    path: "/services",
-    handler: (request, h) => {
-      return remotes;
-    },
-  });
-
-  await server.register([require("@hapi/inert")]);
   server.route({
     method: "GET",
     path: "/",
@@ -132,6 +144,9 @@ const init = async () => {
         multipart: true,
         maxBytes: 100 * 2 * 1000 * 1000 * 1000,
       },
+      description: "Create new deployment",
+      notes: "Returns the location of the new deployment",
+      tags: ["api"],
     },
     handler: (req, h) => {
       console.log("Creating Package");
@@ -160,7 +175,9 @@ const init = async () => {
         console.log("done writing env");
       });
 
-      console.log(`New App Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`);
+      console.log(
+        `New App Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`
+      );
 
       return `Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`;
     },
@@ -175,6 +192,11 @@ const init = async () => {
         listing: true,
       },
     },
+    options: {
+      description: "Fetch UI assets",
+      notes: "Returns html, js, css, and other UI assets",
+      tags: ["api"],
+    },
   });
 
   server.route({
@@ -188,6 +210,11 @@ const init = async () => {
           path: `/${assetName}/${deployment}`,
         };
       });
+    },
+    options: {
+      description: "List all deployments",
+      notes: "Returns deployment names, versions, and path to deployment",
+      tags: ["api"],
     },
   });
 
@@ -208,6 +235,10 @@ const init = async () => {
 
       return h.file(pathToFile);
       return h.redirect(`${request.path.replace("latest", v)}`).permanent();
+    },
+    options: {
+      description: `Fetch ${assetName} assets for the latest version of the deployment`,
+      tags: ["api"],
     },
   });
 
