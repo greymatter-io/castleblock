@@ -1,6 +1,10 @@
 "use strict";
 import fs from "fs";
 import Hapi from "@hapi/hapi";
+import H2o2 from "@hapi/h2o2";
+import Boom from "@hapi/boom";
+import axios from "axios";
+
 import Joi from "@hapi/joi";
 import Inert from "@hapi/inert";
 import Path from "path";
@@ -13,10 +17,14 @@ import {
   getDirectories,
 } from "./versioning.js";
 
+// Options
 const port = process.env.PORT || 3000;
 const host = process.env.HOST || "localhost";
+const originWhitelist = process.env.ORIGIN_WHITELIST
+  ? JSON.parse(process.env.ORIGIN_WHITELIST)
+  : []; //[ "https://google.com", "https://reddit.com"] is an example whitelist
 
-//This is just used in the path when requesting a microfrontend
+//This is just used in the path when requesting a UI
 //Examples: package, ui, mf, app
 //Example path: /<assetName>/my-app/2.3.4/
 const assetName = process.env.ASSETNAME || "ui";
@@ -48,6 +56,46 @@ const init = async () => {
   const server = Hapi.server({
     port,
     host,
+  });
+  await server.register(H2o2);
+
+  //Allow proxying to other services
+  server.route({
+    method: "*",
+    path: `/api/{url*}`,
+    options: {
+      validate: {
+        params: async (value, options, next) => {
+          const url = new URL(value.url);
+          if (originWhitelist.includes(url.origin)) {
+            return value;
+          } else {
+            throw Boom.badRequest(
+              `${url.origin} is not a whitelisted service. Contact your administrator.`
+            );
+          }
+        },
+      },
+    },
+    handler: {
+      proxy: {
+        mapUri: function (request) {
+          return {
+            uri: `${request.params.url}`,
+          };
+        },
+        passThrough: true,
+        xforward: true,
+      },
+    },
+  });
+
+  server.route({
+    method: "GET",
+    path: "/services",
+    handler: (request, h) => {
+      return remotes;
+    },
   });
 
   await server.register([require("@hapi/inert")]);
@@ -112,6 +160,8 @@ const init = async () => {
         console.log("done writing env");
       });
 
+      console.log(`New App Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`);
+
       return `Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`;
     },
   });
@@ -135,7 +185,7 @@ const init = async () => {
         return {
           name: deployment,
           versions: versions(deployment, directory),
-          path: `./${assetName}/${deployment}`,
+          path: `/${assetName}/${deployment}`,
         };
       });
     },

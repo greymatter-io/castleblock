@@ -4,10 +4,14 @@
    let env= new Promise((resolve, reject)=>{
     return axios.get('./env.json').then(results=>resolve(results.data));
   });
+   let google= new Promise((resolve, reject)=>{
+       return axios.get(`${window.location.origin}/services`).then(results=>resolve(results.data));
+  });
+
 
  
   let packages = new Promise((resolve, reject)=>{
-    return axios.get('http://localhost:3000/deployments').then(results=>resolve(results.data));
+      return axios.get(`${window.location.origin}/deployments`).then(results=>resolve(results.data));
   });
 
 </script>
@@ -32,11 +36,11 @@
     {:then results}
       {#each results as pack}
         <details>
-          <summary><a target="_blank" href={`${pack.path}/latest/`}>{pack.name}</a></summary>
+          <summary><a target="_blank" href={`${window.location.origin}${pack.path}/latest/`}>{pack.name}</a></summary>
           <p>
             {#each pack.versions.reverse() as version,i}
               <div>
-                <a target="_blank" href={`${pack.path}/${version}/`}>
+                <a target="_blank" href={`${window.location.origin}${pack.path}/${version}/`}>
                   {pack.name} - {version} {i==0 ? '(latest)':''}
                 </a>
               </div>
