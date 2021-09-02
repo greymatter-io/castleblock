@@ -12,6 +12,7 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 - Deployment versioning
 - Environmental Variable Support
 - Reverse Proxy for CORS support
+- Dynamic Swagger Documentation (http://localhost:3000/documentation)
 - Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
 - Tapas UI for browsing deployed Apps, Microfrontends, and SPAs
 
