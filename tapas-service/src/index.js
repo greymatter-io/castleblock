@@ -1,6 +1,10 @@
 "use strict";
 import fs from "fs";
 import Hapi from "@hapi/hapi";
+import H2o2 from "@hapi/h2o2";
+import Boom from "@hapi/boom";
+import axios from "axios";
+
 import Joi from "@hapi/joi";
 import Inert from "@hapi/inert";
 import Path from "path";
@@ -48,6 +52,54 @@ const init = async () => {
   const server = Hapi.server({
     port,
     host,
+  });
+  await server.register(H2o2);
+
+  const whitelist = [
+    "https://api.coindesk.com",
+    "https://www.boredapi.com",
+    "https://api.agify.io",
+    "https://dog.ceo",
+    "https://google.com",
+  ];
+
+  //Allow proxying to other services
+  server.route({
+    method: "*",
+    path: `/api/{url*}`,
+    options: {
+      validate: {
+        params: async (value, options, next) => {
+          const url = new URL(value.url);
+          if (whitelist.includes(url.origin)) {
+            return value;
+          } else {
+            throw Boom.badRequest(
+              `${url.origin} is not a whitelisted service. Contact your administrator.`
+            );
+          }
+        },
+      },
+    },
+    handler: {
+      proxy: {
+        mapUri: function (request) {
+          return {
+            uri: `${request.params.url}`,
+          };
+        },
+        passThrough: true,
+        xforward: true,
+      },
+    },
+  });
+
+  server.route({
+    method: "GET",
+    path: "/services",
+    handler: (request, h) => {
+      return remotes;
+    },
   });
 
   await server.register([require("@hapi/inert")]);
