@@ -160,6 +160,8 @@ const init = async () => {
         console.log("done writing env");
       });
 
+      console.log(`New App Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`);
+
       return `Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`;
     },
   });
