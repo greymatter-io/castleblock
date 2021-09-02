@@ -11,6 +11,7 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 - CLI for manual deployments or continuous delivery
 - Deployment versioning
 - Environmental Variable Support
+- Reverse Proxy for CORS support
 - Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
 - Tapas UI for browsing deployed Apps, Microfrontends, and SPAs
 
