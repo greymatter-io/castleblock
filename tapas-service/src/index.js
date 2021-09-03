@@ -178,12 +178,14 @@ const init = async () => {
         extract(dir, req.payload.name);
       });
 
-      const envStream = req.payload.env.pipe(
-        fs.createWriteStream(`${dir}env.json`)
-      );
-      envStream.on("finish", function () {
-        console.log("done writing env");
-      });
+      if (req.payload.env) {
+        const envStream = req.payload.env.pipe(
+          fs.createWriteStream(`${dir}env.json`)
+        );
+        envStream.on("finish", function () {
+          console.log("done writing env");
+        });
+      }
 
       console.log(
         `New App Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`
