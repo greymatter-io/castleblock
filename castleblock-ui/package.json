@@ -1,16 +1,21 @@
 {
-  "name": "svelte-app",
+  "name": "castleblock-ui",
   "version": "1.0.0",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public",
-    "deploy": "npm run build; castleblock-cli -d ./public/ -n castleblock-ui"
+    "deploy": "npm run build; castleblock-cli -d ./public/ -n castleblock-ui",
+    "prettier": "prettier --write --plugin-search-dir=. ./**/*.svelte"
   },
   "contributors": [
     {
       "name": "John Cudd",
       "email": "john.cudd@greymatter.io"
+    },
+    {
+      "name": "Stuart Hanberg",
+      "email": "stuart.handberg@greymatter.io"
     }
   ],
   "license": "MIT",
