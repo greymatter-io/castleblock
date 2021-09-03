@@ -1,6 +1,4 @@
-# CastleBlock
-
-Build it. Deploy it. Share it.
+<img src="./assets/brand/Logo.png" height="80px" />
 
 Deploy your Web Components, Microfrontends, and Single Page Apps all in one place. Ideal for UIs, with no dedicated backends, that leverage existing microservices and APIs. Share WebComponents and Microfrontends across all of your SPAs. Updates to UIs are delivered automatically to downstream SPAs without the need to rebuild or redeploy any of your SPAs.
 
