@@ -1,4 +1,4 @@
-# Castleblock
+# CastleBlock
 
 Build it. Deploy it. Share it.
 
@@ -14,7 +14,7 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 - Reverse Proxy for CORS support
 - Dynamic Swagger Documentation (http://localhost:3000/documentation)
 - Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
-- Castleblock UI for browsing deployed Apps, Microfrontends, and SPAs
+- CastleBlock UI for browsing deployed Apps, Microfrontends, and SPAs
 
 ## Quick Start
 
