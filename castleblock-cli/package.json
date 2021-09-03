@@ -1,13 +1,13 @@
 {
-  "name": "tapas-cli",
-  "version": "1.0.0",
+  "name": "castleblock",
+  "version": "0.0.1",
   "description": "",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "John Cudd",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^4.1.0",
     "cli": "^1.0.1",
@@ -15,6 +15,6 @@
     "tar": "^6.0.5"
   },
   "bin": {
-    "tapas-cli": "index.js"
+    "castleblock": "index.js"
   }
 }

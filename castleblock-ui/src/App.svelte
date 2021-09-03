@@ -1,4 +1,4 @@
-<svelte:options tag="tapas-ui" />
+<svelte:options tag="castleblock-ui" />
 
 <script>
 import Card from "./Card.svelte";
@@ -27,7 +27,7 @@ let packages = new Promise((resolve, reject) => {
 </script>
 
 <svelte:head>
-  <title>Tapas Dashboard</title>
+  <title>Castleblock Dashboard</title>
 </svelte:head>
 
 <main>
@@ -43,7 +43,7 @@ let packages = new Promise((resolve, reject) => {
   <p>
     Deploying couldn't be simpler. Just build your application and transpile it
     to minified static assets and run the following command.
-    <code class="block">tapas-cli -n cool-calculator -d ./build/</code>
+    <code class="block">castleblock-cli -n cool-calculator -d ./build/</code>
   </p>
   <div class="box">
   {#await packages}
