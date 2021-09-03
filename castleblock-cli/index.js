@@ -5,13 +5,13 @@ var cli = require("cli");
 var chalk = require("chalk");
 var fs = require("fs");
 
-console.log(chalk.bold(chalk.cyan("Welcome to the tapas-cli")));
+console.log(chalk.bold(chalk.cyan("Welcome to the castleblock-cli")));
 cli.info("Type --help for list of parameters");
 
 const args = cli.parse({
   directory: ["d", "Directory containing your built assets", "file"],
   name: ["n", "Name of deployment", "string"],
-  url: ["u", "URL to tapas service", "string", "localhost:3000"],
+  url: ["u", "URL to castleblock service", "string", "localhost:3000"],
   version: ["v", "Increment Version", "string"],
   env: [
     "e",

@@ -1,10 +1,10 @@
-# Tapas
+# Castleblock
 
 Build it. Deploy it. Share it.
 
 Deploy your Web Components, Microfrontends, and Single Page Apps all in one place. Ideal for UIs, with no dedicated backends, that leverage existing microservices and APIs. Share WebComponents and Microfrontends across all of your SPAs. Updates to UIs are delivered automatically to downstream SPAs without the need to rebuild or redeploy any of your SPAs.
 
-![diagram of tapas high level concept](./tapas-concept.png "Tapas high-level concept")
+![diagram of castleblock high level concept](./castleblock-concept.png "Castleblock high-level concept")
 
 ## Features:
 
@@ -14,19 +14,19 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 - Reverse Proxy for CORS support
 - Dynamic Swagger Documentation (http://localhost:3000/documentation)
 - Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
-- Tapas UI for browsing deployed Apps, Microfrontends, and SPAs
+- Castleblock UI for browsing deployed Apps, Microfrontends, and SPAs
 
 ## Quick Start
 
 - Bundle your project
-- Run [tapas-service](./tapas-service)
-- Deploy your project with [tapas-cli](./tapas-ui)
+- Run [castleblock-service](./castleblock-service)
+- Deploy your project with [castleblock-cli](./castleblock-ui)
 
 ```
-tapas-cli -n my-app -d ./dist
+castleblock-cli -n my-app -d ./dist
 ```
 
-![diagram of how to use tapas](./tapas-usage-diagram.png "Tapas usage diagram")
+![diagram of how to use castleblock](./castleblock-usage-diagram.png "Castleblock usage diagram")
 
 ## Development Environment
 
@@ -34,4 +34,4 @@ Spin up the [nix](https://nixos.org/guides/install-nix.html) shell by running `n
 
 ## Comming Soon!
 
-- Check out the backlog of [planned features](https://github.com/greymatter-io/tapas/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
+- Check out the backlog of [planned features](https://github.com/greymatter-io/castleblock/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)

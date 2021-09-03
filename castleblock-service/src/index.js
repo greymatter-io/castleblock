@@ -133,14 +133,14 @@ const init = async () => {
         <head>
           <meta charset='utf-8'>
           <meta name='viewport' content='width=device-width,initial-scale=1'>
-          <link rel='icon' type='image/png' href='./${assetName}/tapas-ui/latest/favicon.png'>
-          <link rel='stylesheet' href='./${assetName}/tapas-ui/latest/global.css'>
-          <link rel='stylesheet' href='./${assetName}/tapas-ui/latest/build/bundle.css'>
-          <script defer src='./${assetName}/tapas-ui/latest/build/bundle.js'></script>
+          <link rel='icon' type='image/png' href='./${assetName}/castleblock-ui/latest/favicon.png'>
+          <link rel='stylesheet' href='./${assetName}/castleblock-ui/latest/global.css'>
+          <link rel='stylesheet' href='./${assetName}/castleblock-ui/latest/build/bundle.css'>
+          <script defer src='./${assetName}/castleblock-ui/latest/build/bundle.js'></script>
         </head>
 
         <body>
-        <tapas-ui></tapas-ui>
+        <castleblock-ui></castleblock-ui>
         </body>
         </html>
         `;
