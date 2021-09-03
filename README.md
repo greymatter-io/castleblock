@@ -11,6 +11,7 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 - Environmental Variable Support
 - Reverse Proxy for CORS support
 - Dynamic Swagger Documentation (http://localhost:3000/documentation)
+- [manifest.json](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json) files are used to display app information in the CastleBlock UI.
 - Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
 - CastleBlock UI for browsing deployed Apps, Microfrontends, and SPAs
 
