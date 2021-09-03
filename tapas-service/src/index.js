@@ -6,6 +6,7 @@ import Boom from "@hapi/boom";
 import Inert from "@hapi/inert";
 import Joi from "@hapi/joi";
 import Vision from "@hapi/vision";
+import Wreck from "@hapi/wreck";
 import HapiSwagger from "hapi-swagger";
 
 import Path from "path";
@@ -64,6 +65,7 @@ function createPath(p) {
 }
 
 const init = async () => {
+  console.log("Origins:", originWhitelist);
   const server = Hapi.server({
     port,
     host,
@@ -115,6 +117,7 @@ const init = async () => {
             uri: `${request.params.url}`,
           };
         },
+
         passThrough: true,
         xforward: true,
       },

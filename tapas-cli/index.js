@@ -60,7 +60,7 @@ async function upload() {
       args.env ? `-F 'env=@./${args.env}'` : ""
     } ${args.url}/deployment`,
     function callback(error, stdout, stderr) {
-      if ((error, stderr)) {
+      if (error) {
         cli.info(error);
       }
       cli.info(stdout);
