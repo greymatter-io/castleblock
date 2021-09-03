@@ -9,8 +9,13 @@
     "build": "docker build . --build-arg NPM_TOKEN=${NPM_TOKEN} --no-cache -t castleblock-service",
     "docker": "docker run  -p 3000:3000 --net=host castleblock-service "
   },
-  "author": "",
-  "license": "ISC",
+  "contributors": [
+    {
+      "name": "John Cudd",
+      "email": "john.cudd@greymatter.io"
+    }
+  ],
+  "license": "MIT",
   "dependencies": {
     "@hapi/boom": "^9.1.4",
     "@hapi/h2o2": "^9.1.0",
@@ -23,7 +28,8 @@
     "hapi-swagger": "^14.2.4",
     "joi": "^17.4.2",
     "lodash": "^4.17.21",
-    "semver": "^7.3.5"
+    "semver": "^7.3.5",
+    "tar": "^6.1.11"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",

@@ -7,6 +7,13 @@
     "start": "sirv public",
     "deploy": "npm run build; castleblock-cli -d ./public/ -n castleblock-ui"
   },
+  "contributors": [
+    {
+      "name": "John Cudd",
+      "email": "john.cudd@greymatter.io"
+    }
+  ],
+  "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",

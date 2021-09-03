@@ -8,9 +8,8 @@ import Joi from "@hapi/joi";
 import Vision from "@hapi/vision";
 import Wreck from "@hapi/wreck";
 import HapiSwagger from "hapi-swagger";
-
+import tar from "tar";
 import Path from "path";
-import { exec } from "child_process";
 
 import {
   versions,
@@ -45,16 +44,11 @@ function getManifestPath(dir) {
 async function extract(path, name) {
   return new Promise((resolve, reject) => {
     console.log("Extracting...", `tar -xf ${path}${name}.tar.gz -C ${path}`);
-    exec(
-      `tar -xf ${path}${name}.tar.gz -C ${path}`,
-      function callback(error, stdout, stderr) {
-        console.log(stdout);
-        console.log(stderr);
-        if (error) {
-          reject();
-        }
-        resolve();
-      }
+    fs.createReadStream(`${path}${name}.tar.gz`).pipe(
+      tar.x({
+        strip: 1,
+        C: `${path}`, // alias for cwd:'some-dir', also ok
+      })
     );
   });
 }

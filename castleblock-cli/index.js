@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 
-var exec = require("child_process").exec;
 var cli = require("cli");
 var chalk = require("chalk");
 var fs = require("fs");
+var tar = require("tar");
+var path = require("path");
+var axios = require("axios");
+var FormData = require("form-data");
 
 console.log(chalk.bold(chalk.cyan("Welcome to the castleblock cli")));
 cli.info("Type --help for list of parameters");
@@ -11,7 +14,7 @@ cli.info("Type --help for list of parameters");
 const args = cli.parse({
   directory: ["d", "Directory containing your built assets", "file"],
   name: ["n", "Name of deployment", "string"],
-  url: ["u", "URL to castleblock service", "string", "localhost:3000"],
+  url: ["u", "URL to castleblock service", "string", "http://localhost:3000"],
   version: ["v", "Increment Version", "string"],
   env: [
     "e",
@@ -38,34 +41,42 @@ if (!args.directory) {
 async function bundle() {
   return new Promise((resolve, reject) => {
     console.log(chalk.cyan("Packaging..."));
-    exec(
-      `tar -czvf ${args.name}.tar.gz -C ${args.directory} .`,
-      function callback(error, stdout, stderr) {
-        console.log(stdout);
-        if (error) {
-          reject();
-        }
+    tar
+      .c(
+        {
+          gzip: "czvf",
+          file: `${args.name}.tar.gz`,
+        },
+        [`${path.join(args.directory, "/")}`]
+      )
+      .then((_) => {
         resolve();
-      }
-    );
+      })
+      .catch(() => reject());
   });
 }
 
 async function upload() {
   console.log(chalk.cyan("Uploading..."));
-  exec(
-    `curl -X POST -F 'name=${args.name}' -F 'version=${
-      args.version
-    }' -F 'file=@./${args.name}.tar.gz' ${
-      args.env ? `-F 'env=@./${args.env}'` : ""
-    } ${args.url}/deployment`,
-    function callback(error, stdout, stderr) {
-      if (error) {
-        cli.info(error);
-      }
-      cli.info(stdout);
-    }
-  );
+
+  var form = new FormData();
+  if (args.name) {
+    form.append("name", args.name);
+  }
+  if (args.version) {
+    form.append("version", args.version);
+  }
+  form.append("file", fs.createReadStream(`./${args.name}.tar.gz`));
+  if (args.env) {
+    form.append("env", fs.createReadStream(`./${args.env}`));
+  }
+
+  axios
+    .post(`${args.url}/deployment`, form, { headers: form.getHeaders() })
+    .then((response) => {
+      cli.info(response.data);
+    })
+    .catch((error) => cli.error(error));
 }
 
 console.log(`${chalk.bold("Name")}: ${chalk.cyan(args.name)}`);
