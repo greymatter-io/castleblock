@@ -1,18 +1,25 @@
 {
   "name": "castleblock",
   "version": "0.0.1",
-  "description": "",
+  "description": "CLI Program for the CastleBlock service.",
+  "keywords": ["cli", "deployment", "microfrontends", "ui"],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "John Cudd",
+  "contributors": [
+    {
+      "name": "John Cudd",
+      "email": "john.cudd@greymatter.io"
+    }
+  ],
   "license": "MIT",
   "dependencies": {
+    "axios": "^0.21.1",
     "chalk": "^4.1.0",
     "cli": "^1.0.1",
-    "form-data": "^3.0.0",
-    "tar": "^6.0.5"
+    "form-data": "^3.0.1",
+    "tar": "^6.1.11"
   },
   "bin": {
     "castleblock": "index.js"
