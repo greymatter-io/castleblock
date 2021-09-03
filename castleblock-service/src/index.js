@@ -9,9 +9,7 @@ import Vision from "@hapi/vision";
 import Wreck from "@hapi/wreck";
 import HapiSwagger from "hapi-swagger";
 import tar from "tar";
-
 import Path from "path";
-import { exec } from "child_process";
 
 import {
   versions,

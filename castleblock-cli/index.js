@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 
-var exec = require("child_process").exec;
 var cli = require("cli");
 var chalk = require("chalk");
 var fs = require("fs");
