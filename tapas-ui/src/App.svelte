@@ -5,10 +5,8 @@
     return axios.get('./env.json').then(results=>resolve(results.data));
   });
    let google= new Promise((resolve, reject)=>{
-       return axios.get(`${window.location.origin}/services`).then(results=>resolve(results.data));
+       return axios.get(`${window.location.origin}/proxy/https://google.com`).then(results=>resolve(results.data));
   });
-
-
  
   let packages = new Promise((resolve, reject)=>{
       return axios.get(`${window.location.origin}/deployments`).then(results=>resolve(results.data));

@@ -29,7 +29,17 @@ const originWhitelist = process.env.ORIGIN_WHITELIST
 //Examples: package, ui, mf, app
 //Example path: /<assetName>/my-app/2.3.4/
 const assetName = process.env.ASSETNAME || "ui";
-const directory = "./assets";
+const directoryName = "assets";
+const directory = `./${directoryName}`;
+
+function getManifestPath(dir) {
+  const path = Path.join(dir, "manifest.json");
+  if (fs.existsSync(path)) {
+    return `/${path.replace(directoryName, assetName)}`;
+  } else {
+    return null;
+  }
+}
 
 async function extract(path, name) {
   return new Promise((resolve, reject) => {
@@ -168,12 +178,14 @@ const init = async () => {
         extract(dir, req.payload.name);
       });
 
-      const envStream = req.payload.env.pipe(
-        fs.createWriteStream(`${dir}env.json`)
-      );
-      envStream.on("finish", function () {
-        console.log("done writing env");
-      });
+      if (req.payload.env) {
+        const envStream = req.payload.env.pipe(
+          fs.createWriteStream(`${dir}env.json`)
+        );
+        envStream.on("finish", function () {
+          console.log("done writing env");
+        });
+      }
 
       console.log(
         `New App Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`
@@ -208,6 +220,9 @@ const init = async () => {
           name: deployment,
           versions: versions(deployment, directory),
           path: `/${assetName}/${deployment}`,
+          latestManifest: getManifestPath(
+            `${directory}/${deployment}/${latestVersion(deployment, directory)}`
+          ),
         };
       });
     },
