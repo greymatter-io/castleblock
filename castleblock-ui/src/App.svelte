@@ -64,7 +64,7 @@ h1 {
   text-align: left;
 }
 .box {
-  display:flex;
+  display: flex;
   flex-direction: row;
   flex-wrap: wrap;
 }

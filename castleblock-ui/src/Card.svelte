@@ -70,9 +70,8 @@ export let icons = null;
   margin: 10px 10px;
   padding: 10px;
   display: flex;
-  min-width:200px;
+  min-width: 200px;
   width: 300px;
-
 }
 
 .icon {
