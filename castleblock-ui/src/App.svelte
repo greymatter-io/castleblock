@@ -28,31 +28,19 @@ let packages = new Promise((resolve, reject) => {
 
 <svelte:head>
   <title>Castleblock Dashboard</title>
+  <link rel="icon" href="favicon.png" type="image/png" />
 </svelte:head>
 
 <main>
-  <h1>UI Catalog</h1>
-  <p>
-    Join the microfrontend (MFE) revolution today! Microfrontends apply much of
-    the same principles as microservices, but to user interfaces. Read more <a
-      href="https://micro-frontends.org/">here</a
-    >!
-  </p>
-
-  <h3>Deploying a Microfrontend</h3>
-  <p>
-    Deploying couldn't be simpler. Just build your application and transpile it
-    to minified static assets and run the following command.
-    <code class="block">castleblock-cli -n cool-calculator -d ./build/</code>
-  </p>
+  <img src="./Logo.png" height="80px" />
   <div class="box">
-  {#await packages}
-    <div>Loading</div>
-  {:then results}
-    {#each results as pack}
-      <Card pack="{pack}" />
-    {/each}
-  {/await}
+    {#await packages}
+      <div>Loading</div>
+    {:then results}
+      {#each results as pack}
+        <Card pack="{pack}" />
+      {/each}
+    {/await}
   </div>
 </main>
 
@@ -75,8 +63,9 @@ h1 {
   margin: 0.5em;
   text-align: left;
 }
-  .box {
-    display:flex;
-    flex-wrap:wrap;
-  }
+.box {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
 </style>

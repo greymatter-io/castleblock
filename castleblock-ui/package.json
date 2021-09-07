@@ -1,24 +1,37 @@
 {
-  "name": "svelte-app",
+  "name": "castleblock-ui",
   "version": "1.0.0",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c -w",
     "start": "sirv public",
-    "deploy": "npm run build; castleblock-cli -d ./public/ -n castleblock-ui"
+    "deploy": "npm run build; castleblock-cli -d ./public/ -n castleblock-ui",
+    "prettier": "prettier --write --plugin-search-dir=. ./**/*.svelte",
+    "pretty": "pretty-quick"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "pretty-quick --staged"
+    }
   },
   "contributors": [
     {
       "name": "John Cudd",
       "email": "john.cudd@greymatter.io"
+    },
+    {
+      "name": "Stuart Hanberg",
+      "email": "stuart.handberg@greymatter.io"
     }
   ],
   "license": "MIT",
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
+    "husky": "^7.0.2",
     "prettier": "^2.3.2",
     "prettier-plugin-svelte": "^2.4.0",
+    "pretty-quick": "^3.1.1",
     "rollup": "^2.3.4",
     "rollup-plugin-css-only": "^3.0.0",
     "rollup-plugin-livereload": "^2.0.0",
