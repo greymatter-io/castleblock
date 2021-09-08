@@ -25,6 +25,7 @@
     "@hapi/vision": "^6.1.0",
     "axios": "^0.21.1",
     "hapi-swagger": "^14.2.4",
+    "hapijs-status-monitor": "^1.0.1",
     "joi": "^17.4.2",
     "lodash": "^4.17.21",
     "semver": "^7.3.5",
