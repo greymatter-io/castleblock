@@ -32,6 +32,6 @@ castleblock-cli -n my-app -d ./dist
 
 Spin up the [nix](https://nixos.org/guides/install-nix.html) shell by running `nix-shell` in the root of the project.
 
-## Comming Soon!
+## Coming Soon!
 
 - Check out the backlog of [planned features](https://github.com/greymatter-io/castleblock/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement)
