@@ -10,6 +10,7 @@ import Wreck from "@hapi/wreck";
 import HapiSwagger from "hapi-swagger";
 import tar from "tar";
 import Path from "path";
+import Status from "hapijs-status-monitor";
 
 import {
   versions,
@@ -18,24 +19,28 @@ import {
   getDirectories,
 } from "./versioning.js";
 
-// Options
-const port = process.env.PORT || 3000;
-const host = process.env.HOST || "localhost";
-const originWhitelist = process.env.ORIGIN_WHITELIST
-  ? JSON.parse(process.env.ORIGIN_WHITELIST)
-  : []; //[ "https://google.com", "https://reddit.com"] is an example whitelist
+function setEnv(envVar, defaultValue) {
+  if (typeof envVar === "undefined") {
+    return defaultValue;
+  } else {
+    return envVar;
+  }
+}
 
-//This is just used in the path when requesting a UI
-//Examples: package, ui, mf, app
-//Example path: /<assetName>/my-app/2.3.4/
-const assetName = process.env.ASSETNAME || "ui";
-const directoryName = "assets";
-const directory = `./${directoryName}`;
+// Options / Settings
+const port = setEnv(process.env.PORT, 3000);
+const host = setEnv(process.env.HOST, "localhost");
+const corsProxyEnable = setEnv(process.env.CORS_PROXY_ENABLE, true);
+const originWhitelist = JSON.parse(setEnv(process.env.ORIGIN_WHITELIST, [])); //["https://google.com", "https://reddit.com"] is an example whitelist
+const statusMonitorEnable = setEnv(process.env.STATUS_MONITOR_ENABLE, true);
+const swaggerDocsEnable = setEnv(process.env.SWAGGER_DOCS_ENABLE, true);
+const assetPath = Path.normalize(setEnv(process.env.ASSET_PATH, "./assets"));
+const basePath = setEnv(process.env.BASE_PATH, "ui"); //Example path: <castleblock-service.url>/<basePath>/my-app/2.3.4/
 
 function getManifestPath(dir) {
   const path = Path.join(dir, "manifest.json");
   if (fs.existsSync(path)) {
-    return `/${path.replace(directoryName, assetName)}`;
+    return `/${path.replace(Path.posix.basename(assetPath), basePath)}`;
   } else {
     return null;
   }
@@ -44,7 +49,7 @@ function getManifestPath(dir) {
 async function extract(path, name) {
   return new Promise((resolve, reject) => {
     console.log("Extracting...", `tar -xf ${path}${name}.tar.gz -C ${path}`);
-    fs.createReadStream(`${path}${name}.tar.gz`).pipe(
+    fs.createReadStream(Path.join(`${path}`, `/${name}.tar.gz`)).pipe(
       tar.x({
         strip: 1,
         C: `${path}`, // alias for cwd:'some-dir', also ok
@@ -65,20 +70,33 @@ const init = async () => {
     host,
   });
 
-  await server.register([
-    Inert,
-    H2o2,
-    Vision,
-    {
-      plugin: HapiSwagger,
-      options: {
-        info: {
-          title: "API Documentation",
-          version: "0.0.1",
+  await server.register([Inert, H2o2, Vision]);
+  if (swaggerDocsEnable) {
+    await server.register([
+      {
+        plugin: HapiSwagger,
+        options: {
+          info: {
+            title: "API Documentation",
+            version: "0.0.1",
+          },
         },
       },
-    },
-  ]);
+    ]);
+  }
+  if (statusMonitorEnable) {
+    await server.register([
+      {
+        plugin: Status,
+        options: {
+          title: "CastleBlock Status Monitor",
+          routeConfig: {
+            auth: false,
+          },
+        },
+      },
+    ]);
+  }
 
   //Allow proxying to other services
   server.route({
@@ -127,10 +145,10 @@ const init = async () => {
         <head>
           <meta charset='utf-8'>
           <meta name='viewport' content='width=device-width,initial-scale=1'>
-          <link rel='icon' type='image/png' href='./${assetName}/castleblock-ui/latest/favicon.png'>
-          <link rel='stylesheet' href='./${assetName}/castleblock-ui/latest/global.css'>
-          <link rel='stylesheet' href='./${assetName}/castleblock-ui/latest/build/bundle.css'>
-          <script defer src='./${assetName}/castleblock-ui/latest/build/bundle.js'></script>
+          <link rel='icon' type='image/png' href='./${basePath}/castleblock-ui/latest/favicon.png'>
+          <link rel='stylesheet' href='./${basePath}/castleblock-ui/latest/global.css'>
+          <link rel='stylesheet' href='./${basePath}/castleblock-ui/latest/build/bundle.css'>
+          <script defer src='./${basePath}/castleblock-ui/latest/build/bundle.js'></script>
         </head>
 
         <body>
@@ -157,19 +175,20 @@ const init = async () => {
     },
     handler: (req, h) => {
       console.log("Creating Package");
-      let dir = `${directory}/${req.payload.name}/`;
       let next = nextVersion(
-        latestVersion(req.payload.name, directory),
+        latestVersion(req.payload.name, assetPath),
         req.payload.version
       );
       console.log("Version:", next);
-      //add the version to the dir path
-      dir = createPath(`${directory}/${req.payload.name}/${next}/`);
+
+      const dir = createPath(
+        Path.join(`${assetPath}`, `${req.payload.name}`, `${next}`)
+      );
 
       console.log("dir", dir);
 
       const stream = req.payload.file.pipe(
-        fs.createWriteStream(`${dir}${req.payload.name}.tar.gz`)
+        fs.createWriteStream(Path.join(`${dir}`, `/${req.payload.name}.tar.gz`))
       );
       stream.on("finish", function () {
         extract(dir, req.payload.name);
@@ -177,7 +196,7 @@ const init = async () => {
 
       if (req.payload.env) {
         const envStream = req.payload.env.pipe(
-          fs.createWriteStream(`${dir}env.json`)
+          fs.createWriteStream(Path.join(`${dir}`, `env.json`))
         );
         envStream.on("finish", function () {
           console.log("done writing env");
@@ -185,10 +204,10 @@ const init = async () => {
       }
 
       console.log(
-        `New App Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`
+        `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
       );
 
-      return `Deployed: http://${host}:${port}/${assetName}/${req.payload.name}/${next}/`;
+      return `Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`;
     },
   });
 
@@ -201,19 +220,29 @@ const init = async () => {
       );
       if (req.params.version) {
         //Remove specific version
-        fs.rmdirSync(`${directory}/${req.params.name}/${req.params.version}`, {
-          recursive: true,
-        });
+        fs.rmdirSync(
+          Path.join(
+            `${assetPath}`,
+            `${req.params.name}`,
+            `${req.params.version}`
+          ),
+          {
+            recursive: true,
+          }
+        );
 
         //Remove parent directory if empty
-        if (fs.readdirSync(`${directory}/${req.params.name}`).length === 0) {
-          fs.rmdirSync(`${directory}/${req.params.name}`, {
+        if (
+          fs.readdirSync(Path.join(`${assetPath}`, `${req.params.name}`))
+            .length === 0
+        ) {
+          fs.rmdirSync(Path.join(`${assetPath}`, `${req.params.name}`), {
             recursive: true,
           });
         }
       } else {
         //Remove all versions
-        fs.rmdirSync(`${directory}/${req.params.name}`, {
+        fs.rmdirSync(Path.join(`${assetPath}`, `${req.params.name}`), {
           recursive: true,
         });
       }
@@ -238,10 +267,10 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: `/${assetName}/{file*}`,
+    path: `/${basePath}/{file*}`,
     handler: {
       directory: {
-        path: `${directory}`,
+        path: Path.normalize(`${assetPath}`),
         listing: true,
       },
     },
@@ -256,13 +285,17 @@ const init = async () => {
     method: "GET",
     path: `/deployments`,
     handler: () => {
-      return getDirectories(`${directory}/`).map((deployment) => {
+      return getDirectories(`${assetPath}/`).map((deployment) => {
         return {
           name: deployment,
-          versions: versions(deployment, directory),
-          path: `/${assetName}/${deployment}`,
+          versions: versions(deployment, assetPath),
+          path: `/${basePath}/${deployment}`,
           latestManifest: getManifestPath(
-            `${directory}/${deployment}/${latestVersion(deployment, directory)}`
+            Path.join(
+              `${assetPath}`,
+              `${deployment}`,
+              `${latestVersion(deployment, assetPath)}`
+            )
           ),
         };
       });
@@ -276,12 +309,12 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: `/${assetName}/{file}/latest/{end*}`,
+    path: `/${basePath}/{file}/latest/{end*}`,
     handler: (request, h) => {
-      const v = latestVersion(request.path.split("/")[2], directory);
+      const v = latestVersion(request.path.split("/")[2], assetPath);
       let pathToFile = request.path
         .substring(1)
-        .replace(assetName, directory)
+        .replace(basePath, assetPath)
         .replace("latest", v);
 
       //if a directory is requested append index.html
@@ -293,7 +326,7 @@ const init = async () => {
       return h.redirect(`${request.path.replace("latest", v)}`).permanent();
     },
     options: {
-      description: `Fetch ${assetName} assets for the latest version of the deployment`,
+      description: `Fetch ${basePath} assets for the latest version of the deployment`,
       tags: ["api"],
     },
   });
