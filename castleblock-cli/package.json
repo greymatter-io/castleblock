@@ -1,24 +1,25 @@
 {
   "name": "castleblock",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "CLI Program for the CastleBlock service.",
+  "license": "MIT",
+  "homepage": "https://github.com/greymatter-io/castleblock/tree/master/castleblock-cli",
   "keywords": [
     "cli",
     "deployment",
     "microfrontends",
     "ui"
   ],
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "contributors": [
     {
       "name": "John Cudd",
       "email": "john.cudd@greymatter.io"
     }
   ],
-  "license": "MIT",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "dependencies": {
     "axios": "^0.21.1",
     "chalk": "^4.1.0",
