@@ -5,9 +5,13 @@ import Card from "./Card.svelte";
 
 import { onMount } from "svelte";
 import axios from "axios";
+import logo from "./Logo.png";
+
+
 let env = new Promise((resolve, reject) => {
   return axios.get("./env.json").then((results) => resolve(results.data));
 });
+  console.log('w', window.location)
 let google = new Promise((resolve, reject) => {
   return axios
     .get(
@@ -32,7 +36,7 @@ let packages = new Promise((resolve, reject) => {
 </svelte:head>
 
 <main>
-  <img src="./Logo.png" height="80px" />
+  <img src={logo} height="80px" />
   <div class="box">
     {#await packages}
       <div>Loading</div>
