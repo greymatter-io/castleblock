@@ -20,7 +20,7 @@ Deploy your Web Components, Microfrontends, and Single Page Apps all in one plac
 
 - Bundle your project
 - Run [castleblock-service](./castleblock-service)
-- Deploy your project with [castleblock-cli](./castleblock-ui)
+- Deploy your project with [castleblock-cli](./castleblock-cli)
 
 ```
 castleblock-cli -n my-app -d ./dist
