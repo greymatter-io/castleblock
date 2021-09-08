@@ -2,7 +2,12 @@
   "name": "castleblock",
   "version": "0.0.1",
   "description": "CLI Program for the CastleBlock service.",
-  "keywords": ["cli", "deployment", "microfrontends", "ui"],
+  "keywords": [
+    "cli",
+    "deployment",
+    "microfrontends",
+    "ui"
+  ],
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -17,11 +22,16 @@
   "dependencies": {
     "axios": "^0.21.1",
     "chalk": "^4.1.0",
+    "chokidar": "^3.5.2",
     "cli": "^1.0.1",
+    "crypto-random-string": "^4.0.0",
+    "esm": "^3.2.25",
     "form-data": "^3.0.1",
+    "nanoid": "^3.1.25",
     "tar": "^6.1.11"
   },
   "bin": {
-    "castleblock": "index.js"
-  }
+    "castleblock": "bin/castleblock"
+  },
+  "devDependencies": {}
 }
