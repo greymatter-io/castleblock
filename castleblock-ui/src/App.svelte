@@ -27,7 +27,7 @@ let packages = new Promise((resolve, reject) => {
 </script>
 
 <svelte:head>
-  <title>Castleblock Dashboard</title>
+  <title>Castleblock Dashboard </title>
   <link rel="icon" href="favicon.png" type="image/png" />
 </svelte:head>
 

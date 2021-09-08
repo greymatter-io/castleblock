@@ -193,6 +193,41 @@ const init = async () => {
   });
 
   server.route({
+    method: "DELETE",
+    path: `/deployment/{name}/{version?}`,
+    handler: (req) => {
+      console.log(
+        `REMOVING: ${req.params.name} version: ${req.params.version}`
+      );
+      if (req.params.version) {
+        //Remove specific version
+        fs.rmdirSync(`${directory}/${req.params.name}/${req.params.version}`, {
+          recursive: true,
+        });
+
+        //Remove parent directory if empty
+        if (fs.readdirSync(`${directory}/${req.params.name}`).length === 0) {
+          fs.rmdirSync(`${directory}/${req.params.name}`, {
+            recursive: true,
+          });
+        }
+      } else {
+        //Remove all versions
+        fs.rmdirSync(`${directory}/${req.params.name}`, {
+          recursive: true,
+        });
+      }
+
+      return `Removed ${req.params.name}`;
+    },
+    options: {
+      description: "Fetch UI assets",
+      notes: "Returns html, js, css, and other UI assets",
+      tags: ["api"],
+    },
+  });
+
+  server.route({
     method: "GET",
     path: `/${assetName}/{file*}`,
     handler: {
