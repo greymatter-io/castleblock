@@ -4,7 +4,7 @@ import Hapi from "@hapi/hapi";
 import H2o2 from "@hapi/h2o2";
 import Boom from "@hapi/boom";
 import Inert from "@hapi/inert";
-import Joi from "@hapi/joi";
+import Joi from "joi";
 import Vision from "@hapi/vision";
 import Wreck from "@hapi/wreck";
 import HapiSwagger from "hapi-swagger";
@@ -220,10 +220,19 @@ const init = async () => {
 
       return `Removed ${req.params.name}`;
     },
+
     options: {
-      description: "Fetch UI assets",
-      notes: "Returns html, js, css, and other UI assets",
+      description: "Delete Deployment",
+      notes: "Removes deployment from the service.",
       tags: ["api"],
+      validate: {
+        params: Joi.object({
+          name: Joi.string()
+            .required()
+            .description("The name of the deployment"),
+          version: Joi.string().description("The version of the deployment"),
+        }),
+      },
     },
   });
 
