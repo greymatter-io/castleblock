@@ -23,7 +23,7 @@
     "@hapi/inert": "^6.0.3",
     "@hapi/somever": "^3.0.1",
     "@hapi/vision": "^6.1.0",
-    "axios": "^0.21.1",
+    "axios": "^0.21.4",
     "hapi-swagger": "^14.2.4",
     "hapijs-status-monitor": "^1.0.1",
     "joi": "^17.4.2",
