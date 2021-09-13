@@ -19,10 +19,13 @@ import {
   getDirectories,
 } from "./versioning.js";
 
-function setEnv(envVar, defaultValue) {
+function setEnv(envVar, defaultValue, format) {
   if (typeof envVar === "undefined") {
     return defaultValue;
   } else {
+    if (format === "json") {
+      return JSON.parse(envVar);
+    }
     return envVar;
   }
 }
@@ -31,7 +34,8 @@ function setEnv(envVar, defaultValue) {
 const port = setEnv(process.env.PORT, 3000);
 const host = setEnv(process.env.HOST, "localhost");
 const corsProxyEnable = setEnv(process.env.CORS_PROXY_ENABLE, true);
-const originWhitelist = JSON.parse(setEnv(process.env.ORIGIN_WHITELIST, [])); //["https://google.com", "https://reddit.com"] is an example whitelist
+const originWhitelist = setEnv(process.env.ORIGIN_WHITELIST, [], "json");
+//["https://google.com", "https://reddit.com"] is an example whitelist
 const statusMonitorEnable = setEnv(process.env.STATUS_MONITOR_ENABLE, true);
 const swaggerDocsEnable = setEnv(process.env.SWAGGER_DOCS_ENABLE, true);
 const assetPath = Path.normalize(setEnv(process.env.ASSET_PATH, "./assets"));
