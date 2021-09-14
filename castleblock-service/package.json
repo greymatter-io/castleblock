@@ -26,6 +26,7 @@
     "axios": "^0.21.4",
     "hapi-swagger": "^14.2.4",
     "hapijs-status-monitor": "^1.0.1",
+    "hasha": "^5.2.2",
     "joi": "^17.4.2",
     "lodash": "^4.17.21",
     "semver": "^7.3.5",

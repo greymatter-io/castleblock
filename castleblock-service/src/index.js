@@ -1,6 +1,7 @@
 "use strict";
 import fs from "fs";
 import Hapi from "@hapi/hapi";
+import crypto from "crypto";
 import H2o2 from "@hapi/h2o2";
 import Boom from "@hapi/boom";
 import Inert from "@hapi/inert";
@@ -18,6 +19,16 @@ import {
   nextVersion,
   getDirectories,
 } from "./versioning.js";
+
+function hash(stream) {
+  return new Promise((resolve, reject) => {
+    const hasher = crypto.createHash("sha512");
+    hasher.setEncoding("hex");
+    stream.pipe(hasher).on("finish", function () {
+      resolve(hasher.read());
+    });
+  });
+}
 
 function setEnv(envVar, defaultValue, format) {
   if (typeof envVar === "undefined") {
@@ -72,6 +83,9 @@ const init = async () => {
   const server = Hapi.server({
     port,
     host,
+    router: {
+      stripTrailingSlash: true,
+    },
   });
 
   await server.register([Inert, H2o2, Vision]);
@@ -139,6 +153,29 @@ const init = async () => {
       },
     },
   });
+  server.route({
+    method: "GET",
+    path: `/verify/{name}/{version}`,
+    handler: async (req) => {
+      console.log("verify", req.params.name, req.params.version);
+      const dir = createPath(
+        Path.join(
+          `${assetPath}`,
+          `${req.params.name}`,
+          `${
+            req.params.version == "latest"
+              ? latestVersion(req.params.name, assetPath)
+              : req.params.version
+          }`
+        )
+      );
+
+      return await hash(
+        fs.createReadStream(Path.join(`${dir}`, `/${req.params.name}.tar.gz`))
+      );
+      return "true";
+    },
+  });
 
   server.route({
     method: "GET",
@@ -177,7 +214,7 @@ const init = async () => {
       notes: "Returns the location of the new deployment",
       tags: ["api"],
     },
-    handler: (req, h) => {
+    handler: async (req, h) => {
       console.log("Creating Package");
       let next = nextVersion(
         latestVersion(req.payload.name, assetPath),
@@ -206,6 +243,8 @@ const init = async () => {
           console.log("done writing env");
         });
       }
+
+      console.log(await hash(req.payload.file));
 
       console.log(
         `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`

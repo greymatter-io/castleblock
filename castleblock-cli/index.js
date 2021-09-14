@@ -1,4 +1,5 @@
 import cli from "cli";
+import crypto from "crypto";
 import chalk from "chalk";
 import fs from "fs";
 import tar from "tar";
@@ -79,6 +80,16 @@ async function bundle() {
   });
 }
 
+function hash(stream) {
+  return new Promise((resolve, reject) => {
+    const hasher = crypto.createHash("sha512");
+    hasher.setEncoding("hex");
+    stream.pipe(hasher).on("finish", function () {
+      resolve(hasher.read());
+    });
+  });
+}
+
 async function upload() {
   console.log(chalk.cyan("Uploading..."));
 
@@ -89,10 +100,14 @@ async function upload() {
   if (args.version) {
     form.append("version", args.version);
   }
-  form.append("file", fs.createReadStream(`./${args.name}.tar.gz`));
+  const rs = fs.createReadStream(`./${args.name}.tar.gz`);
+  form.append("file", rs);
   if (args.env) {
     form.append("env", fs.createReadStream(`./${args.env}`));
   }
+
+  const hh = await hash(fs.createReadStream(`./${args.name}.tar.gz`));
+  console.log("h", hh);
 
   axios
     .post(`${args.url}/deployment`, form, { headers: form.getHeaders() })
