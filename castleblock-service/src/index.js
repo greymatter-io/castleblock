@@ -1,6 +1,7 @@
 "use strict";
 import fs from "fs";
 import Hapi from "@hapi/hapi";
+import crypto from "crypto";
 import H2o2 from "@hapi/h2o2";
 import Boom from "@hapi/boom";
 import Inert from "@hapi/inert";
@@ -18,6 +19,16 @@ import {
   nextVersion,
   getDirectories,
 } from "./versioning.js";
+
+function hash(stream) {
+  return new Promise((resolve, reject) => {
+    const hasher = crypto.createHash("sha512");
+    hasher.setEncoding("hex");
+    stream.pipe(hasher).on("finish", function () {
+      resolve(hasher.read());
+    });
+  });
+}
 
 function setEnv(envVar, defaultValue, format) {
   if (typeof envVar === "undefined") {
@@ -177,27 +188,19 @@ const init = async () => {
       notes: "Returns the location of the new deployment",
       tags: ["api"],
     },
-    handler: (req, h) => {
-      console.log("Creating Package");
+    handler: async (req, h) => {
       let next = nextVersion(
         latestVersion(req.payload.name, assetPath),
         req.payload.version
       );
-      console.log("Version:", next);
 
       const dir = createPath(
         Path.join(`${assetPath}`, `${req.payload.name}`, `${next}`)
       );
 
-      console.log("dir", dir);
-
-      const stream = req.payload.file.pipe(
-        fs.createWriteStream(Path.join(`${dir}`, `/${req.payload.name}.tar.gz`))
+      console.log(
+        `\nCreating Package:\nName: ${req.payload.name}\nVersion: ${next}\nLocation: ${dir}\n\n`
       );
-      stream.on("finish", function () {
-        extract(dir, req.payload.name);
-      });
-
       if (req.payload.env) {
         const envStream = req.payload.env.pipe(
           fs.createWriteStream(Path.join(`${dir}`, `env.json`))
@@ -206,11 +209,30 @@ const init = async () => {
           console.log("done writing env");
         });
       }
-
-      console.log(
-        `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
+      const stream = req.payload.file.pipe(
+        fs.createWriteStream(Path.join(`${dir}`, `/${req.payload.name}.tar.gz`))
       );
+      stream.on("finish", async function () {
+        extract(dir, req.payload.name);
+        const metadata = {
+          deploymentDate: new Date(),
+          sha512: await hash(
+            fs.createReadStream(
+              Path.join(`${dir}`, `/${req.payload.name}.tar.gz`)
+            )
+          ),
+        };
+        fs.writeFileSync(
+          Path.join(`${dir}`, `/info.json`),
+          JSON.stringify(metadata)
+        );
+        console.log("Deployment Date:", metadata.deploymentDate);
+        console.log("SHA512:", metadata.sha512);
 
+        console.log(
+          `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
+        );
+      });
       return `Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`;
     },
   });
@@ -271,22 +293,6 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: `/${basePath}/{file*}`,
-    handler: {
-      directory: {
-        path: Path.normalize(`${assetPath}`),
-        listing: true,
-      },
-    },
-    options: {
-      description: "Fetch UI assets",
-      notes: "Returns html, js, css, and other UI assets",
-      tags: ["api"],
-    },
-  });
-
-  server.route({
-    method: "GET",
     path: `/deployments`,
     handler: () => {
       return getDirectories(`${assetPath}/`).map((deployment) => {
@@ -313,9 +319,37 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: `/${basePath}/{file}/latest/{end*}`,
+    path: `/${basePath}/{file*}`,
+    handler: {
+      directory: {
+        path: Path.normalize(`${assetPath}`),
+        listing: true,
+      },
+    },
+    options: {
+      description: "Fetch UI assets",
+      notes: "Returns html, js, css, and other UI assets",
+      tags: ["api"],
+    },
+  });
+
+  server.route({
+    method: "GET",
+    path: `/${basePath}/{appName}/{version}`,
+    handler: (req, h) => {
+      return h.redirect(`${req.path}/`).permanent();
+    },
+  });
+
+  server.route({
+    method: "GET",
+    path: `/${basePath}/{appName}/{version}/{end*}`,
     handler: (request, h) => {
-      const v = latestVersion(request.path.split("/")[2], assetPath);
+      const v =
+        request.params.version == "latest"
+          ? latestVersion(request.params.appName, assetPath)
+          : request.params.version;
+
       let pathToFile = request.path
         .substring(1)
         .replace(basePath, assetPath)
@@ -327,7 +361,6 @@ const init = async () => {
         : pathToFile;
 
       return h.file(pathToFile);
-      return h.redirect(`${request.path.replace("latest", v)}`).permanent();
     },
     options: {
       description: `Fetch ${basePath} assets for the latest version of the deployment`,

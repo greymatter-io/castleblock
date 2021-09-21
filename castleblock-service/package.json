@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --ignore './package/' --exec babel-node src/index.js",
+    "dev": "nodemon --ignore './package/' --ignore './assets/' --exec babel-node src/index.js",
     "start": "babel-node src/index.js",
     "build": "docker build . --build-arg NPM_TOKEN=${NPM_TOKEN} --no-cache -t castleblock-service",
     "docker": "docker run  -p 3000:3000 --net=host castleblock-service "
@@ -26,6 +26,7 @@
     "axios": "^0.21.4",
     "hapi-swagger": "^14.2.4",
     "hapijs-status-monitor": "^1.0.1",
+    "hasha": "^5.2.2",
     "joi": "^17.4.2",
     "lodash": "^4.17.21",
     "semver": "^7.3.5",

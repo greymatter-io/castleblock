@@ -20,7 +20,7 @@ The homepage is the application you would like to be hosted at http://localhost:
 ```bash
 cd ../castleblock-ui
 npm run build
-castleblock-cli -n homepage -d ./public
+castleblock -n castleblock-ui -d ./public
 ```
 
 Now when you go to the castleblock-service at http://localhost:3000/ the castleblock-ui will be displayed. It will list all the deployed apps and versions available. This is useful for developers looking to leverage existing applications as microfrontends or webcomponents.
