@@ -20,7 +20,8 @@ import {
   getDirectories,
 } from "./versioning.js";
 
-function hash(stream) {
+function hash(filePath) {
+  const stream = fs.createReadStream(filePath);
   return new Promise((resolve, reject) => {
     const hasher = crypto.createHash("sha512");
     hasher.setEncoding("hex");
@@ -224,9 +225,7 @@ const init = async () => {
         const metadata = {
           deploymentDate: new Date(),
           sha512: await hash(
-            fs.createReadStream(
-              Path.join(`${dir}`, `/${req.payload.name}.tar.gz`)
-            )
+            Path.join(`${dir}`, `/${req.payload.name}.tar.gz`)
           ),
         };
         fs.writeFileSync(
