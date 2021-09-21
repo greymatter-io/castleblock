@@ -83,9 +83,6 @@ const init = async () => {
   const server = Hapi.server({
     port,
     host,
-    router: {
-      stripTrailingSlash: true,
-    },
   });
 
   await server.register([Inert, H2o2, Vision]);
@@ -153,29 +150,6 @@ const init = async () => {
       },
     },
   });
-  server.route({
-    method: "GET",
-    path: `/verify/{name}/{version}`,
-    handler: async (req) => {
-      console.log("verify", req.params.name, req.params.version);
-      const dir = createPath(
-        Path.join(
-          `${assetPath}`,
-          `${req.params.name}`,
-          `${
-            req.params.version == "latest"
-              ? latestVersion(req.params.name, assetPath)
-              : req.params.version
-          }`
-        )
-      );
-
-      return await hash(
-        fs.createReadStream(Path.join(`${dir}`, `/${req.params.name}.tar.gz`))
-      );
-      return "true";
-    },
-  });
 
   server.route({
     method: "GET",
@@ -215,26 +189,18 @@ const init = async () => {
       tags: ["api"],
     },
     handler: async (req, h) => {
-      console.log("Creating Package");
       let next = nextVersion(
         latestVersion(req.payload.name, assetPath),
         req.payload.version
       );
-      console.log("Version:", next);
 
       const dir = createPath(
         Path.join(`${assetPath}`, `${req.payload.name}`, `${next}`)
       );
 
-      console.log("dir", dir);
-
-      const stream = req.payload.file.pipe(
-        fs.createWriteStream(Path.join(`${dir}`, `/${req.payload.name}.tar.gz`))
+      console.log(
+        `\nCreating Package:\nName: ${req.payload.name}\nVersion: ${next}\nLocation: ${dir}\n\n`
       );
-      stream.on("finish", function () {
-        extract(dir, req.payload.name);
-      });
-
       if (req.payload.env) {
         const envStream = req.payload.env.pipe(
           fs.createWriteStream(Path.join(`${dir}`, `env.json`))
@@ -243,13 +209,30 @@ const init = async () => {
           console.log("done writing env");
         });
       }
-
-      console.log(await hash(req.payload.file));
-
-      console.log(
-        `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
+      const stream = req.payload.file.pipe(
+        fs.createWriteStream(Path.join(`${dir}`, `/${req.payload.name}.tar.gz`))
       );
+      stream.on("finish", async function () {
+        extract(dir, req.payload.name);
+        const metadata = {
+          deploymentDate: new Date(),
+          sha512: await hash(
+            fs.createReadStream(
+              Path.join(`${dir}`, `/${req.payload.name}.tar.gz`)
+            )
+          ),
+        };
+        fs.writeFileSync(
+          Path.join(`${dir}`, `/info.json`),
+          JSON.stringify(metadata)
+        );
+        console.log("Deployment Date:", metadata.deploymentDate);
+        console.log("SHA512:", metadata.sha512);
 
+        console.log(
+          `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
+        );
+      });
       return `Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`;
     },
   });
@@ -310,22 +293,6 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: `/${basePath}/{file*}`,
-    handler: {
-      directory: {
-        path: Path.normalize(`${assetPath}`),
-        listing: true,
-      },
-    },
-    options: {
-      description: "Fetch UI assets",
-      notes: "Returns html, js, css, and other UI assets",
-      tags: ["api"],
-    },
-  });
-
-  server.route({
-    method: "GET",
     path: `/deployments`,
     handler: () => {
       return getDirectories(`${assetPath}/`).map((deployment) => {
@@ -352,9 +319,37 @@ const init = async () => {
 
   server.route({
     method: "GET",
-    path: `/${basePath}/{file}/latest/{end*}`,
+    path: `/${basePath}/{file*}`,
+    handler: {
+      directory: {
+        path: Path.normalize(`${assetPath}`),
+        listing: true,
+      },
+    },
+    options: {
+      description: "Fetch UI assets",
+      notes: "Returns html, js, css, and other UI assets",
+      tags: ["api"],
+    },
+  });
+
+  server.route({
+    method: "GET",
+    path: `/${basePath}/{appName}/{version}`,
+    handler: (req, h) => {
+      return h.redirect(`${req.path}/`).permanent();
+    },
+  });
+
+  server.route({
+    method: "GET",
+    path: `/${basePath}/{appName}/{version}/{end*}`,
     handler: (request, h) => {
-      const v = latestVersion(request.path.split("/")[2], assetPath);
+      const v =
+        request.params.version == "latest"
+          ? latestVersion(request.params.appName, assetPath)
+          : request.params.version;
+
       let pathToFile = request.path
         .substring(1)
         .replace(basePath, assetPath)
@@ -366,7 +361,6 @@ const init = async () => {
         : pathToFile;
 
       return h.file(pathToFile);
-      return h.redirect(`${request.path.replace("latest", v)}`).permanent();
     },
     options: {
       description: `Fetch ${basePath} assets for the latest version of the deployment`,

@@ -106,8 +106,8 @@ async function upload() {
     form.append("env", fs.createReadStream(`./${args.env}`));
   }
 
-  const hh = await hash(fs.createReadStream(`./${args.name}.tar.gz`));
-  console.log("h", hh);
+  const sha512 = await hash(fs.createReadStream(`./${args.name}.tar.gz`));
+  console.log(chalk.bold("SHA512:"), chalk.cyan(sha512));
 
   axios
     .post(`${args.url}/deployment`, form, { headers: form.getHeaders() })
