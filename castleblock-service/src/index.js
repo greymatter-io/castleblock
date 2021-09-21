@@ -182,6 +182,17 @@ const init = async () => {
     },
   });
 
+  function writeStream(stream, filePath) {
+    return new Promise((resolve, reject) => {
+      console.log("test", filePath);
+      const s = stream.pipe(fs.createWriteStream(filePath));
+      s.on("finish", function () {
+        console.log("finished writing", filePath);
+        resolve();
+      });
+    });
+  }
+
   server.route({
     method: "POST",
     path: `/deployment`,
@@ -202,43 +213,42 @@ const init = async () => {
         req.payload.version
       );
 
-      const dir = createPath(
+      const destination = createPath(
         Path.join(`${assetPath}`, `${req.payload.name}`, `${next}`)
       );
 
       console.log(
-        `\nCreating Package:\nName: ${req.payload.name}\nVersion: ${next}\nLocation: ${dir}\n\n`
+        `\nCreating Package:\nName: ${req.payload.name}\nVersion: ${next}\nLocation: ${destination}\n\n`
       );
       if (req.payload.env) {
-        const envStream = req.payload.env.pipe(
-          fs.createWriteStream(Path.join(`${dir}`, `env.json`))
+        await writeStream(
+          req.payload.env,
+          Path.join(`${destination}`, `env.json`)
         );
-        envStream.on("finish", function () {
-          console.log("done writing env");
-        });
       }
-      const stream = req.payload.file.pipe(
-        fs.createWriteStream(Path.join(`${dir}`, `/${req.payload.name}.tar.gz`))
+      await writeStream(
+        req.payload.file,
+        Path.join(`${destination}`, `/${req.payload.name}.tar.gz`)
       );
-      stream.on("finish", async function () {
-        extract(dir, req.payload.name);
-        const metadata = {
-          deploymentDate: new Date(),
-          sha512: await hash(
-            Path.join(`${dir}`, `/${req.payload.name}.tar.gz`)
-          ),
-        };
-        fs.writeFileSync(
-          Path.join(`${dir}`, `/info.json`),
-          JSON.stringify(metadata)
-        );
-        console.log("Deployment Date:", metadata.deploymentDate);
-        console.log("SHA512:", metadata.sha512);
 
-        console.log(
-          `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
-        );
-      });
+      const info = {
+        deploymentDate: new Date(),
+        sha512: await hash(
+          Path.join(`${destination}`, `/${req.payload.name}.tar.gz`)
+        ),
+      };
+
+      fs.writeFileSync(
+        Path.join(`${destination}`, `/info.json`),
+        JSON.stringify(info)
+      );
+
+      await extract(destination, req.payload.name);
+      console.log("Deployment Date:", info.deploymentDate);
+      console.log("SHA512:", info.sha512);
+      console.log(
+        `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
+      );
       return `Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`;
     },
   });
@@ -333,7 +343,7 @@ const init = async () => {
       },
     },
     options: {
-      description: "Fetch UI assets",
+      description: "Fetch homepage assets",
       notes: "Returns html, js, css, and other UI assets",
       tags: ["api"],
     },
