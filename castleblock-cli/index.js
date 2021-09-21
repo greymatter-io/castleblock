@@ -68,7 +68,7 @@ async function bundle() {
     tar
       .c(
         {
-          gzip: "czvf",
+          gzip: true,
           file: `${args.name}.tar.gz`,
         },
         [`${path.join(args.directory, "/")}`]
@@ -142,6 +142,11 @@ function watch() {
     .watch(args.watch, {
       ignoreInitial: true,
       ignored: [`${args.directory}`], // ignore dotfiles
+    })
+    .on("ready", async () => {
+      await build();
+      await bundle();
+      await upload();
     })
     .on("all", async (event, path) => {
       await build();

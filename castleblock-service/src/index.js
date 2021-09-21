@@ -63,13 +63,20 @@ function getManifestPath(dir) {
 
 async function extract(path, name) {
   return new Promise((resolve, reject) => {
-    console.log("Extracting...", `tar -xf ${path}${name}.tar.gz -C ${path}`);
-    fs.createReadStream(Path.join(`${path}`, `/${name}.tar.gz`)).pipe(
-      tar.x({
-        strip: 1,
-        C: `${path}`, // alias for cwd:'some-dir', also ok
-      })
-    );
+    console.log(`Extracting: ${Path.join(`${path}`, `/${name}.tar.gz`)}`);
+    tar
+      .x(
+        // or tar.extract(
+        {
+          file: Path.join(`${path}`, `/${name}.tar.gz`),
+          strip: 1,
+          C: `${path}`, // alias for cwd:'some-dir', also ok
+        }
+      )
+      .then((_) => {
+        console.log(`Extracted: ${Path.join(`${path}`, `/${name}.tar.gz`)}`);
+        resolve();
+      });
   });
 }
 
