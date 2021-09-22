@@ -56,7 +56,7 @@ export let icons = null;
     </details>
 
     <div class="deployment-version">
-      deployment: {pack.versions.slice(-1)[0]}
+      {pack.versions.slice(-1)[0]}
     </div>
   </div>
 </div>

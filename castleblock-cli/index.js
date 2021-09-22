@@ -15,9 +15,7 @@ cli.info("Type --help for list of parameters");
 
 const args = cli.parse({
   directory: ["d", "Directory containing the built assets", "file"],
-  name: ["n", "Name of deployment", "string"],
   url: ["u", "URL to castleblock service", "string", "http://localhost:3000"],
-  version: ["v", "Increment Version", "string"],
   env: [
     "e",
     "Include env file in deployment (accessible from ./env.json when deployed)",
@@ -34,18 +32,17 @@ const args = cli.parse({
 
 //Check for required variables
 
-if (!args.name && !args.watch) {
-  cli.error(
-    'Please include a name for your deployment. i.e. --name "my-deployment"'
-  );
-  process.exit(1);
-}
 if (!args.directory && !args.remove) {
   cli.error(
     'Please include a directory to your build assets i.e. --directory"./build"'
   );
   process.exit(1);
 }
+
+const manifest = JSON.parse(
+  fs.readFileSync(path.join(args.directory, "manifest.json"))
+);
+console.log("manifest", manifest);
 
 const execWithPromise = async (command) => {
   return new Promise(async (resolve, reject) => {
@@ -69,7 +66,7 @@ async function bundle() {
       .c(
         {
           gzip: true,
-          file: `${args.name}.tar.gz`,
+          file: `${manifest.short_name}.tar.gz`,
         },
         [`${path.join(args.directory, "/")}`]
       )
@@ -94,19 +91,15 @@ async function upload() {
   console.log(chalk.cyan("Uploading..."));
 
   var form = new FormData();
-  if (args.name) {
-    form.append("name", args.name);
-  }
-  if (args.version) {
-    form.append("version", args.version);
-  }
-  const rs = fs.createReadStream(`./${args.name}.tar.gz`);
+  const rs = fs.createReadStream(`./${manifest.short_name}.tar.gz`);
   form.append("file", rs);
   if (args.env) {
     form.append("env", fs.createReadStream(`./${args.env}`));
   }
 
-  const sha512 = await hash(fs.createReadStream(`./${args.name}.tar.gz`));
+  const sha512 = await hash(
+    fs.createReadStream(`./${manifest.short_name}.tar.gz`)
+  );
   console.log(chalk.bold("SHA512:"), chalk.cyan(sha512));
 
   axios
@@ -121,7 +114,7 @@ async function remove() {
   console.log("Deleting Deployment");
   await axios
     .delete(
-      `${args.url}/deployment/${args.name}${
+      `${args.url}/deployment/${manifest.short_name}${
         args.version ? `/${args.version}` : ""
       }`
     )
@@ -156,7 +149,7 @@ function watch() {
     });
 }
 
-console.log(`${chalk.bold("Name")}: ${chalk.cyan(args.name)}`);
+console.log(`${chalk.bold("Name")}: ${chalk.cyan(manifest.short_name)}`);
 console.log(`${chalk.bold("Package")}: ${chalk.cyan(args.directory)}`);
 
 export async function start(argv) {

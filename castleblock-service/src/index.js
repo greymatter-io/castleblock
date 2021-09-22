@@ -12,6 +12,7 @@ import HapiSwagger from "hapi-swagger";
 import tar from "tar";
 import Path from "path";
 import Status from "hapijs-status-monitor";
+import { v4 as uuidv4 } from "uuid";
 
 import {
   versions,
@@ -62,26 +63,49 @@ function getManifestPath(dir) {
   }
 }
 
-async function extract(path, name) {
+async function extract(path, destination) {
+  console.log(`Extracting ${path} to ${destination}`);
   return new Promise((resolve, reject) => {
-    console.log(`Extracting: ${Path.join(`${path}`, `/${name}.tar.gz`)}`);
     tar
       .x(
         // or tar.extract(
         {
-          file: Path.join(`${path}`, `/${name}.tar.gz`),
+          file: path,
           strip: 1,
-          C: `${path}`, // alias for cwd:'some-dir', also ok
+          C: destination, // alias for cwd:'some-dir', also ok
         }
       )
       .then((_) => {
-        console.log(`Extracted: ${Path.join(`${path}`, `/${name}.tar.gz`)}`);
+        console.log(`Extracted: ${path} to ${destination}`);
         resolve();
       });
   });
 }
 
-function createPath(p) {
+async function getManifest(path, tarName) {
+  return new Promise((resolve, reject) => {
+    tar
+      .x(
+        // or tar.extract(
+        {
+          file: Path.join(path, tarName),
+          strip: 1,
+          filter: (item, entry) => {
+            return item.includes("manifest.json");
+          },
+          C: `${path}`,
+        }
+      )
+      .then((result) => {
+        resolve(JSON.parse(fs.readFileSync(Path.join(path, "manifest.json"))));
+      });
+  });
+}
+
+function createPath(p, clearExisting) {
+  if (clearExisting) {
+    fs.rmdirSync(p, { recursive: true });
+  }
   fs.mkdirSync(p, { recursive: true });
   return p;
 }
@@ -208,48 +232,63 @@ const init = async () => {
       tags: ["api"],
     },
     handler: async (req, h) => {
-      let next = nextVersion(
-        latestVersion(req.payload.name, assetPath),
-        req.payload.version
-      );
+      //Generate random temp name
+      const tempName = uuidv4();
+      const tempDir = Path.join("temp", tempName);
 
-      const destination = createPath(
-        Path.join(`${assetPath}`, `${req.payload.name}`, `${next}`)
-      );
-
-      console.log(
-        `\nCreating Package:\nName: ${req.payload.name}\nVersion: ${next}\nLocation: ${destination}\n\n`
-      );
-      if (req.payload.env) {
-        await writeStream(
-          req.payload.env,
-          Path.join(`${destination}`, `env.json`)
-        );
-      }
+      createPath(Path.join("temp", `${tempName}`));
+      // Write tar.gz file to disk
       await writeStream(
         req.payload.file,
-        Path.join(`${destination}`, `/${req.payload.name}.tar.gz`)
+        Path.join(tempDir, `/${tempName}.tar.gz`)
       );
+      // Validate the manifest.json
 
+      const manifest = await getManifest(
+        Path.join("temp", tempName),
+        `${tempName}.tar.gz`
+      );
+      console.log(manifest);
+
+      // Move the tar where it belongs
+      const destination = Path.join(
+        `${assetPath}`,
+        manifest.short_name,
+        manifest.version
+      );
+      createPath(destination, true);
+
+      // Extract
+
+      await extract(Path.join(tempDir, `${tempName}.tar.gz`), destination);
+
+      // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await hash(
-          Path.join(`${destination}`, `/${req.payload.name}.tar.gz`)
-        ),
+        sha512: await hash(Path.join(tempDir, `${tempName}.tar.gz`)),
       };
 
+      // Write metadata to disk
       fs.writeFileSync(
-        Path.join(`${destination}`, `/info.json`),
+        Path.join(destination, "info.json"),
         JSON.stringify(info)
       );
+      if (req.payload.env) {
+        //If env file is included, write it to disk
+        await writeStream(req.payload.env, Path.join(destination, "env.json"));
+      }
+      // Delete the tar
+      fs.rmdirSync(Path.join("temp", `${tempName}`), { recursive: true });
 
-      await extract(destination, req.payload.name);
       console.log("Deployment Date:", info.deploymentDate);
       console.log("SHA512:", info.sha512);
-      console.log(
-        `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
-      );
-      return `Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`;
+      const out = `Deployed: http://${host}:${port}/${Path.join(
+        basePath,
+        manifest.short_name,
+        manifest.version
+      )}`;
+      console.log(out);
+      return out;
     },
   });
 
