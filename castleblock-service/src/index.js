@@ -13,6 +13,9 @@ import tar from "tar";
 import Path from "path";
 import Status from "hapijs-status-monitor";
 import { v4 as uuidv4 } from "uuid";
+import slugify from "slugify";
+import semver from "semver";
+import { generateSlug } from "random-word-slugs";
 
 import {
   versions,
@@ -63,43 +66,33 @@ function getManifestPath(dir) {
   }
 }
 
-async function extract(path, destination) {
+function extract(path, destination) {
   console.log(`Extracting ${path} to ${destination}`);
-  return new Promise((resolve, reject) => {
-    tar
-      .x(
-        // or tar.extract(
-        {
-          file: path,
-          strip: 1,
-          C: destination, // alias for cwd:'some-dir', also ok
-        }
-      )
-      .then((_) => {
-        console.log(`Extracted: ${path} to ${destination}`);
-        resolve();
-      });
-  });
+  tar.x(
+    // or tar.extract(
+    {
+      file: path,
+      C: destination, // alias for cwd:'some-dir', also ok
+      strip: 1,
+      sync: true,
+    }
+  );
 }
 
-async function getManifest(path, tarName) {
-  return new Promise((resolve, reject) => {
-    tar
-      .x(
-        // or tar.extract(
-        {
-          file: Path.join(path, tarName),
-          strip: 1,
-          filter: (item, entry) => {
-            return item.includes("manifest.json");
-          },
-          C: `${path}`,
-        }
-      )
-      .then((result) => {
-        resolve(JSON.parse(fs.readFileSync(Path.join(path, "manifest.json"))));
-      });
-  });
+function getManifest(path, tarName) {
+  tar.x(
+    // or tar.extract(
+    {
+      file: Path.join(path, tarName),
+      strip: 1,
+      filter: (item, entry) => {
+        return item.includes("manifest.json");
+      },
+      C: `${path}`,
+      sync: true,
+    }
+  );
+  return JSON.parse(fs.readFileSync(Path.join(path, "manifest.json")));
 }
 
 function createPath(p, clearExisting) {
@@ -206,7 +199,7 @@ const init = async () => {
     },
   });
 
-  function writeStream(stream, filePath) {
+  async function writeStream(stream, filePath) {
     return new Promise((resolve, reject) => {
       console.log("test", filePath);
       const s = stream.pipe(fs.createWriteStream(filePath));
@@ -217,6 +210,7 @@ const init = async () => {
     });
   }
 
+  let locks = [];
   server.route({
     method: "POST",
     path: `/deployment`,
@@ -244,23 +238,39 @@ const init = async () => {
       );
       // Validate the manifest.json
 
-      const manifest = await getManifest(
+      const manifest = getManifest(
         Path.join("temp", tempName),
         `${tempName}.tar.gz`
       );
       console.log(manifest);
+      if (!semver.valid(manifest.version)) {
+        return Boom.badRequest(
+          `Invalid Version: "${manifest.version}" Please update the manifest.json with valid semantic version.`
+        );
+      }
+
+      const appPath = Path.join(
+        slugify(manifest.short_name),
+        req.payload.adhocVersion ? req.payload.adhocVersion : manifest.version
+      );
+
+      if (locks.includes(appPath)) {
+        console.log("Already Locked", locks);
+        return Boom.conflict(
+          "someone is currently deploying to this location. Try again later."
+        );
+      } else {
+        locks = locks.concat([appPath]);
+        console.log("new lock", locks);
+      }
 
       // Move the tar where it belongs
-      const destination = Path.join(
-        `${assetPath}`,
-        manifest.short_name,
-        manifest.version
-      );
+      const destination = Path.join(`${assetPath}`, appPath);
       createPath(destination, true);
 
       // Extract
 
-      await extract(Path.join(tempDir, `${tempName}.tar.gz`), destination);
+      extract(Path.join(tempDir, `${tempName}.tar.gz`), destination);
 
       // Generate metadata info.json
       const info = {
@@ -282,53 +292,39 @@ const init = async () => {
 
       console.log("Deployment Date:", info.deploymentDate);
       console.log("SHA512:", info.sha512);
-      const out = `Deployed: http://${host}:${port}/${Path.join(
-        basePath,
-        manifest.short_name,
-        manifest.version
-      )}`;
+      const out = `http://${host}:${port}/${Path.join(basePath, appPath)}`;
       console.log(out);
-      return out;
+
+      locks = locks.filter((v) => v !== appPath);
+      return {
+        appPath: appPath,
+        url: `http://${host}:${port}/${Path.join(basePath, appPath)}`,
+      };
     },
   });
 
   server.route({
     method: "DELETE",
-    path: `/deployment/{name}/{version?}`,
+    path: `/deployment/{name}/{version}`,
     handler: (req) => {
       console.log(
         `REMOVING: ${req.params.name} version: ${req.params.version}`
       );
-      if (req.params.version) {
-        //Remove specific version
-        fs.rmdirSync(
-          Path.join(
-            `${assetPath}`,
-            `${req.params.name}`,
-            `${req.params.version}`
-          ),
-          {
-            recursive: true,
-          }
-        );
-
-        //Remove parent directory if empty
-        if (
-          fs.readdirSync(Path.join(`${assetPath}`, `${req.params.name}`))
-            .length === 0
-        ) {
-          fs.rmdirSync(Path.join(`${assetPath}`, `${req.params.name}`), {
-            recursive: true,
-          });
-        }
-      } else {
-        //Remove all versions
+      //Remove specific version
+      fs.rmdirSync(Path.join(assetPath, req.params.name, req.params.version), {
+        recursive: true,
+      });
+      //Remove parent directory if empty
+      if (
+        fs.readdirSync(Path.join(`${assetPath}`, `${req.params.name}`))
+          .length === 0
+      ) {
         fs.rmdirSync(Path.join(`${assetPath}`, `${req.params.name}`), {
           recursive: true,
         });
       }
 
-      return `Removed ${req.params.name}`;
+      return `Removed ${req.params.name} ${req.params.version}`;
     },
 
     options: {
@@ -350,20 +346,24 @@ const init = async () => {
     method: "GET",
     path: `/deployments`,
     handler: () => {
-      return getDirectories(`${assetPath}/`).map((deployment) => {
-        return {
-          name: deployment,
-          versions: versions(deployment, assetPath),
-          path: `/${basePath}/${deployment}`,
-          latestManifest: getManifestPath(
-            Path.join(
-              `${assetPath}`,
-              `${deployment}`,
-              `${latestVersion(deployment, assetPath)}`
-            )
-          ),
-        };
-      });
+      return getDirectories(`${assetPath}/`)
+        .map((deployment) => {
+          if (versions(deployment, assetPath).length) {
+            return {
+              name: deployment,
+              versions: versions(deployment, assetPath),
+              path: `/${basePath}/${deployment}`,
+              latestManifest: getManifestPath(
+                Path.join(
+                  `${assetPath}`,
+                  `${deployment}`,
+                  `${latestVersion(deployment, assetPath)}`
+                )
+              ),
+            };
+          }
+        })
+        .filter(Boolean);
     },
     options: {
       description: "List all deployments",

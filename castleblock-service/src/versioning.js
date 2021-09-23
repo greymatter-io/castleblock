@@ -14,17 +14,25 @@ export function getDirectories(source) {
   }
   return fs
     .readdirSync(source, { withFileTypes: true })
-    .filter((dirent) => dirent.isDirectory())
+    .filter((dirent) => {
+      return dirent.isDirectory();
+    })
     .map((dirent) => dirent.name);
 }
 
 export function versions(appName, path) {
-  const v = semverSort(getDirectories(`${path}/${appName}`));
+  const v = semverSort(
+    getDirectories(`${path}/${appName}`).filter((n) => semver.valid(n))
+  );
   return v ? v : [];
 }
 
 export function latestVersion(appName, path) {
-  const v = _.last(semverSort(getDirectories(`${path}/${appName}`)));
+  const v = _.last(
+    semverSort(
+      getDirectories(`${path}/${appName}`).filter((n) => semver.valid(n))
+    )
+  );
   return v ? v : "0.0.0";
 }
 
