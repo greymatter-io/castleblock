@@ -4,10 +4,8 @@ import axios from "axios";
 import { onMount } from "svelte";
 export let pack = {};
 onMount(() => {
-  console.log("mounted");
   if (pack.latestManifest) {
-    axios.get(pack.latestManifest).then((results) => {
-      console.log("GOT MANI", results.data);
+      axios.get(`${window.location.origin}/${pack.latestManifest}`).then((results) => {
       title = results.data.name;
       description = results.data.description;
       icons = results.data.icons;
@@ -24,7 +22,7 @@ export let icons = null;
     {#if icons}
       <picture>
         {#each icons.reverse() as icon}
-          <source srcset="{`${pack.path}/latest/${icon.src}`}" />
+          <source srcset="{`${window.location.origin}${pack.path}/latest/${icon.src}`}" />
         {/each}
         <img alt="logo" width="60px" />
       </picture>
