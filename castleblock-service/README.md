@@ -1,6 +1,6 @@
 # castleblock-service
 
-A mircofrontend service that hosts SPAs and Microfrontends in a uniform way designed to encourage reuse and full versioning of deployments.
+A webhosting service that hosts web aps in a uniform way designed to encourage reuse and full versioning of deployments.
 
 ## Dev Environment
 
