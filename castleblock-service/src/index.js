@@ -15,7 +15,6 @@ import Status from "hapijs-status-monitor";
 import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import semver from "semver";
-import { generateSlug } from "random-word-slugs";
 
 import {
   versions,
@@ -80,19 +79,20 @@ function extract(path, destination) {
 }
 
 function getManifest(path, tarName) {
-  tar.x(
-    // or tar.extract(
-    {
-      file: Path.join(path, tarName),
-      strip: 1,
-      filter: (item, entry) => {
-        return item.includes("manifest.json");
-      },
-      C: `${path}`,
-      sync: true,
-    }
-  );
-  return JSON.parse(fs.readFileSync(Path.join(path, "manifest.json")));
+  return fs
+    .createReadStream(Path.join(path, tarName))
+    .pipe(
+      tar.x({
+        strip: 1,
+        filter: (item, entry) => {
+          return item.includes("manifest.json");
+        },
+        sync: true,
+      })
+    )
+    .on("finish", (entry) => {
+      console.log("got", entry);
+    });
 }
 
 function createPath(p, clearExisting) {
@@ -210,7 +210,23 @@ const init = async () => {
     });
   }
 
-  let locks = [];
+  function readStream(stream) {
+    let data;
+    return new Promise((resolve, reject) => {
+      stream.on("data", (chunk) => {
+        console.log(`Received ${chunk.length} bytes of data.`);
+        data = data ? data + chunk : chunk;
+      });
+      stream.on("end", () => {
+        resolve(data);
+      });
+
+      stream.on("error", (err) => {
+        reject(err);
+      });
+    });
+  }
+
   server.route({
     method: "POST",
     path: `/deployment`,
@@ -228,54 +244,52 @@ const init = async () => {
     handler: async (req, h) => {
       //Generate random temp name
       const tempName = uuidv4();
-      const tempDir = Path.join("temp", tempName);
 
-      createPath(Path.join("temp", `${tempName}`));
+      createPath(Path.join("temp"));
       // Write tar.gz file to disk
       await writeStream(
         req.payload.file,
-        Path.join(tempDir, `/${tempName}.tar.gz`)
+        Path.join("temp", `/${tempName}.tar.gz`)
       );
-      // Validate the manifest.json
 
-      const manifest = getManifest(
-        Path.join("temp", tempName),
-        `${tempName}.tar.gz`
-      );
-      console.log(manifest);
-      if (!semver.valid(manifest.version)) {
-        return Boom.badRequest(
-          `Invalid Version: "${manifest.version}" Please update the manifest.json with valid semantic version.`
-        );
+      // Validate the manifest.json
+      const manifest = JSON.parse(await readStream(req.payload.manifest));
+
+      const manifestSchema = Joi.object({
+        short_name: Joi.string().required(),
+        version: Joi.string()
+          .custom(function (value, helpers) {
+            if (!semver.valid(value)) {
+              return helpers.error("any.invalid");
+            }
+            return value;
+          }, "Semantic Version of the application")
+          .required(),
+        description: Joi.string(),
+      });
+
+      const manifestValidation = manifestSchema.validate(manifest);
+      if (manifestValidation.error) {
+        return Boom.badRequest(manifestValidation.error);
       }
 
       const appPath = Path.join(
         slugify(manifest.short_name),
-        req.payload.adhocVersion ? req.payload.adhocVersion : manifest.version
+        req.payload.adhoc ? req.payload.adhoc : manifest.version
       );
-
-      if (locks.includes(appPath)) {
-        console.log("Already Locked", locks);
-        return Boom.conflict(
-          "someone is currently deploying to this location. Try again later."
-        );
-      } else {
-        locks = locks.concat([appPath]);
-        console.log("new lock", locks);
-      }
 
       // Move the tar where it belongs
       const destination = Path.join(`${assetPath}`, appPath);
+
       createPath(destination, true);
 
       // Extract
-
-      extract(Path.join(tempDir, `${tempName}.tar.gz`), destination);
+      extract(Path.join("temp", `${tempName}.tar.gz`), destination);
 
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await hash(Path.join(tempDir, `${tempName}.tar.gz`)),
+        sha512: await hash(Path.join("temp", `${tempName}.tar.gz`)),
       };
 
       // Write metadata to disk
@@ -295,7 +309,6 @@ const init = async () => {
       const out = `http://${host}:${port}/${Path.join(basePath, appPath)}`;
       console.log(out);
 
-      locks = locks.filter((v) => v !== appPath);
       return {
         appPath: appPath,
         url: `http://${host}:${port}/${Path.join(basePath, appPath)}`,
@@ -305,7 +318,7 @@ const init = async () => {
 
   server.route({
     method: "DELETE",
-    path: `/deployment/{name}/{version}`,
+    path: `/${basePath}/{name}/{version}`,
     handler: (req) => {
       console.log(
         `REMOVING: ${req.params.name} version: ${req.params.version}`

@@ -12,8 +12,8 @@ import { nanoid } from "nanoid";
 import slugify from "slugify";
 import { generateSlug } from "random-word-slugs";
 
-let adhocVersion = generateSlug();
-let manifest;
+const adhocVersion = generateSlug();
+let adhocURL = "";
 
 //CLI commands and options
 const commands = ["deploy", "watch", "remove"];
@@ -33,7 +33,7 @@ const args = cli.parse(
       "npm run build",
     ],
     src: ["s", "Source directory to watch for changes", "file", "./src"],
-    version: ["v", "Remove specific version", "string"],
+    deployURL: [null, "Deployment URL to be removed", "string"],
     package: ["p", "Name of tar.gz file", "string", "deployment.tar.gz"],
   },
   commands
@@ -58,34 +58,11 @@ export async function init(argv) {
       watch();
       break;
     case "remove":
-      await remove(
-        slugify(manifest.short_name),
-        args.version ? args.version : manifest.version
-      );
+      await remove(args.deployURL);
       break;
     default:
     // code block
   }
-}
-
-function getManifest() {
-  cli.info(`Fetching ${Path.join(args.dist, "manifest.json")} file`);
-  if (!fs.existsSync(Path.join(args.dist, "manifest.json"))) {
-    cli.fatal(
-      `manifest.json does not exist in the ${args.dist}. Make sure it exists and is included into your build process.`
-    );
-  }
-
-  const manifest = JSON.parse(
-    fs.readFileSync(Path.join(args.dist, "manifest.json"))
-  );
-  if (!manifest.short_name) {
-    cli.fatal(`manifest.json must have a "short_name" set.`);
-  }
-  if (!manifest.version) {
-    cli.fatal(`manifest.json must have a "verison" set.`);
-  }
-  return manifest;
 }
 
 const execWithPromise = async (command) => {
@@ -99,7 +76,6 @@ const execWithPromise = async (command) => {
 };
 
 async function build() {
-  manifest = getManifest();
   if (args.build) {
     cli.info(`Building Project: ${args.build}`);
     return await execWithPromise(args.build);
@@ -116,7 +92,6 @@ async function compress() {
     tar
       .c(
         {
-          gzip: true,
           file: `${args.package}`,
         },
         [`${Path.join(args.dist, "/")}`]
@@ -139,17 +114,22 @@ function hash(stream) {
 }
 
 async function deploy(adhoc) {
-  cli.info(`Uploading ${args.package}`);
+  cli.info(`Uploading ${args.package}`, adhoc);
 
   var form = new FormData();
   const rs = fs.createReadStream(`./${args.package}`);
   form.append("file", rs);
   if (adhoc) {
-    form.append("adhocVersion", adhoc);
+    form.append("adhoc", adhoc);
   }
   if (args.env) {
     form.append("env", fs.createReadStream(`./${args.env}`));
   }
+
+  form.append(
+    "manifest",
+    fs.createReadStream(Path.join(args.dist, "manifest.json"))
+  );
 
   const sha512 = await hash(fs.createReadStream(`./${args.package}`));
   cli.info(`${chalk.bold("SHA512:")}\n      ${chalk.cyan(sha512)}`);
@@ -159,17 +139,20 @@ async function deploy(adhoc) {
       headers: form.getHeaders(),
     })
     .then((response) => {
+      adhocURL = response.data.url;
+      console.log("set", adhocURL);
       cli.info(`URL: ${response.data.url}`);
     })
     .catch((error) => {
-      cli.error(error);
+      console.log(error.response.data.message);
+      cli.error(error.response.data.message);
     });
 }
 
-async function remove(name, version) {
-  cli.info("Deleting Deployment", name, version);
+async function remove(url) {
+  cli.info("Deleting Deployment", url);
   await axios
-    .delete(`${args.url}/${Path.join("deployment", name, version)}`)
+    .delete(url)
     .then((response) => {
       cli.info(response.data);
     })
@@ -204,7 +187,7 @@ function watch() {
     });
   process.on("SIGINT", async function () {
     cli.info("Caught interrupt signal, stopping now.");
-    await remove(slugify(manifest.short_name), adhocVersion);
+    await remove(adhocURL);
     process.exit();
   });
 }
