@@ -258,6 +258,7 @@ const init = async () => {
       const info = {
         deploymentDate: new Date(),
         sha512: await hash(Path.join(destination, tarName)),
+        bundleSizeBytes: fs.statSync(Path.join(destination, tarName)).size,
       };
 
       // Write metadata to disk
