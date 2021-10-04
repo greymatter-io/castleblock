@@ -56,15 +56,6 @@ const swaggerDocsEnable = setEnv(process.env.SWAGGER_DOCS_ENABLE, true);
 const assetPath = Path.normalize(setEnv(process.env.ASSET_PATH, "./assets"));
 const basePath = setEnv(process.env.BASE_PATH, "ui"); //Example path: <castleblock-service.url>/<basePath>/my-app/2.3.4/
 
-function getManifestPath(dir) {
-  const path = Path.join(dir, "manifest.json");
-  if (fs.existsSync(path)) {
-    return `/${path.replace(Path.posix.basename(assetPath), basePath)}`;
-  } else {
-    return null;
-  }
-}
-
 function extract(path, destination) {
   console.log(`Extracting ${path} to ${destination}`);
   tar.x(
@@ -76,23 +67,6 @@ function extract(path, destination) {
       sync: true,
     }
   );
-}
-
-function getManifest(path, tarName) {
-  return fs
-    .createReadStream(Path.join(path, tarName))
-    .pipe(
-      tar.x({
-        strip: 1,
-        filter: (item, entry) => {
-          return item.includes("manifest.json");
-        },
-        sync: true,
-      })
-    )
-    .on("finish", (entry) => {
-      console.log("got", entry);
-    });
 }
 
 function createPath(p, clearExisting) {
@@ -242,16 +216,6 @@ const init = async () => {
       tags: ["api"],
     },
     handler: async (req, h) => {
-      //Generate random temp name
-      const tempName = uuidv4();
-
-      createPath(Path.join("temp"));
-      // Write tar.gz file to disk
-      await writeStream(
-        req.payload.file,
-        Path.join("temp", `/${tempName}.tar.gz`)
-      );
-
       // Validate the manifest.json
       const manifest = JSON.parse(await readStream(req.payload.manifest));
 
@@ -266,30 +230,34 @@ const init = async () => {
           }, "Semantic Version of the application")
           .required(),
         description: Joi.string(),
-      });
+      }).unknown(true);
 
       const manifestValidation = manifestSchema.validate(manifest);
       if (manifestValidation.error) {
         return Boom.badRequest(manifestValidation.error);
       }
 
+      //Determine path for deployment
       const appPath = Path.join(
         slugify(manifest.short_name),
         req.payload.adhoc ? req.payload.adhoc : manifest.version
       );
 
-      // Move the tar where it belongs
+      //Create directory for deployment
       const destination = Path.join(`${assetPath}`, appPath);
-
       createPath(destination, true);
 
-      // Extract
-      extract(Path.join("temp", `${tempName}.tar.gz`), destination);
+      // Write tar.gz file to disk
+      const tarName = `${manifest.short_name}-${manifest.version}.tar.gz`;
+      await writeStream(req.payload.file, Path.join(destination, tarName));
+
+      // Extract tarball
+      extract(Path.join(destination, tarName), destination);
 
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await hash(Path.join("temp", `${tempName}.tar.gz`)),
+        sha512: await hash(Path.join(destination, tarName)),
       };
 
       // Write metadata to disk
@@ -297,12 +265,11 @@ const init = async () => {
         Path.join(destination, "info.json"),
         JSON.stringify(info)
       );
+
+      //If env file is included, write it to disk
       if (req.payload.env) {
-        //If env file is included, write it to disk
         await writeStream(req.payload.env, Path.join(destination, "env.json"));
       }
-      // Delete the tar
-      fs.rmdirSync(Path.join("temp", `${tempName}`), { recursive: true });
 
       console.log("Deployment Date:", info.deploymentDate);
       console.log("SHA512:", info.sha512);
@@ -366,12 +333,11 @@ const init = async () => {
               name: deployment,
               versions: versions(deployment, assetPath),
               path: `/${basePath}/${deployment}`,
-              latestManifest: getManifestPath(
-                Path.join(
-                  `${assetPath}`,
-                  `${deployment}`,
-                  `${latestVersion(deployment, assetPath)}`
-                )
+              latestManifest: Path.join(
+                `${basePath}`,
+                `${deployment}`,
+                `${latestVersion(deployment, assetPath)}`,
+                "manifest.json"
               ),
             };
           }

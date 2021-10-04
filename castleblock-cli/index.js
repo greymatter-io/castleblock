@@ -140,7 +140,6 @@ async function deploy(adhoc) {
     })
     .then((response) => {
       adhocURL = response.data.url;
-      console.log("set", adhocURL);
       cli.info(`URL: ${response.data.url}`);
     })
     .catch((error) => {
