@@ -5,16 +5,18 @@ import { onMount } from "svelte";
 export let pack = {};
 onMount(() => {
   if (pack.latestManifest) {
-      axios.get(`${window.location.origin}/${pack.latestManifest}`).then((results) => {
-      title = results.data.name;
-      description = results.data.description;
-      icons = results.data.icons;
-    });
+    axios
+      .get(`${window.location.origin}/${pack.latestManifest}`)
+      .then((results) => {
+        title = results.data.name;
+        description = results.data.description;
+        icons = results.data.icons;
+      });
   }
 });
-export let title = null;
-export let description = null;
-export let icons = null;
+export let title;
+export let description;
+export let icons;
 </script>
 
 <div class="box">
@@ -22,7 +24,8 @@ export let icons = null;
     {#if icons}
       <picture>
         {#each icons.reverse() as icon}
-          <source srcset="{`${window.location.origin}${pack.path}/latest/${icon.src}`}" />
+          <source
+            srcset="{`${window.location.origin}${pack.path}/latest/${icon.src}`}" />
         {/each}
         <img alt="logo" width="60px" />
       </picture>
