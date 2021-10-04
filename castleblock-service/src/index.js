@@ -55,6 +55,7 @@ const statusMonitorEnable = setEnv(process.env.STATUS_MONITOR_ENABLE, true);
 const swaggerDocsEnable = setEnv(process.env.SWAGGER_DOCS_ENABLE, true);
 const assetPath = Path.normalize(setEnv(process.env.ASSET_PATH, "./assets"));
 const basePath = setEnv(process.env.BASE_PATH, "ui"); //Example path: <castleblock-service.url>/<basePath>/my-app/2.3.4/
+const homepage = setEnv(process.env.HOMEPAGE, `castleblock-ui`);
 
 function extract(path, destination) {
   console.log(`Extracting ${path} to ${destination}`);
@@ -154,22 +155,31 @@ const init = async () => {
     method: "GET",
     path: "/",
     handler: (request, h) => {
-      return `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset='utf-8'>
-          <meta name='viewport' content='width=device-width,initial-scale=1'>
-          <link rel='icon' type='image/png' href='./${basePath}/castleblock-ui/latest/favicon.png'>
-          <link rel='stylesheet' href='./${basePath}/castleblock-ui/latest/global.css'>
-          <link rel='stylesheet' href='./${basePath}/castleblock-ui/latest/build/bundle.css'>
-          <script defer src='./${basePath}/castleblock-ui/latest/build/bundle.js'></script>
-        </head>
+      console.log(
+        Path.join(
+          `${assetPath}/${homepage}/${latestVersion(
+            homepage,
+            assetPath
+          )}/index.html`
+        )
+      );
 
-        <body>
-        <castleblock-ui></castleblock-ui>
-        </body>
-        </html>
-        `;
+      const homepagePath = Path.join(
+        assetPath,
+        homepage,
+        latestVersion(homepage, assetPath),
+        "index.html"
+      );
+      let htmlFile = fs.readFileSync(homepagePath);
+
+      return `${htmlFile}`.replace(
+        "<head>",
+        `<head><base href="http://${host}:${port}/${Path.join(
+          basePath,
+          homepage,
+          latestVersion(homepage, assetPath)
+        )}/" />`
+      );
     },
   });
 
