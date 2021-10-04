@@ -23,7 +23,7 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps Catalog for discover
 - Deploy your project with [castleblock-cli](./castleblock-cli)
 
 ```
-castleblock-cli -n my-app -d ./dist
+castleblock deploy
 ```
 
 ![diagram of how to use castleblock](./castleblock-usage-diagram.png "Castleblock usage diagram")
