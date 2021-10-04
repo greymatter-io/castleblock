@@ -1,6 +1,6 @@
 {
   "name": "castleblock",
-  "version": "0.0.4",
+  "version": "0.1.0",
   "description": "CLI Program for the CastleBlock service.",
   "license": "MIT",
   "homepage": "https://github.com/greymatter-io/castleblock/tree/master/castleblock-cli",
