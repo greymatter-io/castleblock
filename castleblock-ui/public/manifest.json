@@ -1,6 +1,7 @@
 {
   "name": "Castleblock UI",
-  "short_name": "Castleblock",
+  "short_name": "castleblock-ui",
+  "version": "1.0.0",
   "description": "A dashboard for this service.",
   "icons": [
     {

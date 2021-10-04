@@ -12,6 +12,9 @@ import HapiSwagger from "hapi-swagger";
 import tar from "tar";
 import Path from "path";
 import Status from "hapijs-status-monitor";
+import { v4 as uuidv4 } from "uuid";
+import slugify from "slugify";
+import semver from "semver";
 
 import {
   versions,
@@ -53,35 +56,23 @@ const swaggerDocsEnable = setEnv(process.env.SWAGGER_DOCS_ENABLE, true);
 const assetPath = Path.normalize(setEnv(process.env.ASSET_PATH, "./assets"));
 const basePath = setEnv(process.env.BASE_PATH, "ui"); //Example path: <castleblock-service.url>/<basePath>/my-app/2.3.4/
 
-function getManifestPath(dir) {
-  const path = Path.join(dir, "manifest.json");
-  if (fs.existsSync(path)) {
-    return `/${path.replace(Path.posix.basename(assetPath), basePath)}`;
-  } else {
-    return null;
+function extract(path, destination) {
+  console.log(`Extracting ${path} to ${destination}`);
+  tar.x(
+    // or tar.extract(
+    {
+      file: path,
+      C: destination, // alias for cwd:'some-dir', also ok
+      strip: 1,
+      sync: true,
+    }
+  );
+}
+
+function createPath(p, clearExisting) {
+  if (clearExisting) {
+    fs.rmdirSync(p, { recursive: true });
   }
-}
-
-async function extract(path, name) {
-  return new Promise((resolve, reject) => {
-    console.log(`Extracting: ${Path.join(`${path}`, `/${name}.tar.gz`)}`);
-    tar
-      .x(
-        // or tar.extract(
-        {
-          file: Path.join(`${path}`, `/${name}.tar.gz`),
-          strip: 1,
-          C: `${path}`, // alias for cwd:'some-dir', also ok
-        }
-      )
-      .then((_) => {
-        console.log(`Extracted: ${Path.join(`${path}`, `/${name}.tar.gz`)}`);
-        resolve();
-      });
-  });
-}
-
-function createPath(p) {
   fs.mkdirSync(p, { recursive: true });
   return p;
 }
@@ -182,13 +173,30 @@ const init = async () => {
     },
   });
 
-  function writeStream(stream, filePath) {
+  async function writeStream(stream, filePath) {
     return new Promise((resolve, reject) => {
       console.log("test", filePath);
       const s = stream.pipe(fs.createWriteStream(filePath));
       s.on("finish", function () {
         console.log("finished writing", filePath);
         resolve();
+      });
+    });
+  }
+
+  function readStream(stream) {
+    let data;
+    return new Promise((resolve, reject) => {
+      stream.on("data", (chunk) => {
+        console.log(`Received ${chunk.length} bytes of data.`);
+        data = data ? data + chunk : chunk;
+      });
+      stream.on("end", () => {
+        resolve(data);
+      });
+
+      stream.on("error", (err) => {
+        reject(err);
       });
     });
   }
@@ -208,88 +216,95 @@ const init = async () => {
       tags: ["api"],
     },
     handler: async (req, h) => {
-      let next = nextVersion(
-        latestVersion(req.payload.name, assetPath),
-        req.payload.version
-      );
+      // Validate the manifest.json
+      const manifest = JSON.parse(await readStream(req.payload.manifest));
 
-      const destination = createPath(
-        Path.join(`${assetPath}`, `${req.payload.name}`, `${next}`)
-      );
+      const manifestSchema = Joi.object({
+        short_name: Joi.string().required(),
+        version: Joi.string()
+          .custom(function (value, helpers) {
+            if (!semver.valid(value)) {
+              return helpers.error("any.invalid");
+            }
+            return value;
+          }, "Semantic Version of the application")
+          .required(),
+        description: Joi.string(),
+      }).unknown(true);
 
-      console.log(
-        `\nCreating Package:\nName: ${req.payload.name}\nVersion: ${next}\nLocation: ${destination}\n\n`
-      );
-      if (req.payload.env) {
-        await writeStream(
-          req.payload.env,
-          Path.join(`${destination}`, `env.json`)
-        );
+      const manifestValidation = manifestSchema.validate(manifest);
+      if (manifestValidation.error) {
+        return Boom.badRequest(manifestValidation.error);
       }
-      await writeStream(
-        req.payload.file,
-        Path.join(`${destination}`, `/${req.payload.name}.tar.gz`)
+
+      //Determine path for deployment
+      const appPath = Path.join(
+        slugify(manifest.short_name),
+        req.payload.adhoc ? req.payload.adhoc : manifest.version
       );
 
+      //Create directory for deployment
+      const destination = Path.join(`${assetPath}`, appPath);
+      createPath(destination, true);
+
+      // Write tar.gz file to disk
+      const tarName = `${manifest.short_name}-${manifest.version}.tar.gz`;
+      await writeStream(req.payload.file, Path.join(destination, tarName));
+
+      // Extract tarball
+      extract(Path.join(destination, tarName), destination);
+
+      // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await hash(
-          Path.join(`${destination}`, `/${req.payload.name}.tar.gz`)
-        ),
+        sha512: await hash(Path.join(destination, tarName)),
       };
 
+      // Write metadata to disk
       fs.writeFileSync(
-        Path.join(`${destination}`, `/info.json`),
+        Path.join(destination, "info.json"),
         JSON.stringify(info)
       );
 
-      await extract(destination, req.payload.name);
+      //If env file is included, write it to disk
+      if (req.payload.env) {
+        await writeStream(req.payload.env, Path.join(destination, "env.json"));
+      }
+
       console.log("Deployment Date:", info.deploymentDate);
       console.log("SHA512:", info.sha512);
-      console.log(
-        `New App Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`
-      );
-      return `Deployed: http://${host}:${port}/${basePath}/${req.payload.name}/${next}/`;
+      const out = `http://${host}:${port}/${Path.join(basePath, appPath)}`;
+      console.log(out);
+
+      return {
+        appPath: appPath,
+        url: `http://${host}:${port}/${Path.join(basePath, appPath)}`,
+      };
     },
   });
 
   server.route({
     method: "DELETE",
-    path: `/deployment/{name}/{version?}`,
+    path: `/${basePath}/{name}/{version}`,
     handler: (req) => {
       console.log(
         `REMOVING: ${req.params.name} version: ${req.params.version}`
       );
-      if (req.params.version) {
-        //Remove specific version
-        fs.rmdirSync(
-          Path.join(
-            `${assetPath}`,
-            `${req.params.name}`,
-            `${req.params.version}`
-          ),
-          {
-            recursive: true,
-          }
-        );
-
-        //Remove parent directory if empty
-        if (
-          fs.readdirSync(Path.join(`${assetPath}`, `${req.params.name}`))
-            .length === 0
-        ) {
-          fs.rmdirSync(Path.join(`${assetPath}`, `${req.params.name}`), {
-            recursive: true,
-          });
-        }
-      } else {
-        //Remove all versions
+      //Remove specific version
+      fs.rmdirSync(Path.join(assetPath, req.params.name, req.params.version), {
+        recursive: true,
+      });
+      //Remove parent directory if empty
+      if (
+        fs.readdirSync(Path.join(`${assetPath}`, `${req.params.name}`))
+          .length === 0
+      ) {
         fs.rmdirSync(Path.join(`${assetPath}`, `${req.params.name}`), {
           recursive: true,
         });
       }
 
-      return `Removed ${req.params.name}`;
+      return `Removed ${req.params.name} ${req.params.version}`;
     },
 
     options: {
@@ -311,20 +326,23 @@ const init = async () => {
     method: "GET",
     path: `/deployments`,
     handler: () => {
-      return getDirectories(`${assetPath}/`).map((deployment) => {
-        return {
-          name: deployment,
-          versions: versions(deployment, assetPath),
-          path: `/${basePath}/${deployment}`,
-          latestManifest: getManifestPath(
-            Path.join(
-              `${assetPath}`,
-              `${deployment}`,
-              `${latestVersion(deployment, assetPath)}`
-            )
-          ),
-        };
-      });
+      return getDirectories(`${assetPath}/`)
+        .map((deployment) => {
+          if (versions(deployment, assetPath).length) {
+            return {
+              name: deployment,
+              versions: versions(deployment, assetPath),
+              path: `/${basePath}/${deployment}`,
+              latestManifest: Path.join(
+                `${basePath}`,
+                `${deployment}`,
+                `${latestVersion(deployment, assetPath)}`,
+                "manifest.json"
+              ),
+            };
+          }
+        })
+        .filter(Boolean);
     },
     options: {
       description: "List all deployments",

@@ -3,48 +3,66 @@ import crypto from "crypto";
 import chalk from "chalk";
 import fs from "fs";
 import tar from "tar";
-import path from "path";
+import Path from "path";
 import axios from "axios";
 import FormData from "form-data";
 import chokidar from "chokidar";
 import childProcess from "child_process";
 import { nanoid } from "nanoid";
+import slugify from "slugify";
+import { generateSlug } from "random-word-slugs";
 
-console.log(chalk.bold(chalk.cyan("Welcome to the castleblock cli")));
-cli.info("Type --help for list of parameters");
+const adhocVersion = generateSlug();
+let adhocURL = "";
 
-const args = cli.parse({
-  directory: ["d", "Directory containing the built assets", "file"],
-  name: ["n", "Name of deployment", "string"],
-  url: ["u", "URL to castleblock service", "string", "http://localhost:3000"],
-  version: ["v", "Increment Version", "string"],
-  env: [
-    "e",
-    "Include env file in deployment (accessible from ./env.json when deployed)",
-    "file",
-  ],
-  watch: [
-    "w",
-    "Watch the current directory, then build and deploy when a file changes.",
-    "directory",
-  ],
-  build: ["b", "Build command that is run before deployment", "string"],
-  remove: ["r", "Remove deployment"],
-});
+//CLI commands and options
+const commands = ["deploy", "watch", "remove"];
+const args = cli.parse(
+  {
+    dist: ["d", "Directory containing the built assets", "file", "./build"],
+    url: ["u", "URL to castleblock service", "string", "http://localhost:3000"],
+    env: [
+      "e",
+      "Include env file in deployment (accessible from ./env.json when deployed)",
+      "file",
+    ],
+    build: [
+      "b",
+      "Build command that is run before deployment",
+      "string",
+      "npm run build",
+    ],
+    src: ["s", "Source directory to watch for changes", "file", "./src"],
+    deployURL: [null, "Deployment URL to be removed", "string"],
+    package: ["p", "Name of tar.gz file", "string", "deployment.tar.gz"],
+  },
+  commands
+);
 
-//Check for required variables
+//This script is run in /bin/castleblock
+export async function init(argv) {
+  //Check for valid command
+  if (!commands.includes(cli.command)) {
+    cli.fatal(`${cli.command} is an unknown command`);
+  }
 
-if (!args.name && !args.watch) {
-  cli.error(
-    'Please include a name for your deployment. i.e. --name "my-deployment"'
-  );
-  process.exit(1);
-}
-if (!args.directory && !args.remove) {
-  cli.error(
-    'Please include a directory to your build assets i.e. --directory"./build"'
-  );
-  process.exit(1);
+  //Read manifest from build directory
+
+  switch (cli.command) {
+    case "deploy":
+      await build();
+      await compress();
+      await deploy();
+      break;
+    case "watch":
+      watch();
+      break;
+    case "remove":
+      await remove(args.deployURL);
+      break;
+    default:
+    // code block
+  }
 }
 
 const execWithPromise = async (command) => {
@@ -59,19 +77,24 @@ const execWithPromise = async (command) => {
 
 async function build() {
   if (args.build) {
+    cli.info(`Building Project: ${args.build}`);
     return await execWithPromise(args.build);
   }
 }
-async function bundle() {
+
+async function compress() {
   return new Promise((resolve, reject) => {
-    console.log(chalk.cyan("Packaging..."));
+    cli.info(
+      `Compressing ${chalk.cyan(args.dist)} into ${chalk.cyan(
+        `${args.package}`
+      )}`
+    );
     tar
       .c(
         {
-          gzip: true,
-          file: `${args.name}.tar.gz`,
+          file: `${args.package}`,
         },
-        [`${path.join(args.directory, "/")}`]
+        [`${Path.join(args.dist, "/")}`]
       )
       .then((_) => {
         resolve();
@@ -90,41 +113,45 @@ function hash(stream) {
   });
 }
 
-async function upload() {
-  console.log(chalk.cyan("Uploading..."));
+async function deploy(adhoc) {
+  cli.info(`Uploading ${args.package}`, adhoc);
 
   var form = new FormData();
-  if (args.name) {
-    form.append("name", args.name);
-  }
-  if (args.version) {
-    form.append("version", args.version);
-  }
-  const rs = fs.createReadStream(`./${args.name}.tar.gz`);
+  const rs = fs.createReadStream(`./${args.package}`);
   form.append("file", rs);
+  if (adhoc) {
+    form.append("adhoc", adhoc);
+  }
   if (args.env) {
     form.append("env", fs.createReadStream(`./${args.env}`));
   }
 
-  const sha512 = await hash(fs.createReadStream(`./${args.name}.tar.gz`));
-  console.log(chalk.bold("SHA512:"), chalk.cyan(sha512));
+  form.append(
+    "manifest",
+    fs.createReadStream(Path.join(args.dist, "manifest.json"))
+  );
+
+  const sha512 = await hash(fs.createReadStream(`./${args.package}`));
+  cli.info(`${chalk.bold("SHA512:")}\n      ${chalk.cyan(sha512)}`);
 
   axios
-    .post(`${args.url}/deployment`, form, { headers: form.getHeaders() })
-    .then((response) => {
-      cli.info(response.data);
+    .post(`${args.url}/deployment`, form, {
+      headers: form.getHeaders(),
     })
-    .catch((error) => cli.error(error));
+    .then((response) => {
+      adhocURL = response.data.url;
+      cli.info(`URL: ${response.data.url}`);
+    })
+    .catch((error) => {
+      console.log(error.response.data.message);
+      cli.error(error.response.data.message);
+    });
 }
 
-async function remove() {
-  console.log("Deleting Deployment");
+async function remove(url) {
+  cli.info("Deleting Deployment", url);
   await axios
-    .delete(
-      `${args.url}/deployment/${args.name}${
-        args.version ? `/${args.version}` : ""
-      }`
-    )
+    .delete(url)
     .then((response) => {
       cli.info(response.data);
     })
@@ -134,48 +161,32 @@ async function remove() {
 function watch() {
   // One-liner for current directory
 
-  console.log(`${chalk.bold("Watching")}: ${args.watch} for changes.`);
-  args.name = nanoid(10);
+  cli.info(
+    `${chalk.bold("Watching For Changes")}\n      Source Directory: "${
+      args.src
+    }"\n      Build Command: "${args.build}"`
+  );
 
-  args.version = "0.0.1";
   chokidar
-    .watch(args.watch, {
+    .watch(args.src, {
       ignoreInitial: true,
-      ignored: [`${args.directory}`], // ignore dotfiles
+      ignored: [`${args.dist}`, "*.tar.gz", ".*"], // ignore dotfiles
+      interval: 5000,
     })
     .on("ready", async () => {
       await build();
-      await bundle();
-      await upload();
+      await compress();
+      await deploy(adhocVersion);
     })
-    .on("all", async (event, path) => {
+    .on("change", async (event, path) => {
       await build();
-      await bundle();
-      await upload();
-      console.log(event, path);
+      await compress();
+      await deploy(adhocVersion);
+      cli.info(event, path);
     });
-}
-
-console.log(`${chalk.bold("Name")}: ${chalk.cyan(args.name)}`);
-console.log(`${chalk.bold("Package")}: ${chalk.cyan(args.directory)}`);
-
-export async function start(argv) {
   process.on("SIGINT", async function () {
-    console.log("Caught interrupt signal");
-    if (args.watch) {
-      await remove();
-    }
+    cli.info("Caught interrupt signal, stopping now.");
+    await remove(adhocURL);
     process.exit();
   });
-  if (args.remove) {
-    await remove();
-  } else if (args.watch) {
-    //Watch for changes
-    watch();
-  } else {
-    //Package and Deploy
-    await build();
-    await bundle();
-    await upload();
-  }
 }

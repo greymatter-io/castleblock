@@ -1,4 +1,4 @@
 #!/usr/bin/env node
 
 require = require('esm')(module /*, options*/);
-require('../index.js').start(process.argv);
+require('../index.js').init(process.argv);

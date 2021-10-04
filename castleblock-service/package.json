@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --ignore './package/' --ignore './assets/' --exec babel-node src/index.js",
+    "dev": "nodemon --ignore './package/' --ignore './temp/' --ignore './assets/' --exec babel-node src/index.js",
     "start": "babel-node src/index.js",
     "build": "docker build . --build-arg NPM_TOKEN=${NPM_TOKEN} --no-cache -t castleblock-service",
     "docker": "docker run  -p 3000:3000 --net=host castleblock-service "
@@ -28,9 +28,14 @@
     "hapijs-status-monitor": "^1.0.1",
     "hasha": "^5.2.2",
     "joi": "^17.4.2",
+    "lockfile": "^1.0.4",
     "lodash": "^4.17.21",
+    "proper-lockfile": "^4.1.2",
+    "random-word-slugs": "0.0.5",
     "semver": "^7.3.5",
-    "tar": "^6.1.11"
+    "slugify": "^1.6.0",
+    "tar": "^6.1.11",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",

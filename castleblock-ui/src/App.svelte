@@ -3,25 +3,11 @@
 <script>
 import Card from "./Card.svelte";
 
+
 import { onMount } from "svelte";
 import axios from "axios";
 import logo from "./Logo.png";
 
-
-let env = new Promise((resolve, reject) => {
-  return axios.get("./env.json").then((results) => resolve(results.data));
-});
-  console.log('w', window.location)
-let google = new Promise((resolve, reject) => {
-  return axios
-    .get(
-      `${window.location.origin}/proxy/https://dog.ceo/api/breeds/image/random`
-    )
-    .then((results) => {
-      console.log(results.data);
-      resolve(results.data);
-    });
-});
 
 let packages = new Promise((resolve, reject) => {
   return axios
