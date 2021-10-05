@@ -24,6 +24,14 @@ castleblock deploy -d ./public
 
 Now when you go to the castleblock-service at http://localhost:3000/ the castleblock-ui will be displayed. It will list all the deployed apps and versions available. This is useful for developers looking to leverage existing applications as microfrontends or webcomponents.
 
+### Reverse Proxy
+
+Applications can access microservices and eternal origins that are whitelisted.
+
+```
+fetch("/proxy/http://coolservice.com")
+```
+
 ### Build docker image
 
 ```
@@ -46,6 +54,6 @@ npm run docker
 | ORIGIN_WHITELIST      | List of origins that clients are allowed to proxy to.         | []             | ["https://google.com", "https://reddit.com"]       |
 | STATUS_MONITOR_ENABLE | Enables status monitor page for the service                   | true           | <castleblock-service.url>/status                   |
 | SWAGGER_DOCS_ENABLE   | Enable swagger documentation                                  | true           | <castleblock-service.url>/documentation            |
-| ASSET_PATH            | Directory on disk that the deployments will be stored         | "./assets"     |                                                    |
-| BASE_PATH             | URL basePath for hosted web apps.                             | "ui"           | <castleblock-service.url>/<basePath>/my-app/2.3.4/ |
+| ASSET_PATH            | Directory on disk that the deployments will be stored         | ./assets       |                                                    |
+| BASE_PATH             | URL basePath for hosted web apps.                             | ui             | <castleblock-service.url>/<basePath>/my-app/2.3.4/ |
 | HOMEPAGE              | App that is displayed when you go to the root of the service. | castleblock-ui |                                                    |
