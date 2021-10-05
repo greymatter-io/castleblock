@@ -2,7 +2,7 @@
 
 The castleblock-cli interfaces with the castleblock-service API and deploys apps via a command line interface.
 
-## Usage
+## CLI Usage
 
 ```
 $ castleblock --help
@@ -28,10 +28,11 @@ Commands:
 
 Castleblock relies on your app's [manifest.json](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json) file to deploy your app.
 
-- `short_name` - (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`
-- `version` - (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`
-- `name` - Used in castleblock-ui
-- `description` - Used in castleblock-ui
+- [short_name](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/short_name) - (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`
+- [version](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/version) - (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`. The version must follow the [semver standard](https://semver.org/)
+- [name](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/name) - Used in castleblock-ui app cards
+- [description](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/description) - Used in castleblock-ui
+- [icons](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/icons)
 
 ## Deploying an app
 
@@ -53,6 +54,8 @@ $ castleblock remove --deployURL http://localhost:3000/ui/my-app/1.2.3/
 
 ## Watch and Deploy
 
+The watch command allows you to deploy an adhoc version of your application to a randomly generated URL. Castleblock will watch your files for changes, rebuild, and deploy anytime you make a change. This allows you to share or demo a feature currently in development and test it directly against your microservices in your deployment environment..
+
 ```
 $ castleblock watch -s ./src -b "npm run build" -d ./dist
 INFO: Watching For Changes
@@ -66,3 +69,14 @@ INFO: SHA512:
 INFO: URL: http://localhost:3000/ui/my-app/few-rhythmic-spring
 
 ```
+
+## Environmental Variable Injection
+
+Sometimes your application needs to be configurable after it has already been bundled. CastleBlock provides a mechanism to include an additional json file alongside your bundled application.
+e the `--env` option to include configurations at runtime.
+
+```
+castleblock deploy --env env.json
+```
+
+This will inject the env.json file into your deployment, so your application can `fetch(./env.json)` to load custom configuration values when the application first loads.

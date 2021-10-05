@@ -18,7 +18,10 @@ let packages = new Promise((resolve, reject) => {
 </svelte:head>
 
 <main>
-  <img src="{logo}" height="80px" alt="CastleBlock Logo" />
+  <div class="header">
+    <div id="logo"><img  src="{logo}" height="80px" alt="CastleBlock Logo" /></div>
+    <a href="#getting-started">Getting Started</a>
+  </div>
   <div class="box">
     {#await packages}
       <div>Loading</div>
@@ -31,6 +34,12 @@ let packages = new Promise((resolve, reject) => {
 </main>
 
 <style>
+  #logo {
+    flex:1;
+  }
+  .header {
+    display:flex;
+  }
 main {
   padding: 1em;
   margin: 0 auto;
