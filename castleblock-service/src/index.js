@@ -15,6 +15,7 @@ import Status from "hapijs-status-monitor";
 import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import semver from "semver";
+import susie from "susie";
 
 import {
   versions,
@@ -22,6 +23,8 @@ import {
   nextVersion,
   getDirectories,
 } from "./versioning.js";
+
+let adhocClients = [];
 
 function hash(filePath) {
   const stream = fs.createReadStream(filePath);
@@ -85,7 +88,7 @@ const init = async () => {
     host,
   });
 
-  await server.register([Inert, H2o2, Vision]);
+  await server.register([Inert, H2o2, Vision, susie]);
   if (swaggerDocsEnable) {
     await server.register([
       {
@@ -151,6 +154,13 @@ const init = async () => {
     },
   });
 
+  function injectBasePath(htmlString, relPath) {
+    return `${htmlString}`.replace(
+      "<head>",
+      `<head><base href="${relPath}" />`
+    );
+  }
+
   server.route({
     method: "GET",
     path: "/",
@@ -171,14 +181,9 @@ const init = async () => {
         "index.html"
       );
       let htmlFile = fs.readFileSync(homepagePath);
-
-      return `${htmlFile}`.replace(
-        "<head>",
-        `<head><base href="http://${host}:${port}/${Path.join(
-          basePath,
-          homepage,
-          latestVersion(homepage, assetPath)
-        )}/" />`
+      return injectBasePath(
+        htmlFile,
+        `/${Path.join(basePath, homepage, latestVersion(homepage, assetPath))}/`
       );
     },
   });
@@ -287,10 +292,50 @@ const init = async () => {
       const out = `http://${host}:${port}/${Path.join(basePath, appPath)}`;
       console.log(out);
 
+      if (req.payload.adhoc) {
+        console.log("ADHOC Clients:", adhocClients.length);
+        adhocClients = adhocClients
+          .map((c) => {
+            console.log("cinfo", c.request.info.referrer);
+            if (c.request.info.referrer.includes(appPath)) {
+              c.event({
+                data: "refresh",
+              });
+              return null;
+            }
+            return c;
+          })
+          .filter(Boolean);
+
+        console.log("ADHOC Clients:", adhocClients.length);
+        //read index.html
+        let htmlFile = fs.readFileSync(Path.join(destination, "index.html"));
+
+        //insert script
+        htmlFile = `${htmlFile}`.replace(
+          "</body>",
+          `<script>
+          var source = new EventSource('/refresh');source.onmessage = function(e) { console.log(e); if(e.data=="refresh"){ location.reload();}}</script></body>`
+        );
+
+        //save file
+        fs.writeFileSync(Path.join(destination, "index.html"), htmlFile);
+      }
+
       return {
         appPath: appPath,
         url: `http://${host}:${port}/${Path.join(basePath, appPath)}`,
       };
+    },
+  });
+
+  server.route({
+    method: "GET",
+    path: "/refresh",
+    handler: function (request, h) {
+      adhocClients = adhocClients.concat([h]);
+      console.log("ADHOC Clients:", adhocClients.length);
+      return h.event({ data: "hotreloading enabled" });
     },
   });
 
@@ -301,6 +346,15 @@ const init = async () => {
       console.log(
         `REMOVING: ${req.params.name} version: ${req.params.version}`
       );
+      adhocClients = adhocClients.filter(
+        (c) =>
+          !c.request.info.referrer.includes(
+            `${req.params.name}/${req.params.version}`
+          )
+      );
+
+      console.log("ADHOC Clients:", adhocClients.length);
+
       //Remove specific version
       fs.rmdirSync(Path.join(assetPath, req.params.name, req.params.version), {
         recursive: true,
@@ -401,9 +455,13 @@ const init = async () => {
         .replace("latest", v);
 
       //if a directory is requested append index.html
-      pathToFile = pathToFile.endsWith("/")
-        ? pathToFile + "index.html"
-        : pathToFile;
+      if (pathToFile.endsWith("/")) {
+        let htmlFile = fs.readFileSync(pathToFile + "index.html");
+        return injectBasePath(
+          htmlFile,
+          `/${Path.join(basePath, request.params.appName, v)}/`
+        );
+      }
 
       return h.file(pathToFile);
     },

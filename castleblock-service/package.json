@@ -34,6 +34,7 @@
     "random-word-slugs": "0.0.5",
     "semver": "^7.3.5",
     "slugify": "^1.6.0",
+    "susie": "^3.0.0",
     "tar": "^6.1.11",
     "uuid": "^8.3.2"
   },
