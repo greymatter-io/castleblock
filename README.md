@@ -8,11 +8,11 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps Catalog for discover
 
 - CLI for manual deployments or continuous delivery
 - Deployment versioning using [Semantic Versioning](https://semver.org/)
-- [Environmental Variable Injection](./castleblock-cli/README.md#environmental-variable-injection)
-- Reverse Proxy for CORS support
-- [Ad hoc deployments](./castleblock-cli/README.md#ad-hoc-deployments)
+- [Environmental Variable Injection](./castleblock-cli#environmental-variable-injection)
+- [Reverse Proxy](./castleblock-service#reverse-proxy) 
+- [Ad hoc deployments](./castleblock-cli#ad-hoc-deployments)
 - Dynamic Swagger Documentation (http://localhost:3000/documentation)
-- [manifest.json](./castleblock-ui/README.md#manifest.json) files are used to display app information in the CastleBlock UI.
+- [manifest.json](./castleblock-ui#manifest.json) files are used to display app information in the CastleBlock UI.
 - [CastleBlock UI](./castleblock-ui) for browsing deployed Apps, Microfrontends, and SPAs
 - Reverse Proxy for microservices in your environment
 
