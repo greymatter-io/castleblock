@@ -14,7 +14,7 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps Catalog for discover
 - Dynamic Swagger Documentation (http://localhost:3000/documentation)
 - [manifest.json](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json) files are used to display app information in the CastleBlock UI.
 - Deploy Single Page Apps, Microfrontends, Web Components, any Web Asset
-- [CastleBlock UI](./castleblock-ui/README.md) for browsing deployed Apps, Microfrontends, and SPAs
+- [CastleBlock UI](./castleblock-ui) for browsing deployed Apps, Microfrontends, and SPAs
 - Reverse Proxy for microservices in your environment
 
 ## Quick Start

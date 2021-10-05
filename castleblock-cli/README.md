@@ -52,7 +52,7 @@ INFO: URL: http://localhost:3000/ui/my-app/1.2.3
 $ castleblock remove --deployURL http://localhost:3000/ui/my-app/1.2.3/
 ```
 
-## Watch and Deploy
+## ADHOC Deployments
 
 The watch command allows you to deploy an adhoc version of your application to a randomly generated URL. Castleblock will watch your files for changes, rebuild, and deploy anytime you make a change. This allows you to share or demo a feature currently in development and test it directly against your microservices in your deployment environment..
 
