@@ -19,7 +19,7 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps Catalog for discover
 ## Quick Start
 
 - Bundle your project
-- Run [castleblock-service](./castleblock-service)
+- Run [castleblock-service](./castleblock-service) or use an existing instance.
 - Deploy your project with [castleblock-cli](./castleblock-cli)
 
 ```
