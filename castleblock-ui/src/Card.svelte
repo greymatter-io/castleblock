@@ -21,18 +21,16 @@ export let icons;
 </script>
 
 <div class="card app-card">
-  <div class="card-content">
+  <div class="card-content content">
     <div class="media">
       {#if icons}
         <div class="media-left">
-          <figure class="image is-48x48">
             <img
+              class="image is-96x96"
               alt="logo"
-              width="60px"
               src="{`${window.location.origin}${pack.path}/latest/${
                 icons.reverse()[icons.length - 1].src
               }`}" />
-          </figure>
         </div>
       {/if}
       <div class="media-content">
@@ -82,7 +80,15 @@ export let icons;
 
 <style>
 .app-card {
+  display:flex;
+  flex-direction:column;
   min-width: 350px;
   width: 350px;
 }
+  .content {
+    flex:1;
+  }
+  img {
+    flex:1;
+  }
 </style>
