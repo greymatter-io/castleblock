@@ -6,7 +6,7 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps Catalog for discover
 
 ## Features:
 
-- CLI for manual deployments or continuous delivery
+- [CLI](./castleblock-cli) for manual deployments or continuous delivery
 - Deployment versioning using [Semantic Versioning](https://semver.org/)
 - [Environmental Variable Injection](./castleblock-cli#environmental-variable-injection)
 - [Reverse Proxy](./castleblock-service#reverse-proxy) 
