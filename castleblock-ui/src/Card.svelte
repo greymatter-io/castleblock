@@ -1,7 +1,8 @@
 <script>
 import axios from "axios";
-
 import { onMount } from "svelte";
+
+import Dropdown from "./Dropdown.svelte";
 export let pack = {};
 onMount(() => {
   if (pack.latestManifest) {
@@ -19,78 +20,69 @@ export let description;
 export let icons;
 </script>
 
-<div class="box">
-  <div class="icon">
-    {#if icons}
-      <picture>
-        {#each icons.reverse() as icon}
-          <source
-            srcset="{`${window.location.origin}${pack.path}/latest/${icon.src}`}" />
-        {/each}
-        <img alt="logo" width="60px" />
-      </picture>
-    {/if}
-  </div>
-  <div class="right-side">
-    <details>
-      <summary>
-        <a
-          target="_blank"
-          href="{`${window.location.origin}${pack.path}/latest/`}"
-          >{title || pack.name}</a>
+<div class="card app-card">
+  <div class="card-content">
+    <div class="media">
+      {#if icons}
+        <div class="media-left">
+          <figure class="image is-48x48">
+            <img
+              alt="logo"
+              width="60px"
+              src="{`${window.location.origin}${pack.path}/latest/${
+                icons.reverse()[icons.length - 1].src
+              }`}" />
+          </figure>
+        </div>
+      {/if}
+      <div class="media-content">
+        <p class="title is-5">
+          <a
+            target="_blank"
+            href="{`${window.location.origin}${pack.path}/latest/`}"
+            >{title || pack.name}</a>
+        </p>
         {#if description}
-          <div>{description}</div>
+          <p class="subtitle is-6">
+            {description}
+          </p>
         {/if}
-      </summary>
-      <p>
-        {#each pack.versions.reverse() as version, i}
-          <div>
+      </div>
+    </div>
+  </div>
+  <footer class="card-footer">
+    <div class=" dropdown is-hoverable">
+      <div class="dropdown-trigger">
+        <button
+          class="button is-small"
+          aria-haspopup="true"
+          aria-controls="dropdown-menu3">
+          <span>versions</span>
+          <span class="icon is-small">
+            <i class="fas fa-angle-down" aria-hidden="true"></i>
+          </span>
+        </button>
+      </div>
+      <div class="dropdown-menu" id="dropdown-menu3" role="menu">
+        <div class="dropdown-content">
+          {#each pack.versions.reverse() as version, i}
             <a
               target="_blank"
-              href="{`${window.location.origin}${pack.path}/${version}/`}">
+              href="{`${window.location.origin}${pack.path}/${version}/`}"
+              class="dropdown-item">
               {pack.name} - {version}
               {i == 0 ? "(latest)" : ""}
             </a>
-          </div>
-        {/each}
-      </p>
-    </details>
-
-    <div class="deployment-version">
-      {pack.versions.slice(-1)[0]}
+          {/each}
+        </div>
+      </div>
     </div>
-  </div>
+  </footer>
 </div>
 
 <style>
-.box {
-  display: inline-block;
-  background: #f9f9f9;
-  border: 1px solid black;
-  border-radius: 10px;
-  margin: 10px 10px;
-  padding: 10px;
-  display: flex;
-  min-width: 200px;
-  width: 300px;
-}
-
-.icon {
-  min-width: 60px;
-  height: 60px;
-  background: #f7f7f7;
-  margin: 10px;
-}
-details {
-  flex: 1;
-}
-.right-side {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-}
-.deployment-version {
-  text-align: right;
-  font-size: 12px;
+.app-card {
+  min-width: 350px;
+  width: 350px;
 }
 </style>
