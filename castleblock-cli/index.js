@@ -99,7 +99,10 @@ async function compress() {
       .then((_) => {
         resolve();
       })
-      .catch(() => reject());
+      .catch((e) => {
+        cli.fatal(e)
+        reject(e);
+      });
   });
 }
 
