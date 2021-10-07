@@ -21,22 +21,15 @@
     "@hapi/h2o2": "^9.1.0",
     "@hapi/hapi": "^20.1.5",
     "@hapi/inert": "^6.0.3",
-    "@hapi/somever": "^3.0.1",
     "@hapi/vision": "^6.1.0",
-    "axios": "^0.21.4",
     "hapi-swagger": "^14.2.4",
     "hapijs-status-monitor": "^1.0.1",
-    "hasha": "^5.2.2",
     "joi": "^17.4.2",
-    "lockfile": "^1.0.4",
     "lodash": "^4.17.21",
-    "proper-lockfile": "^4.1.2",
-    "random-word-slugs": "0.0.5",
     "semver": "^7.3.5",
     "slugify": "^1.6.0",
     "susie": "^3.0.0",
-    "tar-fs": "^2.1.1",
-    "uuid": "^8.3.2"
+    "tar-fs": "^2.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",
