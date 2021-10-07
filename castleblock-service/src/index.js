@@ -9,10 +9,9 @@ import Joi from "joi";
 import Vision from "@hapi/vision";
 import Wreck from "@hapi/wreck";
 import HapiSwagger from "hapi-swagger";
-import tar from "tar";
+import tar from "tar-fs";
 import Path from "path";
 import Status from "hapijs-status-monitor";
-import { v4 as uuidv4 } from "uuid";
 import slugify from "slugify";
 import semver from "semver";
 import susie from "susie";
@@ -26,8 +25,8 @@ import {
 
 let adhocClients = [];
 
-function hash(filePath) {
-  const stream = fs.createReadStream(filePath);
+function hash(stream) {
+  //const stream = fs.createReadStream(filePath);
   return new Promise((resolve, reject) => {
     const hasher = crypto.createHash("sha512");
     hasher.setEncoding("hex");
@@ -59,19 +58,6 @@ const swaggerDocsEnable = setEnv(process.env.SWAGGER_DOCS_ENABLE, true);
 const assetPath = Path.normalize(setEnv(process.env.ASSET_PATH, "./assets"));
 const basePath = setEnv(process.env.BASE_PATH, "ui"); //Example path: <castleblock-service.url>/<basePath>/my-app/2.3.4/
 const homepage = setEnv(process.env.HOMEPAGE, `castleblock-ui`);
-
-function extract(path, destination) {
-  console.log(`Extracting ${path} to ${destination}`);
-  tar.x(
-    // or tar.extract(
-    {
-      file: path,
-      C: destination, // alias for cwd:'some-dir', also ok
-      strip: 1,
-      sync: true,
-    }
-  );
-}
 
 function createPath(p, clearExisting) {
   if (clearExisting) {
@@ -262,18 +248,13 @@ const init = async () => {
       const destination = Path.join(`${assetPath}`, appPath);
       createPath(destination, true);
 
-      // Write tar.gz file to disk
-      const tarName = `${manifest.short_name}-${manifest.version}.tar.gz`;
-      await writeStream(req.payload.file, Path.join(destination, tarName));
-
       // Extract tarball
-      extract(Path.join(destination, tarName), destination);
+      req.payload.file.pipe(tar.extract(destination));
 
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await hash(Path.join(destination, tarName)),
-        bundleSizeBytes: fs.statSync(Path.join(destination, tarName)).size,
+        sha512: await hash(req.payload.file),
       };
 
       // Write metadata to disk
