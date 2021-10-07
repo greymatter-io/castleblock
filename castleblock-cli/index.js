@@ -100,7 +100,7 @@ async function compress() {
         resolve();
       })
       .catch((e) => {
-        cli.fatal(e)
+        cli.fatal(e);
         reject(e);
       });
   });

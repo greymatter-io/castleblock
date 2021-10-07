@@ -25,12 +25,12 @@ export let icons;
     <div class="media">
       {#if icons}
         <div class="media-left">
-            <img
-              class="image is-96x96"
-              alt="logo"
-              src="{`${window.location.origin}${pack.path}/latest/${
-                icons.reverse()[icons.length - 1].src
-              }`}" />
+          <img
+            class="image is-96x96"
+            alt="logo"
+            src="{`${window.location.origin}${pack.path}/latest/${
+              icons.reverse()[icons.length - 1].src
+            }`}" />
         </div>
       {/if}
       <div class="media-content">
@@ -80,15 +80,15 @@ export let icons;
 
 <style>
 .app-card {
-  display:flex;
-  flex-direction:column;
+  display: flex;
+  flex-direction: column;
   min-width: 350px;
   width: 350px;
 }
-  .content {
-    flex:1;
-  }
-  img {
-    flex:1;
-  }
+.content {
+  flex: 1;
+}
+img {
+  flex: 1;
+}
 </style>
