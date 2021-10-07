@@ -2,7 +2,7 @@ import cli from "cli";
 import crypto from "crypto";
 import chalk from "chalk";
 import fs from "fs";
-import tar from "tar";
+import tar from "tar-fs";
 import Path from "path";
 import axios from "axios";
 import FormData from "form-data";
@@ -34,7 +34,7 @@ const args = cli.parse(
     ],
     src: ["s", "Source directory to watch for changes", "file", "./src"],
     deployURL: [null, "Deployment URL to be removed", "string"],
-    package: ["p", "Name of tar.gz file", "string", "deployment.tar.gz"],
+    package: ["p", "Name of tar file", "string", "deployment.tar"],
   },
   commands
 );
@@ -50,8 +50,6 @@ export async function init(argv) {
 
   switch (cli.command) {
     case "deploy":
-      await build();
-      await compress();
       await deploy();
       break;
     case "watch":
@@ -60,8 +58,6 @@ export async function init(argv) {
     case "remove":
       await remove(args.deployURL);
       break;
-    default:
-    // code block
   }
 }
 
@@ -74,38 +70,6 @@ const execWithPromise = async (command) => {
     }
   });
 };
-
-async function build() {
-  if (args.build) {
-    cli.info(`Building Project: ${args.build}`);
-    return await execWithPromise(args.build);
-  }
-}
-
-async function compress() {
-  return new Promise((resolve, reject) => {
-    cli.info(
-      `Compressing ${chalk.cyan(args.dist)} into ${chalk.cyan(
-        `${args.package}`
-      )}`
-    );
-    tar
-      .c(
-        {
-          file: `${args.package}`,
-        },
-        [`${Path.join(args.dist, "/")}`]
-      )
-      .then((_) => {
-        resolve();
-      })
-      .catch((e) => {
-        cli.fatal(e);
-        reject(e);
-      });
-  });
-}
-
 function hash(stream) {
   return new Promise((resolve, reject) => {
     const hasher = crypto.createHash("sha512");
@@ -117,11 +81,21 @@ function hash(stream) {
 }
 
 async function deploy(adhoc) {
-  cli.info(`Uploading ${args.package}`, adhoc);
+  cli.info(
+    `Compressing ${chalk.cyan(args.dist)} into ${chalk.cyan(`${args.package}`)}`
+  );
+
+  if (args.build) {
+    cli.info(`Building Project: ${args.build}`);
+    await execWithPromise(args.build);
+  }
+
+  const pack = tar.pack(`${Path.join(args.dist)}`);
 
   var form = new FormData();
-  const rs = fs.createReadStream(`./${args.package}`);
-  form.append("file", rs);
+  form.append("file", pack, {
+    filename: "deployment.tar",
+  });
   if (adhoc) {
     form.append("adhoc", adhoc);
   }
@@ -134,9 +108,10 @@ async function deploy(adhoc) {
     fs.createReadStream(Path.join(args.dist, "manifest.json"))
   );
 
-  const sha512 = await hash(fs.createReadStream(`./${args.package}`));
+  const sha512 = await hash(pack);
   cli.info(`${chalk.bold("SHA512:")}\n      ${chalk.cyan(sha512)}`);
 
+  cli.info(`Uploading ${args.package}`, adhoc);
   axios
     .post(`${args.url}/deployment`, form, {
       headers: form.getHeaders(),
@@ -146,8 +121,7 @@ async function deploy(adhoc) {
       cli.info(`URL: ${response.data.url}`);
     })
     .catch((error) => {
-      console.log(error.response.data.message);
-      cli.error(error.response.data.message);
+      cli.fatal(error);
     });
 }
 
@@ -162,8 +136,6 @@ async function remove(url) {
 }
 
 function watch() {
-  // One-liner for current directory
-
   cli.info(
     `${chalk.bold("Watching For Changes")}\n      Source Directory: "${
       args.src
@@ -173,17 +145,13 @@ function watch() {
   chokidar
     .watch(args.src, {
       ignoreInitial: true,
-      ignored: [`${args.dist}`, "*.tar.gz", ".*"], // ignore dotfiles
+      ignored: [`${args.dist}`, "*.tar", ".*"], // ignore dotfiles
       interval: 5000,
     })
     .on("ready", async () => {
-      await build();
-      await compress();
       await deploy(adhocVersion);
     })
     .on("change", async (event, path) => {
-      await build();
-      await compress();
       await deploy(adhocVersion);
       cli.info(event, path);
     });
