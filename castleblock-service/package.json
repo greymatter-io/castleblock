@@ -26,10 +26,12 @@
     "hapijs-status-monitor": "^1.0.1",
     "joi": "^17.4.2",
     "lodash": "^4.17.21",
+    "readable-stream-clone": "0.0.7",
     "semver": "^7.3.5",
     "slugify": "^1.6.0",
     "susie": "^3.0.0",
-    "tar-fs": "^2.1.1"
+    "tar-fs": "^2.1.1",
+    "tar-stream": "^2.2.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.14.8",

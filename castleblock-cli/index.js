@@ -103,11 +103,6 @@ async function deploy(adhoc) {
     form.append("env", fs.createReadStream(`./${args.env}`));
   }
 
-  form.append(
-    "manifest",
-    fs.createReadStream(Path.join(args.dist, "manifest.json"))
-  );
-
   const sha512 = await hash(pack);
   cli.info(`${chalk.bold("SHA512:")}\n      ${chalk.cyan(sha512)}`);
 

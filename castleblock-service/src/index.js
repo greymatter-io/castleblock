@@ -9,12 +9,14 @@ import Joi from "joi";
 import Vision from "@hapi/vision";
 import Wreck from "@hapi/wreck";
 import HapiSwagger from "hapi-swagger";
-import tar from "tar-fs";
+import tarFS from "tar-fs";
+import tarStream from "tar-stream";
 import Path from "path";
 import Status from "hapijs-status-monitor";
 import slugify from "slugify";
 import semver from "semver";
 import susie from "susie";
+import ReadableStreamClone from "readable-stream-clone";
 
 import {
   versions,
@@ -202,6 +204,24 @@ const init = async () => {
     });
   }
 
+  async function getManifest(oldTarballStream) {
+    let extract = tarStream.extract();
+    let manifest;
+    await new Promise((resolve, reject) => {
+      extract.on("entry", async function (header, stream, callback) {
+        // write the new entry to the pack stream
+        if (header.name == "manifest.json") {
+          manifest = JSON.parse(await readStream(stream));
+          resolve();
+        }
+        callback();
+      });
+
+      oldTarballStream.pipe(extract);
+    });
+    return manifest;
+  }
+
   server.route({
     method: "POST",
     path: `/deployment`,
@@ -218,7 +238,12 @@ const init = async () => {
     },
     handler: async (req, h) => {
       // Validate the manifest.json
-      const manifest = JSON.parse(await readStream(req.payload.manifest));
+      //const manifest = JSON.parse(await readStream(req.payload.manifest));
+
+      const stream1 = new ReadableStreamClone(req.payload.file);
+      const stream2 = new ReadableStreamClone(req.payload.file);
+      const manifest = await getManifest(stream1);
+      console.log(manifest);
 
       const manifestSchema = Joi.object({
         short_name: Joi.string().required(),
@@ -249,12 +274,13 @@ const init = async () => {
       createPath(destination, true);
 
       // Extract tarball
-      req.payload.file.pipe(tar.extract(destination));
+      console.log("Starting Extraction");
+      stream2.pipe(tarFS.extract(destination));
 
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await hash(req.payload.file),
+        sha512: await hash(stream2),
       };
 
       // Write metadata to disk
