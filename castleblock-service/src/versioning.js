@@ -61,3 +61,10 @@ export function nextVersion(version, action) {
   }
   return `${major}.${minor}.${patch + 1}`;
 }
+
+export default {
+  getDirectories,
+  latestVersion,
+  nextVersion,
+  versions,
+};

@@ -9,19 +9,16 @@ import Joi from "joi";
 import Vision from "@hapi/vision";
 import Wreck from "@hapi/wreck";
 import HapiSwagger from "hapi-swagger";
-import tar from "tar-fs";
+import tarFS from "tar-fs";
+import tarStream from "tar-stream";
 import Path from "path";
 import Status from "hapijs-status-monitor";
 import slugify from "slugify";
 import semver from "semver";
 import susie from "susie";
+import ReadableStreamClone from "readable-stream-clone";
 
-import {
-  versions,
-  latestVersion,
-  nextVersion,
-  getDirectories,
-} from "./versioning.js";
+import utils from "./versioning.js";
 
 let adhocClients = [];
 
@@ -153,7 +150,7 @@ const init = async () => {
     handler: (request, h) => {
       console.log(
         Path.join(
-          `${assetPath}/${homepage}/${latestVersion(
+          `${assetPath}/${homepage}/${utils.latestVersion(
             homepage,
             assetPath
           )}/index.html`
@@ -163,13 +160,17 @@ const init = async () => {
       const homepagePath = Path.join(
         assetPath,
         homepage,
-        latestVersion(homepage, assetPath),
+        utils.latestVersion(homepage, assetPath),
         "index.html"
       );
       let htmlFile = fs.readFileSync(homepagePath);
       return injectBasePath(
         htmlFile,
-        `/${Path.join(basePath, homepage, latestVersion(homepage, assetPath))}/`
+        `/${Path.join(
+          basePath,
+          homepage,
+          utils.latestVersion(homepage, assetPath)
+        )}/`
       );
     },
   });
@@ -202,6 +203,24 @@ const init = async () => {
     });
   }
 
+  async function getManifest(oldTarballStream) {
+    let extract = tarStream.extract();
+    let manifest;
+    await new Promise((resolve, reject) => {
+      extract.on("entry", async function (header, stream, callback) {
+        // write the new entry to the pack stream
+        if (header.name == "manifest.json") {
+          manifest = JSON.parse(await readStream(stream));
+          resolve();
+        }
+        callback();
+      });
+
+      oldTarballStream.pipe(extract);
+    });
+    return manifest;
+  }
+
   server.route({
     method: "POST",
     path: `/deployment`,
@@ -215,10 +234,23 @@ const init = async () => {
       description: "Create new deployment",
       notes: "Returns the location of the new deployment",
       tags: ["api"],
+      validate: {
+        payload: Joi.object({
+          file: Joi.any().meta({ swaggerType: "file" }).required(),
+          adhoc: Joi.string().optional(),
+          env: Joi.any().optional().meta({ swaggerType: "file" }),
+        }),
+      },
     },
     handler: async (req, h) => {
       // Validate the manifest.json
-      const manifest = JSON.parse(await readStream(req.payload.manifest));
+      //const manifest = JSON.parse(await readStream(req.payload.manifest));
+
+      const stream1 = new ReadableStreamClone(req.payload.file);
+      const stream2 = new ReadableStreamClone(req.payload.file);
+      const stream3 = new ReadableStreamClone(req.payload.file);
+      const manifest = await getManifest(stream1);
+      console.log(manifest);
 
       const manifestSchema = Joi.object({
         short_name: Joi.string().required(),
@@ -231,11 +263,16 @@ const init = async () => {
           }, "Semantic Version of the application")
           .required(),
         description: Joi.string(),
+        icons: Joi.array().items(
+          Joi.object({
+            src: Joi.string().required(),
+          }).unknown(true)
+        ),
       }).unknown(true);
 
       const manifestValidation = manifestSchema.validate(manifest);
       if (manifestValidation.error) {
-        return Boom.badRequest(manifestValidation.error);
+        return Boom.badRequest("manifest.json: " + manifestValidation.error);
       }
 
       //Determine path for deployment
@@ -249,12 +286,22 @@ const init = async () => {
       createPath(destination, true);
 
       // Extract tarball
-      req.payload.file.pipe(tar.extract(destination));
+      console.log("Starting Extraction");
+      stream2.pipe(tarFS.extract(destination));
+
+      writeStream(
+        stream3,
+        Path.join(
+          destination,
+          `${slugify(manifest.short_name)}-${manifest.version}.tar`
+        )
+      );
 
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await hash(req.payload.file),
+        sha512: await hash(stream2),
+        package: `${slugify(manifest.short_name)}-${manifest.version}.tar`,
       };
 
       // Write metadata to disk
@@ -372,17 +419,18 @@ const init = async () => {
     method: "GET",
     path: `/deployments`,
     handler: () => {
-      return getDirectories(`${assetPath}/`)
+      return utils
+        .getDirectories(`${assetPath}/`)
         .map((deployment) => {
-          if (versions(deployment, assetPath).length) {
+          if (utils.versions(deployment, assetPath).length) {
             return {
               name: deployment,
-              versions: versions(deployment, assetPath),
+              versions: utils.versions(deployment, assetPath),
               path: `/${basePath}/${deployment}`,
               latestManifest: Path.join(
                 `${basePath}`,
                 `${deployment}`,
-                `${latestVersion(deployment, assetPath)}`,
+                `${utils.latestVersion(deployment, assetPath)}`,
                 "manifest.json"
               ),
             };
@@ -427,7 +475,7 @@ const init = async () => {
     handler: (request, h) => {
       const v =
         request.params.version == "latest"
-          ? latestVersion(request.params.appName, assetPath)
+          ? utils.latestVersion(request.params.appName, assetPath)
           : request.params.version;
 
       let pathToFile = request.path
