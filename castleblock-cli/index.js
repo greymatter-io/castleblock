@@ -15,8 +15,8 @@ const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
 
 //CLI commands and options
-const commands = ["deploy", "watch", "remove"];
-const args = cli.parse(
+const commands = ["deploy", "watch", "remove", "package"];
+const options = cli.parse(
   {
     dist: ["d", "Directory containing the built assets", "file", "./build"],
     url: ["u", "URL to castleblock service", "string", "http://localhost:3000"],
@@ -32,11 +32,20 @@ const args = cli.parse(
       "npm run build",
     ],
     src: ["s", "Source directory to watch for changes", "file", "./src"],
-    deployURL: [null, "Deployment URL to be removed", "string"],
-    package: ["p", "Name of tar file", "string", "deployment.tar"],
   },
   commands
 );
+const args = cli.args;
+
+//Print specific error if it exists
+function getError(error) {
+  return error &&
+    error.response &&
+    error.response.data &&
+    error.response.data.message
+    ? error.response.data.message
+    : error;
+}
 
 //This script is run in /bin/castleblock
 export async function init(argv) {
@@ -55,7 +64,8 @@ export async function init(argv) {
       watch();
       break;
     case "remove":
-      await remove(args.deployURL);
+      if (!args[0]) cli.fatal("Missing app URL\ncastleblock remove [URL]");
+      await remove(args[0]);
       break;
   }
 }
@@ -80,16 +90,16 @@ function hash(stream) {
 }
 
 async function deploy(adhoc) {
-  cli.info(
-    `Compressing ${chalk.cyan(args.dist)} into ${chalk.cyan(`${args.package}`)}`
-  );
+  cli.info(`Compressing ${chalk.cyan(options.dist)}`);
 
-  if (args.build) {
-    cli.info(`Building Project: ${args.build}`);
-    await execWithPromise(args.build);
+  if (options.build) {
+    cli.info(`Building Project: ${options.build}`);
+    await execWithPromise(options.build);
   }
-
-  const pack = tar.pack(`${Path.join(args.dist)}`);
+  if (!fs.existsSync(`${Path.join(options.dist)}`)) {
+    cli.fatal(` dist directory: "${Path.join(options.dist)}" does not exists!`);
+  }
+  const pack = tar.pack(`${Path.join(options.dist)}`);
 
   var form = new FormData();
   form.append("file", pack, {
@@ -98,16 +108,16 @@ async function deploy(adhoc) {
   if (adhoc) {
     form.append("adhoc", adhoc);
   }
-  if (args.env) {
-    form.append("env", fs.createReadStream(`./${args.env}`));
+  if (options.env) {
+    form.append("env", fs.createReadStream(`./${options.env}`));
   }
 
   const sha512 = await hash(pack);
   cli.info(`${chalk.bold("SHA512:")}\n      ${chalk.cyan(sha512)}`);
 
-  cli.info(`Uploading ${args.package}`, adhoc);
+  cli.info(`Uploading Package`, adhoc);
   axios
-    .post(`${args.url}/deployment`, form, {
+    .post(`${options.url}/deployment`, form, {
       headers: form.getHeaders(),
     })
     .then((response) => {
@@ -115,7 +125,7 @@ async function deploy(adhoc) {
       cli.info(`URL: ${response.data.url}`);
     })
     .catch((error) => {
-      cli.fatal(error);
+      cli.fatal(getError(error));
     });
 }
 
@@ -132,14 +142,14 @@ async function remove(url) {
 function watch() {
   cli.info(
     `${chalk.bold("Watching For Changes")}\n      Source Directory: "${
-      args.src
-    }"\n      Build Command: "${args.build}"`
+      options.src
+    }"\n      Build Command: "${options.build}"`
   );
 
   chokidar
-    .watch(args.src, {
+    .watch(options.src, {
       ignoreInitial: true,
-      ignored: [`${args.dist}`, "*.tar", ".*"], // ignore dotfiles
+      ignored: [`${options.dist}`, "*.tar", ".*"], // ignore dotfiles
       interval: 5000,
     })
     .on("ready", async () => {

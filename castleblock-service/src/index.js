@@ -234,6 +234,13 @@ const init = async () => {
       description: "Create new deployment",
       notes: "Returns the location of the new deployment",
       tags: ["api"],
+      validate: {
+        payload: Joi.object({
+          file: Joi.any().meta({ swaggerType: "file" }).required(),
+          adhoc: Joi.string().optional(),
+          env: Joi.any().optional().meta({ swaggerType: "file" }),
+        }),
+      },
     },
     handler: async (req, h) => {
       // Validate the manifest.json
@@ -241,6 +248,7 @@ const init = async () => {
 
       const stream1 = new ReadableStreamClone(req.payload.file);
       const stream2 = new ReadableStreamClone(req.payload.file);
+      const stream3 = new ReadableStreamClone(req.payload.file);
       const manifest = await getManifest(stream1);
       console.log(manifest);
 
@@ -255,11 +263,16 @@ const init = async () => {
           }, "Semantic Version of the application")
           .required(),
         description: Joi.string(),
+        icons: Joi.array().items(
+          Joi.object({
+            src: Joi.string().required(),
+          }).unknown(true)
+        ),
       }).unknown(true);
 
       const manifestValidation = manifestSchema.validate(manifest);
       if (manifestValidation.error) {
-        return Boom.badRequest(manifestValidation.error);
+        return Boom.badRequest("manifest.json: " + manifestValidation.error);
       }
 
       //Determine path for deployment
@@ -276,10 +289,19 @@ const init = async () => {
       console.log("Starting Extraction");
       stream2.pipe(tarFS.extract(destination));
 
+      writeStream(
+        stream3,
+        Path.join(
+          destination,
+          `${slugify(manifest.short_name)}-${manifest.version}.tar`
+        )
+      );
+
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
         sha512: await hash(stream2),
+        package: `${slugify(manifest.short_name)}-${manifest.version}.tar`,
       };
 
       // Write metadata to disk
