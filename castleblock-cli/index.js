@@ -10,9 +10,8 @@ import chokidar from "chokidar";
 import childProcess from "child_process";
 import { nanoid } from "nanoid";
 import slugify from "slugify";
-import { generateSlug } from "random-word-slugs";
 
-const adhocVersion = generateSlug();
+const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
 
 //CLI commands and options

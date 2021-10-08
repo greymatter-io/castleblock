@@ -18,12 +18,7 @@ import semver from "semver";
 import susie from "susie";
 import ReadableStreamClone from "readable-stream-clone";
 
-import {
-  versions,
-  latestVersion,
-  nextVersion,
-  getDirectories,
-} from "./versioning.js";
+import utils from "./versioning.js";
 
 let adhocClients = [];
 
@@ -155,7 +150,7 @@ const init = async () => {
     handler: (request, h) => {
       console.log(
         Path.join(
-          `${assetPath}/${homepage}/${latestVersion(
+          `${assetPath}/${homepage}/${utils.latestVersion(
             homepage,
             assetPath
           )}/index.html`
@@ -165,13 +160,17 @@ const init = async () => {
       const homepagePath = Path.join(
         assetPath,
         homepage,
-        latestVersion(homepage, assetPath),
+        utils.latestVersion(homepage, assetPath),
         "index.html"
       );
       let htmlFile = fs.readFileSync(homepagePath);
       return injectBasePath(
         htmlFile,
-        `/${Path.join(basePath, homepage, latestVersion(homepage, assetPath))}/`
+        `/${Path.join(
+          basePath,
+          homepage,
+          utils.latestVersion(homepage, assetPath)
+        )}/`
       );
     },
   });
@@ -398,17 +397,18 @@ const init = async () => {
     method: "GET",
     path: `/deployments`,
     handler: () => {
-      return getDirectories(`${assetPath}/`)
+      return utils
+        .getDirectories(`${assetPath}/`)
         .map((deployment) => {
-          if (versions(deployment, assetPath).length) {
+          if (utils.versions(deployment, assetPath).length) {
             return {
               name: deployment,
-              versions: versions(deployment, assetPath),
+              versions: utils.versions(deployment, assetPath),
               path: `/${basePath}/${deployment}`,
               latestManifest: Path.join(
                 `${basePath}`,
                 `${deployment}`,
-                `${latestVersion(deployment, assetPath)}`,
+                `${utils.latestVersion(deployment, assetPath)}`,
                 "manifest.json"
               ),
             };
@@ -453,7 +453,7 @@ const init = async () => {
     handler: (request, h) => {
       const v =
         request.params.version == "latest"
-          ? latestVersion(request.params.appName, assetPath)
+          ? utils.latestVersion(request.params.appName, assetPath)
           : request.params.version;
 
       let pathToFile = request.path
