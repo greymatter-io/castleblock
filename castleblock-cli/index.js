@@ -102,7 +102,7 @@ async function deploy(adhoc) {
   const pack = tar.pack(`${Path.join(options.dist)}`);
 
   var form = new FormData();
-  form.append("file", pack, {
+  form.append("tarball", pack, {
     filename: "deployment.tar",
   });
   if (adhoc) {
