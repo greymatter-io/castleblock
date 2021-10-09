@@ -17,11 +17,18 @@ import settings from "./settings.js";
 import schemas from "./schemas.js";
 import routes from "./routes.js";
 
-let adhocClients = [];
+import adhoc from "./adhoc.js";
+
 export default [
   {
     method: "GET",
     path: "/",
+    options: {
+      description: "Get homepage",
+      notes: "Returns index.html of the homepage",
+      tags: ["api"],
+    },
+
     handler: (request, h) => {
       console.log(
         Path.join(
@@ -133,34 +140,9 @@ export default [
       console.log(info);
 
       if (req.payload.adhoc) {
-        // Inject hot-reloading client and track connected clients.
-        console.log("ADHOC Clients:", adhocClients.length);
-        adhocClients = adhocClients
-          .map((c) => {
-            console.log("cinfo", c.request.info.referrer);
-            if (c.request.info.referrer.includes(appPath)) {
-              c.event({
-                data: "refresh",
-              });
-              return null;
-            }
-            return c;
-          })
-          .filter(Boolean);
-
-        console.log("ADHOC Clients:", adhocClients.length);
-        //read index.html
-        let htmlFile = fs.readFileSync(Path.join(destination, "index.html"));
-
-        //insert hot-reloading client script
-        htmlFile = `${htmlFile}`.replace(
-          "</body>",
-          `<script>
-          var source = new EventSource('/refresh');source.onmessage = function(e) { console.log(e); if(e.data=="refresh"){ location.reload();}}</script></body>`
-        );
-
-        //save file
-        fs.writeFileSync(Path.join(destination, "index.html"), htmlFile);
+        // Inject hot-reloading client and refresh any connected clients for this app..
+        adhoc.updateClients(appPath);
+        adhoc.injectHotReloadClient(Path.join(destination, "index.html"));
       }
 
       return {
@@ -177,26 +159,21 @@ export default [
     method: "GET",
     path: "/refresh",
     handler: function (request, h) {
-      adhocClients = adhocClients.concat([h]);
-      console.log("ADHOC Clients:", adhocClients.length);
+      adhoc.addClient(h);
+      //initialize SSE connection
       return h.event({ data: "hotreloading enabled" });
+    },
+    options: {
+      description: "SSE subscription for hot-reloading",
+      notes: "Initializes a SSE connection",
+      tags: ["api"],
     },
   },
   {
     method: "DELETE",
-    path: `/${settings.basePath}/{name}/{version}`,
+    path: `/${settings.basePath}/{name}/{version}/`,
     handler: (req) => {
-      console.log(
-        `REMOVING: ${req.params.name} version: ${req.params.version}`
-      );
-      adhocClients = adhocClients.filter(
-        (c) =>
-          !c.request.info.referrer.includes(
-            `${req.params.name}/${req.params.version}`
-          )
-      );
-
-      console.log("ADHOC Clients:", adhocClients.length);
+      adhoc.removeClients(req.params.name, req.params.version);
 
       //Remove specific version
       fs.rmdirSync(
