@@ -3,6 +3,7 @@ import crypto from "crypto";
 import chalk from "chalk";
 import fs from "fs";
 import tar from "tar-fs";
+import tarStream from "tar-stream";
 import Path from "path";
 import axios from "axios";
 import FormData from "form-data";
@@ -32,9 +33,12 @@ const options = cli.parse(
       "npm run build",
     ],
     src: ["s", "Source directory to watch for changes", "file", "./src"],
+    file: ["f", "Deploy an existing package", "file"],
+    pack: ["p", "Save deployment package to disk", "bool", false],
   },
   commands
 );
+console.log(options);
 const args = cli.args;
 
 //Print specific error if it exists
@@ -53,8 +57,6 @@ export async function init(argv) {
   if (!commands.includes(cli.command)) {
     cli.fatal(`${cli.command} is an unknown command`);
   }
-
-  //Read manifest from build directory
 
   switch (cli.command) {
     case "deploy":
@@ -89,31 +91,54 @@ function hash(stream) {
   });
 }
 
+function savePackage(pkg) {
+  if (options.pack) {
+    const manifest = JSON.parse(
+      fs.readFileSync(Path.join(options.dist, "manifest.json"))
+    );
+    cli.info(`Saving package: ${manifest.short_name}-${manifest.version}.tar`);
+    pkg.pipe(
+      fs.createWriteStream(`${manifest.short_name}-${manifest.version}.tar`)
+    );
+  }
+}
+
 async function deploy(adhoc) {
   cli.info(`Compressing ${chalk.cyan(options.dist)}`);
-
-  if (options.build) {
+  let pack;
+  if (!options.file) {
     cli.info(`Building Project: ${options.build}`);
     await execWithPromise(options.build);
+    if (!fs.existsSync(`${Path.join(options.dist)}`)) {
+      cli.fatal(
+        ` dist directory: "${Path.join(options.dist)}" does not exists!`
+      );
+    }
+    pack = tar.pack(`${Path.join(options.dist)}`);
+    savePackage(pack);
   }
-  if (!fs.existsSync(`${Path.join(options.dist)}`)) {
-    cli.fatal(` dist directory: "${Path.join(options.dist)}" does not exists!`);
-  }
-  const pack = tar.pack(`${Path.join(options.dist)}`);
 
   var form = new FormData();
-  form.append("tarball", pack, {
-    filename: "deployment.tar",
-  });
+
+  if (options.file) {
+    form.append("tarball", fs.createReadStream(`./${options.file}`));
+    cli.info(
+      `${chalk.bold("SHA512:")}\n      ${chalk.cyan(
+        await hash(fs.createReadStream(`./${options.file}`))
+      )}`
+    );
+  } else {
+    form.append("tarball", pack, {
+      filename: "deployment.tar",
+    });
+    cli.info(`${chalk.bold("SHA512:")}\n      ${chalk.cyan(await hash(pack))}`);
+  }
   if (adhoc) {
     form.append("adhoc", adhoc);
   }
   if (options.env) {
     form.append("env", fs.createReadStream(`./${options.env}`));
   }
-
-  const sha512 = await hash(pack);
-  cli.info(`${chalk.bold("SHA512:")}\n      ${chalk.cyan(sha512)}`);
 
   cli.info(`Uploading Package`, adhoc);
   axios
