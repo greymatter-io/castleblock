@@ -32,8 +32,8 @@ export default [
     handler: (request, h) => {
       console.log(
         Path.join(
-          `${settings.assetPath}/${homepage}/${utils.latestVersion(
-            homepage,
+          `${settings.assetPath}/${settings.homepage}/${utils.latestVersion(
+            settings.homepage,
             settings.assetPath
           )}/index.html`
         )
@@ -41,8 +41,8 @@ export default [
 
       const homepagePath = Path.join(
         settings.assetPath,
-        homepage,
-        utils.latestVersion(homepage, settings.assetPath),
+        settings.homepage,
+        utils.latestVersion(settings.homepage, settings.assetPath),
         "index.html"
       );
       let htmlFile = fs.readFileSync(homepagePath);
@@ -50,8 +50,8 @@ export default [
         htmlFile,
         `/${Path.join(
           settings.basePath,
-          homepage,
-          utils.latestVersion(homepage, settings.assetPath)
+          settings.homepage,
+          utils.latestVersion(settings.homepage, settings.assetPath)
         )}/`
       );
     },
