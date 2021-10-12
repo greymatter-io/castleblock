@@ -5,7 +5,7 @@ The castleblock-cli interfaces with the castleblock-service API and deploys apps
 ## CLI Usage
 
 ```
-$ castleblock --help
+$ castleblock
 Usage:
   castleblock [OPTIONS] <command> [ARGS]
 
@@ -16,8 +16,8 @@ Options:
                          ./env.json when deployed)
   -b, --build [STRING]   Build command that is run before deployment (Default is npm run build)
   -s, --src [FILE]       Source directory to watch for changes (Default is ./src)
-      --deployURL STRING Deployment URL to be removed
-  -p, --package [STRING] Name of tar.gz file (Default is deployment.tar.gz)
+  -f, --file FILE        Deploy an existing package
+  -p, --pack BOOL        Save deployment package to disk
   -h, --help             Display help and usage details
 
 Commands:

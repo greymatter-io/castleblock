@@ -16,7 +16,7 @@ const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
 
 //CLI commands and options
-const commands = ["deploy", "watch", "remove", "package"];
+const commands = ["deploy", "watch", "remove"];
 const options = cli.parse(
   {
     dist: ["d", "Directory containing the built assets", "file", "./build"],
