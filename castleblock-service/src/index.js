@@ -1,9 +1,9 @@
 "use strict";
 import Hapi from "@hapi/hapi";
-
 import setupPlugins from "./plugins.js";
 import settings from "./settings.js";
 import routes from "./routes.js";
+import setupAuth from "./authentication.js";
 
 const init = async () => {
   console.log("Origins:", settings.originWhitelist);
@@ -12,6 +12,7 @@ const init = async () => {
     host: settings.host,
   });
 
+  await setupAuth(server);
   await setupPlugins(server);
 
   routes.forEach((route) => {

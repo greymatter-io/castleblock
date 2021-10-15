@@ -4,10 +4,18 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --ignore './package/' --ignore './temp/' --ignore './assets/' --exec babel-node src/index.js",
+    "dev": "nodemon --watch src --exec babel-node src/index.js",
     "start": "babel-node src/index.js",
     "build": "docker build . --build-arg NPM_TOKEN=${NPM_TOKEN} --no-cache -t castleblock-service",
-    "docker": "docker run  -p 3000:3000 --net=host castleblock-service "
+    "docker": "docker run  -p 3000:3000 --net=host castleblock-service ",
+    "genJWTSecret": "node -e \"console.log(require('crypto').randomBytes(256).toString('base64'));\""
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "package/*",
+      "temp/*",
+      "assets/*"
+    ]
   },
   "contributors": [
     {
@@ -17,11 +25,15 @@
   ],
   "license": "MIT",
   "dependencies": {
+    "@hapi/basic": "^6.0.0",
+    "@hapi/bell": "^12.3.0",
     "@hapi/boom": "^9.1.4",
     "@hapi/h2o2": "^9.1.0",
     "@hapi/hapi": "^20.1.5",
     "@hapi/inert": "^6.0.3",
+    "@hapi/jwt": "^2.1.0",
     "@hapi/vision": "^6.1.0",
+    "dotenv": "^10.0.0",
     "hapi-swagger": "^14.2.4",
     "hapijs-status-monitor": "^1.0.1",
     "joi": "^17.4.2",

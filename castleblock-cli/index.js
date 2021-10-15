@@ -35,6 +35,7 @@ const options = cli.parse(
     src: ["s", "Source directory to watch for changes", "file", "./src"],
     file: ["f", "Deploy an existing package", "file"],
     pack: ["p", "Save deployment package to disk", "bool", false],
+    token: ["t", "Authorization Token", "string"],
   },
   commands
 );
@@ -140,10 +141,20 @@ async function deploy(adhoc) {
     form.append("env", fs.createReadStream(`./${options.env}`));
   }
 
-  cli.info(`Uploading Package`, adhoc);
+  cli.info(`Uploading Package`, adhoc, form);
+
+  console.log({
+    ...form.getHeaders(),
+    Authorization: `Bearer ${options.token}`,
+    Accept: "application/json",
+  });
   axios
     .post(`${options.url}/deployment`, form, {
-      headers: form.getHeaders(),
+      headers: {
+        ...form.getHeaders(),
+        Authorization: `Bearer ${options.token}`,
+        Accept: "application/json",
+      },
     })
     .then((response) => {
       adhocURL = response.data.url;

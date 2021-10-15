@@ -1,15 +1,42 @@
-import utils from "./utils.js";
-const settings = {
-  port: utils.setEnv(process.env.PORT, 3000),
-  host: utils.setEnv(process.env.HOST, "localhost"),
-  corsProxyEnable: utils.setEnv(process.env.CORS_PROXY_ENABLE, true),
-  originWhitelist: utils.setEnv(process.env.ORIGIN_WHITELIST, [], "json"),
-  //["https://google.com", "https://reddit.com"] is an example whitelist
-  statusMonitorEnable: utils.setEnv(process.env.STATUS_MONITOR_ENABLE, true),
-  swaggerDocsEnable: utils.setEnv(process.env.SWAGGER_DOCS_ENABLE, true),
-  assetPath: utils.setEnv(process.env.ASSET_PATH, "./assets"),
-  basePath: utils.setEnv(process.env.BASE_PATH, "ui"), //Example path: <castleblock-service.url>/<basePath>/my-app/2.3.4,
-  homepage: utils.setEnv(process.env.HOMEPAGE, `castleblock-ui`),
-};
+import chalk from "chalk";
+import Joi from "joi";
+import fs from "fs";
+
+let settings;
+try {
+  settings = JSON.parse(fs.readFileSync("./settings.json"));
+} catch (error) {
+  console.log(chalk.red("Problem reading ./settings.json file."));
+  console.log(error);
+  process.exit(1);
+}
+
+const settingsSchema = Joi.object({
+  port: Joi.number().port().default(3000),
+  host: Joi.string().hostname().default("localhost"),
+  corsProxyEnable: Joi.boolean().default(true),
+  originWhitelist: Joi.array().items(Joi.string().domain()).default([]),
+  statusMonitorEnable: Joi.boolean().default(true),
+  swaggerDocsEnable: Joi.boolean().default(true),
+  assetPath: Joi.string().default("./assets"),
+  homepage: Joi.string().default("castleblock-ui"),
+  basePath: Joi.string().default("ui"),
+  authStrategy: Joi.object().default(null),
+  jwtSecret: Joi.string(),
+})
+  .and("authStrategy", "jwtSecret")
+  .unknown()
+  .meta({ name: "My Schema", filename: "mySchema" });
+
+const { error, value } = settingsSchema.validate(settings, {
+  abortEarly: false,
+});
+if (error) {
+  console.log(chalk.yellow(error));
+  process.exit(1);
+}
+
+settings = value;
 console.log(settings);
+
 export default settings;

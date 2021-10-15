@@ -8,7 +8,7 @@ import GettingStarted from "./GettingStarted.svelte";
 
 let packages = new Promise((resolve, reject) => {
   return axios
-    .get(`${window.location.origin}/deployments`)
+    .get(`${window.location.origin}/apps`)
     .then((results) => resolve(results.data));
 });
 let hash = window.location.hash;

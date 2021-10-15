@@ -70,12 +70,20 @@ export default [
       description: "Create new deployment",
       notes: "Returns the location of the new deployment",
       tags: ["api"],
+      plugins: {
+        "hapi-swagger": {
+          payloadType: "form",
+        },
+      },
       validate: {
         payload: Joi.object({
           tarball: Joi.any().meta({ swaggerType: "file" }).required(),
           adhoc: Joi.string().optional(),
           env: Joi.any().optional().meta({ swaggerType: "file" }),
-        }),
+        }).label("Deployment"),
+      },
+      auth: {
+        strategy: "jwt",
       },
     },
     handler: async (req, h) => {
@@ -210,8 +218,15 @@ export default [
     },
   },
   {
+    method: "DELETE",
+    path: `/${settings.basePath}/{name}/{version}`,
+    handler: (req, h) => {
+      return h.redirect(`${req.path}/`).permanent();
+    },
+  },
+  {
     method: "GET",
-    path: `/deployments`,
+    path: `/apps`,
     handler: () => {
       return utils
         .getDirectories(`${settings.assetPath}/`)
@@ -233,8 +248,8 @@ export default [
         .filter(Boolean);
     },
     options: {
-      description: "List all deployments",
-      notes: "Returns deployment names, versions, and path to deployment",
+      description: "List all apps",
+      notes: "Returns app names, versions, and path to app",
       tags: ["api"],
     },
   },
