@@ -16,7 +16,7 @@ const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
 
 //CLI commands and options
-const commands = ["deploy", "watch", "remove"];
+const commands = ["deploy", "watch", "remove", "login"];
 const options = cli.parse(
   {
     dist: ["d", "Directory containing the built assets", "file", "./build"],
@@ -70,6 +70,16 @@ export async function init(argv) {
       if (!args[0]) cli.fatal("Missing app URL\ncastleblock remove [URL]");
       await remove(args[0]);
       break;
+    case "login":
+      const tokensPath = Path.join(require("os").homedir(), ".castleblock");
+      let tokens = {};
+      if (fs.existsSync(tokensPath)) {
+        //get existing file
+        tokens = JSON.parse(fs.readFileSync(tokensPath));
+      }
+      tokens[options.url] = options.token;
+      fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2));
+      cli.info("Logged in");
   }
 }
 
@@ -150,6 +160,20 @@ async function deploy(adhoc) {
       Authorization: `Bearer ${options.token}`,
       Accept: "application/json",
     };
+  } else {
+    // See if there are any saved tokens
+    const tokensPath = Path.join(require("os").homedir(), ".castleblock");
+    if (fs.existsSync(tokensPath)) {
+      //get existing file
+      const tokens = JSON.parse(fs.readFileSync(tokensPath));
+      if (tokens[options.url]) {
+        headers = {
+          ...headers,
+          Authorization: `Bearer ${tokens[options.url]}`,
+          Accept: "application/json",
+        };
+      }
+    }
   }
 
   axios

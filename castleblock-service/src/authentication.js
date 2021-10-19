@@ -51,10 +51,19 @@ export default async function setupAuth(server) {
               {
                 aud: "urn:audience:castleblock",
                 iss: "urn:issuer:castleblock",
+                username: username,
               },
               settings.jwtSecret
             );
-            return `<div><h3>Castleblock Token</h3><textarea id="token" style="width:300px; height:150px;" readonly>${newToken}</textarea><div><button>copy</button></div></div><script>document.querySelector("button").onclick = function(){document.querySelector("textarea").select();document.execCommand('copy');}</script>`;
+            return `<html><head><title>Castleblock Token</title></head><body><div><h3>Castleblock Token</h3>
+              <textarea id="token" style="width:300px; height:150px;" readonly>castleblock login -u ${
+                settings.protocol
+              }://${settings.host}${
+              settings.port ? ":" + settings.port : ""
+            } -t ${newToken}</textarea>
+              <div><button>copy</button></div>
+              </div>
+              <script>document.querySelector("button").onclick = function(){document.querySelector("textarea").select();document.execCommand('copy');}</script></body></html>`;
           } else {
             return `Authorization failed. ${username} is not an admin.`;
           }

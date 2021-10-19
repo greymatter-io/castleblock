@@ -124,11 +124,13 @@ export default [
         )
       );
 
+      console.log(req.auth.artifacts.decoded.payload.username);
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await utils.hash(stream2),
+        deploymentBy: req.auth.artifacts.decoded.payload.username,
         package: `${slugify(manifest.short_name)}-${manifest.version}.tar`,
+        sha512: await utils.hash(stream2),
       };
 
       // Write metadata to disk

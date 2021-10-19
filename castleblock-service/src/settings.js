@@ -12,8 +12,9 @@ try {
 }
 
 const settingsSchema = Joi.object({
-  port: Joi.number().port().default(3000),
+  protocol: Joi.string().default("http"),
   host: Joi.string().hostname().default("localhost"),
+  port: Joi.number().port().default(3000),
   corsProxyEnable: Joi.boolean().default(true),
   originWhitelist: Joi.array().items(Joi.string().domain()).default([]),
   statusMonitorEnable: Joi.boolean().default(true),
