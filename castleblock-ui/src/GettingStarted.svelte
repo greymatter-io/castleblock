@@ -3,7 +3,7 @@
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">Getting Started</p>
-      <a href="./" class="delete" aria-label="close"></a>
+      <a href="./" class="delete" aria-label="close">&nbsp;</a>
     </header>
     <section class="modal-card-body">
       <div class="content">

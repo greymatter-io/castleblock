@@ -63,15 +63,6 @@ onMount(() => {
 </div>
 
 <style>
-.block {
-  display: block;
-}
-#logo {
-  flex: 1;
-}
-.header {
-  display: flex;
-}
 .flex-wrap {
   display: flex;
   flex-direction: row;

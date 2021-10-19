@@ -143,18 +143,18 @@ async function deploy(adhoc) {
 
   cli.info(`Uploading Package`, adhoc, form);
 
-  console.log({
-    ...form.getHeaders(),
-    Authorization: `Bearer ${options.token}`,
-    Accept: "application/json",
-  });
+  let headers = form.getHeaders();
+  if (options.token) {
+    headers = {
+      ...headers,
+      Authorization: `Bearer ${options.token}`,
+      Accept: "application/json",
+    };
+  }
+
   axios
     .post(`${options.url}/deployment`, form, {
-      headers: {
-        ...form.getHeaders(),
-        Authorization: `Bearer ${options.token}`,
-        Accept: "application/json",
-      },
+      headers: headers,
     })
     .then((response) => {
       adhocURL = response.data.url;

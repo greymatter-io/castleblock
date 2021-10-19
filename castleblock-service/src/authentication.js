@@ -3,7 +3,7 @@ import Jwt from "@hapi/jwt";
 
 import settings from "./settings.js";
 
-const admins = ["john.m.cudd"];
+const admins = settings.initialAdmins;
 
 export default async function setupAuth(server) {
   if (settings.authStrategy) {
@@ -33,8 +33,11 @@ export default async function setupAuth(server) {
       method: ["GET", "POST"], // Must handle both GET and POST
       path: "/token", // The callback endpoint registered with the provider
       options: {
+        description: "OAuth authentication and JWT deploymnet token generation",
+        notes: "Returns deployment token",
+        tags: ["api"],
         auth: {
-          mode: "try",
+          mode: "required",
           strategy: "main",
         },
         handler: function (request, h) {
@@ -51,8 +54,7 @@ export default async function setupAuth(server) {
               },
               settings.jwtSecret
             );
-            console.log(`username: ${username} jwt:, ${newToken}`);
-            return newToken;
+            return `<div><h3>Castleblock Token</h3><textarea id="token" style="width:300px; height:150px;" readonly>${newToken}</textarea><div><button>copy</button></div></div><script>document.querySelector("button").onclick = function(){document.querySelector("textarea").select();document.execCommand('copy');}</script>`;
           } else {
             return `Authorization failed. ${username} is not an admin.`;
           }

@@ -2,7 +2,6 @@
 import axios from "axios";
 import { onMount } from "svelte";
 
-import Dropdown from "./Dropdown.svelte";
 export let pack = {};
 onMount(() => {
   if (pack.latestManifest) {

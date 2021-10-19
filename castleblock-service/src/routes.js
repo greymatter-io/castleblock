@@ -215,6 +215,9 @@ export default [
           version: Joi.string().description("The version of the deployment"),
         }),
       },
+      auth: {
+        strategy: "jwt",
+      },
     },
   },
   {

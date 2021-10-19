@@ -22,9 +22,11 @@ const settingsSchema = Joi.object({
   homepage: Joi.string().default("castleblock-ui"),
   basePath: Joi.string().default("ui"),
   authStrategy: Joi.object().default(null),
-  jwtSecret: Joi.string(),
+  jwtSecret: Joi.string().default(
+    require("crypto").randomBytes(256).toString("base64")
+  ),
+  initialAdmins: Joi.array().items(Joi.string()).default([]),
 })
-  .and("authStrategy", "jwtSecret")
   .unknown()
   .meta({ name: "My Schema", filename: "mySchema" });
 
