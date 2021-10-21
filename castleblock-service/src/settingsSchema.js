@@ -28,8 +28,7 @@ const settingsSchema = Joi.object({
     .description("URL basepath where all apps are hosted under"),
   jwt: Joi.object({
     secret: Joi.string()
-      .description("HS256 or HS512 Secret Key.")
-      .note("Default is randomly generated.")
+      .description("HS256 or HS512 Secret Key. Default is randomly generated.")
       .default(require("crypto").randomBytes(256).toString("base64")),
     maxAgeSec: Joi.number().integer().min(0).default(14400), // 4 hours
     timeSkewSec: Joi.number().integer().default(15),
