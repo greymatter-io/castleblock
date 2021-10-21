@@ -123,9 +123,16 @@ export async function getManifest(oldTarballStream) {
       stream.on("end", function () {
         next(); // ready for next entry
       });
+
       stream.resume(); // just auto drain the stream
     });
-
+    extract.on("finish", function () {
+      reject(
+        new Error(
+          "manifest.json not found. Please include a manifest.json in your dist directory."
+        )
+      );
+    });
     oldTarballStream.pipe(extract);
   });
   return manifest;

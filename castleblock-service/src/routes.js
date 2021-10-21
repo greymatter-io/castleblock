@@ -91,7 +91,12 @@ export default [
       const stream3 = new ReadableStreamClone(req.payload.tarball);
 
       //Fetch manifest from package
-      const manifest = await utils.getManifest(stream1);
+      let manifest;
+      try {
+        manifest = await utils.getManifest(stream1);
+      } catch (error) {
+        return Boom.badRequest(error);
+      }
       console.log(manifest);
 
       // Validate the manifest.json

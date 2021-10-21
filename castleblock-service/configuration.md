@@ -26,7 +26,7 @@
 - **`jwt`** (type: object)
 
   - **`secret`** (type: string)
-    (default: `m5fgRVFY8TcRNmAc0/XTpcBEa/2Ltd6dz1TZCxD8n2C9LPDbj4cw6uKLnqMlPW9PGCbpZebZ8sO1Bii3fQhtM8VRdfQpq3OshsNRsenVmnSkjGa6RGBqxo4gvXa0e1U1RKXLHVRvRS70QbzQpJT+uHkOtSeR7ndMr9ticRNUkpWquIuyJdgtZJIGJcnPjZXbNbUBFID5jrL3AChgAISY8TMzPDBKNtcojIQUX2xDd4cvtEdAnnRfdnmbDycg71vHjbhhciEzZw0mvIUo2gH4AY3JJIvmzwYPn08mMGr98eRaizBqC6lJcSGP5wN7wunwJ5J9w9ShzncBXFEi8I9QEg==`)
+    (default: `ly0BLECrvp22vyEytvY+iXkb+c14z+BLjkmdE5pEfLtrPK230BlrclGHZnJlOyCNfROrwTsmTfGsY6F1eiopK6bCZi6b8LGlYU3WjhrXxPEnq00SeL9bRyRPVoPvpakbNohNk3ktmJ/kJMWU1gsX+aH26xLVMgo64NqXfzjWNB4+1il1eAvsDZyirfL4V12p6eOzJKZPKvucPeQ63bfiNpIEpmB/aW89XrEsH/4oI44vgyrUDgEz4AKcZlxfMgfHjFOt4TViD3rBFN1L2xZiPWuKRmv6mMxZITaNzKacfUCFZPGnDenFXbj7hE7UKQtn1L8HNK0TqKKBSFGyipuiSA==`)
   - **`maxAgeSec`** (type: number)
     (default: `14400`)
   - **`timeSkewSec`** (type: number)
@@ -37,7 +37,7 @@
   - **`provider`** (type: string)
 
   - **`password`** (type: string) : The cookie encryption password. Used to encrypt the temporary state cookie used by the module in between the authorization protocol steps.
-    (default: `ywZtjRFEi8nuuyXBlTVLQuWIAP0owK6T67Gg/whm`)
+    (default: `I5wtdAZ1WEep/aY826HqLdP6lsws92lhOB6seM5q`)
   - **`clientId`** (type: string) : the OAuth client identifier (consumer key).
 
   - **`clientSecret`** (type: string) : the OAuth client secret (consumer secret).
