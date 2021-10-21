@@ -3,7 +3,6 @@ import crypto from "crypto";
 import chalk from "chalk";
 import fs from "fs";
 import tar from "tar-fs";
-import tarStream from "tar-stream";
 import Path from "path";
 import axios from "axios";
 import FormData from "form-data";

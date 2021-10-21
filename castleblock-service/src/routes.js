@@ -6,7 +6,6 @@ import tarFS from "tar-fs";
 import H2o2 from "@hapi/h2o2";
 import Boom from "@hapi/boom";
 import Joi from "joi";
-import Wreck from "@hapi/wreck";
 import Path from "path";
 import slugify from "slugify";
 import semver from "semver";
