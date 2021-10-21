@@ -11,6 +11,7 @@ import chokidar from "chokidar";
 import childProcess from "child_process";
 import { nanoid } from "nanoid";
 import slugify from "slugify";
+import Jwt from "@hapi/jwt";
 
 const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
@@ -36,6 +37,11 @@ const options = cli.parse(
     file: ["f", "Deploy an existing package", "file"],
     pack: ["p", "Save deployment package to disk", "bool", false],
     token: ["t", "Authorization Token", "string"],
+    jwtSecret: [
+      "j",
+      "JWT Secret Key for generating a token on the fly",
+      "string",
+    ],
   },
   commands
 );
@@ -57,6 +63,18 @@ export async function init(argv) {
   //Check for valid command
   if (!commands.includes(cli.command)) {
     cli.fatal(`${cli.command} is an unknown command`);
+  }
+
+  if (options.jwtSecret) {
+    //generate a token
+    options.token = Jwt.token.generate(
+      {
+        aud: "urn:audience:castleblock-developers",
+        iss: "urn:issuer:castleblock-service",
+        username: "admin",
+      },
+      options.jwtSecret
+    );
   }
 
   switch (cli.command) {

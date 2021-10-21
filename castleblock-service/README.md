@@ -32,6 +32,10 @@ Applications can access microservices and eternal origins that are whitelisted.
 fetch("/proxy/http://coolservice.com")
 ```
 
+### Configuration
+
+All castleblock settings are stored in the [castleblock.json](./configuration.md) file.
+
 ### Build docker image
 
 ```

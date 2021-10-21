@@ -42,6 +42,9 @@
     </pre>
           </li>
           <li>
+            Get a <a href="{window.location.origin}/token">token</a>.
+          </li>
+          <li>
             Deploy your app with castleblock
             <pre>castleblock deploy --dist ./dist</pre>
           </li>

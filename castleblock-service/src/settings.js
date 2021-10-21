@@ -1,45 +1,44 @@
 import chalk from "chalk";
 import Joi from "joi";
 import fs from "fs";
+import _ from "lodash";
+import cli from "cli";
 
-let settings;
-try {
-  settings = JSON.parse(fs.readFileSync("./settings.json"));
-} catch (error) {
-  console.log(chalk.red("Problem reading ./settings.json file."));
-  console.log(error);
-  process.exit(1);
+import { settingsSchema } from "./settingsSchema.js";
+
+const options = cli.parse({
+  config: ["c", "JSON Configuration file for castleblock", "file"],
+});
+
+console.log("cli options", options, process.argv);
+
+let settings = {};
+if (options.config) {
+  try {
+    settings = JSON.parse(fs.readFileSync(options.config));
+  } catch (error) {
+    console.error(chalk.red(`Problem reading ${options.config} file.`));
+    console.error(error);
+    process.exit(1);
+  }
 }
 
-const settingsSchema = Joi.object({
-  protocol: Joi.string().default("http"),
-  host: Joi.string().hostname().default("localhost"),
-  port: Joi.number().port().default(3000),
-  corsProxyEnable: Joi.boolean().default(true),
-  originWhitelist: Joi.array().items(Joi.string().domain()).default([]),
-  statusMonitorEnable: Joi.boolean().default(true),
-  swaggerDocsEnable: Joi.boolean().default(true),
-  assetPath: Joi.string().default("./assets"),
-  homepage: Joi.string().default("castleblock-ui"),
-  basePath: Joi.string().default("ui"),
-  authStrategy: Joi.object().default(null),
-  jwtSecret: Joi.string().default(
-    require("crypto").randomBytes(256).toString("base64")
-  ),
-  initialAdmins: Joi.array().items(Joi.string()).default([]),
-})
-  .unknown()
-  .meta({ name: "My Schema", filename: "mySchema" });
-
+//console.log(joiToDoc(settingsSchema, 0, "", "Castleblock settings.json"));
 const { error, value } = settingsSchema.validate(settings, {
   abortEarly: false,
 });
 if (error) {
-  console.log(chalk.yellow(error));
+  console.error(chalk.yellow(error));
   process.exit(1);
 }
 
 settings = value;
-console.log(settings);
+console.debug = function () {
+  if (settings.debug) {
+    console.log(chalk.cyan("DEBUG:"), ...arguments);
+  }
+};
+
+console.log("Settings:", JSON.stringify(settings, null, 2));
 
 export default settings;

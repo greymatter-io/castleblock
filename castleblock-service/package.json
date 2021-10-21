@@ -4,11 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch src --exec babel-node src/index.js",
+    "dev": "nodemon --watch src --watch settings.json --exec babel-node src/index.js --",
     "start": "babel-node src/index.js",
     "build": "docker build . --build-arg NPM_TOKEN=${NPM_TOKEN} --no-cache -t castleblock-service",
     "docker": "docker run  -p 3000:3000 --net=host castleblock-service ",
-    "genJWTSecret": "node -e \"console.log(require('crypto').randomBytes(256).toString('base64'));\""
+    "jwtSecret": "node -e \"console.log(require('crypto').randomBytes(256).toString('base64'));\"",
+    "genDocs": "babel-node genDocs.js"
   },
   "nodemonConfig": {
     "ignore": [
@@ -33,10 +34,12 @@
     "@hapi/inert": "^6.0.3",
     "@hapi/jwt": "^2.1.0",
     "@hapi/vision": "^6.1.0",
+    "cli": "^1.0.1",
     "dotenv": "^10.0.0",
     "hapi-swagger": "^14.2.4",
     "hapijs-status-monitor": "^1.0.1",
     "joi": "^17.4.2",
+    "joi-to-md": "^1.1.2",
     "lodash": "^4.17.21",
     "readable-stream-clone": "0.0.7",
     "semver": "^7.3.5",

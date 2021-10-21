@@ -6,25 +6,27 @@ import settings from "./settings.js";
 const admins = settings.initialAdmins;
 
 export default async function setupAuth(server) {
-  if (settings.authStrategy) {
-    await server.register(Bell);
-    await server.register(Jwt);
+  if (settings.jwt) {
+    if (settings.oauth) {
+      await server.register(Bell);
+      server.auth.strategy("main", "bell", settings.oauth);
+    }
 
-    server.auth.strategy("main", "bell", settings.authStrategy);
+    await server.register(Jwt);
     server.auth.strategy("jwt", "jwt", {
       keys: {
-        key: settings.jwtSecret,
+        key: settings.jwt.secret,
         algorithms: ["HS256", "HS512"],
         kid: "castleblock",
       },
       verify: {
-        aud: "urn:audience:castleblock",
-        iss: "urn:issuer:castleblock",
+        aud: "urn:audience:castleblock-developers",
+        iss: "urn:issuer:castleblock-service",
         sub: false,
         nbf: true,
         exp: true,
-        maxAgeSec: 14400, // 4 hours
-        timeSkewSec: 15,
+        maxAgeSec: settings.jwt.maxAgeSec,
+        timeSkewSec: settings.jwt.timeSkewSec,
       },
       validate: false,
     });
@@ -36,36 +38,41 @@ export default async function setupAuth(server) {
         description: "OAuth authentication and JWT deploymnet token generation",
         notes: "Returns deployment token",
         tags: ["api"],
-        auth: {
-          mode: "required",
-          strategy: "main",
-        },
+        auth: settings.oauth
+          ? {
+              mode: "try",
+              strategy: "main",
+            }
+          : null,
         handler: function (request, h) {
-          if (!request.auth.isAuthenticated) {
+          if (request.auth.strategy && !request.auth.isAuthenticated) {
             return `Authentication failed due to: ${request.auth.error.message}`;
           }
-          console.log(request.auth);
-          const username = request.auth.credentials.profile.username;
-          if (admins.includes(username)) {
-            const newToken = Jwt.token.generate(
-              {
-                aud: "urn:audience:castleblock",
-                iss: "urn:issuer:castleblock",
-                username: username,
-              },
-              settings.jwtSecret
-            );
-            return `<html><head><title>Castleblock Token</title></head><body><div><h3>Castleblock Token</h3>
+          if (request.auth.strategy) {
+            const username = request.auth.credentials.profile.username;
+            if (admins.includes(username)) {
+              const newToken = Jwt.token.generate(
+                {
+                  aud: "urn:audience:castleblock-developers",
+                  iss: "urn:issuer:castleblock-service",
+                  username: username,
+                },
+                settings.jwt.secret
+              );
+              return `<html><head><title>Castleblock Token</title></head><body><div><h3>Castleblock Token</h3>
               <textarea id="token" style="width:300px; height:150px;" readonly>castleblock login -u ${
                 settings.protocol
               }://${settings.host}${
-              settings.port ? ":" + settings.port : ""
-            } -t ${newToken}</textarea>
+                settings.port ? ":" + settings.port : ""
+              } -t ${newToken}</textarea>
               <div><button>copy</button></div>
               </div>
               <script>document.querySelector("button").onclick = function(){document.querySelector("textarea").select();document.execCommand('copy');}</script></body></html>`;
+            } else {
+              return `Authorization failed. ${username} is not an admin.`;
+            }
           } else {
-            return `Authorization failed. ${username} is not an admin.`;
+            return "Not issuing tokens at this time. Ask your administrator for a castleblock token.";
           }
           return h.redirect("/");
         },
