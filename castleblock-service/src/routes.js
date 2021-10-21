@@ -180,7 +180,7 @@ export default [
   },
   {
     method: "DELETE",
-    path: `/${settings.basePath}/{name}/{version}`,
+    path: `/${settings.basePath}/{name}/{version}/`,
     handler: (req) => {
       console.log("REMOVEING", req.params.name, req.params.version);
       adhoc.removeClients(req.params.name, req.params.version);
@@ -269,7 +269,7 @@ export default [
   },
 
   {
-    method: "GET",
+    method: ["GET", "DELETE"],
     path: `/${settings.basePath}/{appName}/{version}`,
     handler: (req, h) => {
       return h.redirect(`${req.path}/`).permanent();
