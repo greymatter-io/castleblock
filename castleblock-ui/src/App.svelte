@@ -8,7 +8,7 @@ import GettingStarted from "./GettingStarted.svelte";
 
 let packages = new Promise((resolve, reject) => {
   return axios
-    .get(`${window.location.origin}/deployments`)
+    .get(`${window.location.origin}/apps`)
     .then((results) => resolve(results.data));
 });
 let hash = window.location.hash;
@@ -63,15 +63,6 @@ onMount(() => {
 </div>
 
 <style>
-.block {
-  display: block;
-}
-#logo {
-  flex: 1;
-}
-.header {
-  display: flex;
-}
 .flex-wrap {
   display: flex;
   flex-direction: row;

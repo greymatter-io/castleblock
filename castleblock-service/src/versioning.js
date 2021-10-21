@@ -37,7 +37,7 @@ export function latestVersion(appName, path) {
 }
 
 export function nextVersion(version, action) {
-  console.log("currentVesion", version);
+  console.debug("currentVesion", version);
   let patch = semverPatch(version);
   let minor = semverMinor(version);
   let major = semverMajor(version);

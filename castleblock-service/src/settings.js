@@ -1,15 +1,44 @@
-import utils from "./utils.js";
-const settings = {
-  port: utils.setEnv(process.env.PORT, 3000),
-  host: utils.setEnv(process.env.HOST, "localhost"),
-  corsProxyEnable: utils.setEnv(process.env.CORS_PROXY_ENABLE, true),
-  originWhitelist: utils.setEnv(process.env.ORIGIN_WHITELIST, [], "json"),
-  //["https://google.com", "https://reddit.com"] is an example whitelist
-  statusMonitorEnable: utils.setEnv(process.env.STATUS_MONITOR_ENABLE, true),
-  swaggerDocsEnable: utils.setEnv(process.env.SWAGGER_DOCS_ENABLE, true),
-  assetPath: utils.setEnv(process.env.ASSET_PATH, "./assets"),
-  basePath: utils.setEnv(process.env.BASE_PATH, "ui"), //Example path: <castleblock-service.url>/<basePath>/my-app/2.3.4,
-  homepage: utils.setEnv(process.env.HOMEPAGE, `castleblock-ui`),
+import chalk from "chalk";
+import Joi from "joi";
+import fs from "fs";
+import _ from "lodash";
+import cli from "cli";
+
+import { settingsSchema } from "./settingsSchema.js";
+
+const options = cli.parse({
+  config: ["c", "JSON Configuration file for castleblock", "file"],
+});
+
+console.log("cli options", options, process.argv);
+
+let settings = {};
+if (options.config) {
+  try {
+    settings = JSON.parse(fs.readFileSync(options.config));
+  } catch (error) {
+    console.error(chalk.red(`Problem reading ${options.config} file.`));
+    console.error(error);
+    process.exit(1);
+  }
+}
+
+//console.log(joiToDoc(settingsSchema, 0, "", "Castleblock settings.json"));
+const { error, value } = settingsSchema.validate(settings, {
+  abortEarly: false,
+});
+if (error) {
+  console.error(chalk.yellow(error));
+  process.exit(1);
+}
+
+settings = value;
+console.debug = function () {
+  if (settings.debug) {
+    console.log(chalk.cyan("DEBUG:"), ...arguments);
+  }
 };
-console.log(settings);
+
+console.log("Settings:", JSON.stringify(settings, null, 2));
+
 export default settings;

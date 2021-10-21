@@ -2,6 +2,7 @@
 import Vision from "@hapi/vision";
 import Inert from "@hapi/inert";
 import H2o2 from "@hapi/h2o2";
+import Basic from "@hapi/basic";
 import susie from "susie";
 import HapiSwagger from "hapi-swagger";
 import Status from "hapijs-status-monitor";
@@ -10,6 +11,7 @@ import utils from "./utils.js";
 import settings from "./settings.js";
 export default async function setupPlugins(server) {
   await server.register([Inert, H2o2, Vision, susie]);
+
   if (settings.swaggerDocsEnable) {
     await server.register([
       {

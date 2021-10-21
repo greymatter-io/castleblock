@@ -3,7 +3,7 @@
   <div class="modal-card">
     <header class="modal-card-head">
       <p class="modal-card-title">Getting Started</p>
-      <a href="./" class="delete" aria-label="close"></a>
+      <a href="./" class="delete" aria-label="close">&nbsp;</a>
     </header>
     <section class="modal-card-body">
       <div class="content">
@@ -40,6 +40,9 @@
 }
       }, null, 2)}
     </pre>
+          </li>
+          <li>
+            Get a <a href="{window.location.origin}/token">token</a>.
           </li>
           <li>
             Deploy your app with castleblock

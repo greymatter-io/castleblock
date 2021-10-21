@@ -2,12 +2,12 @@
 import fs from "fs";
 import _ from "lodash";
 import semver from "semver";
-import semverGt from "semver/functions/gt";
-import semverSort from "semver/functions/sort";
-import semverMajor from "semver/functions/major";
-import semverMinor from "semver/functions/minor";
-import semverPatch from "semver/functions/patch";
-import semverInc from "semver/functions/inc";
+import semverGt from "semver/functions/gt.js";
+import semverSort from "semver/functions/sort.js";
+import semverMajor from "semver/functions/major.js";
+import semverMinor from "semver/functions/minor.js";
+import semverPatch from "semver/functions/patch.js";
+import semverInc from "semver/functions/inc.js";
 import crypto from "crypto";
 import tarStream from "tar-stream";
 
@@ -75,16 +75,6 @@ export function hash(stream) {
   });
 }
 
-export function setEnv(envVar, defaultValue, format) {
-  if (typeof envVar === "undefined") {
-    return defaultValue;
-  } else {
-    if (format === "json") {
-      return JSON.parse(envVar);
-    }
-    return envVar;
-  }
-}
 export function createPath(p, clearExisting) {
   if (clearExisting) {
     fs.rmdirSync(p, { recursive: true });
@@ -122,15 +112,27 @@ export async function getManifest(oldTarballStream) {
   let extract = tarStream.extract();
   let manifest;
   await new Promise((resolve, reject) => {
-    extract.on("entry", async function (header, stream, callback) {
+    console.log("get man");
+    extract.on("entry", async function (header, stream, next) {
       // write the new entry to the pack stream
+      console.log(header.name);
       if (header.name == "manifest.json") {
         manifest = JSON.parse(await readStream(stream));
         resolve();
       }
-      callback();
-    });
+      stream.on("end", function () {
+        next(); // ready for next entry
+      });
 
+      stream.resume(); // just auto drain the stream
+    });
+    extract.on("finish", function () {
+      reject(
+        new Error(
+          "manifest.json not found. Please include a manifest.json in your dist directory."
+        )
+      );
+    });
     oldTarballStream.pipe(extract);
   });
   return manifest;
@@ -139,7 +141,6 @@ export function injectBasePath(htmlString, relPath) {
   return `${htmlString}`.replace("<head>", `<head><base href="${relPath}" />`);
 }
 export default {
-  setEnv,
   getDirectories,
   latestVersion,
   nextVersion,

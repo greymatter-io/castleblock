@@ -6,7 +6,6 @@ import tarFS from "tar-fs";
 import H2o2 from "@hapi/h2o2";
 import Boom from "@hapi/boom";
 import Joi from "joi";
-import Wreck from "@hapi/wreck";
 import Path from "path";
 import slugify from "slugify";
 import semver from "semver";
@@ -70,12 +69,20 @@ export default [
       description: "Create new deployment",
       notes: "Returns the location of the new deployment",
       tags: ["api"],
+      plugins: {
+        "hapi-swagger": {
+          payloadType: "form",
+        },
+      },
       validate: {
         payload: Joi.object({
           tarball: Joi.any().meta({ swaggerType: "file" }).required(),
           adhoc: Joi.string().optional(),
           env: Joi.any().optional().meta({ swaggerType: "file" }),
-        }),
+        }).label("Deployment"),
+      },
+      auth: {
+        strategy: "jwt",
       },
     },
     handler: async (req, h) => {
@@ -84,7 +91,12 @@ export default [
       const stream3 = new ReadableStreamClone(req.payload.tarball);
 
       //Fetch manifest from package
-      const manifest = await utils.getManifest(stream1);
+      let manifest;
+      try {
+        manifest = await utils.getManifest(stream1);
+      } catch (error) {
+        return Boom.badRequest(error);
+      }
       console.log(manifest);
 
       // Validate the manifest.json
@@ -116,11 +128,13 @@ export default [
         )
       );
 
+      console.log(req.auth.artifacts.decoded.payload.username);
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
-        sha512: await utils.hash(stream2),
+        deploymentBy: req.auth.artifacts.decoded.payload.username,
         package: `${slugify(manifest.short_name)}-${manifest.version}.tar`,
+        sha512: await utils.hash(stream2),
       };
 
       // Write metadata to disk
@@ -173,6 +187,7 @@ export default [
     method: "DELETE",
     path: `/${settings.basePath}/{name}/{version}/`,
     handler: (req) => {
+      console.log("REMOVEING", req.params.name, req.params.version);
       adhoc.removeClients(req.params.name, req.params.version);
 
       //Remove specific version
@@ -207,11 +222,14 @@ export default [
           version: Joi.string().description("The version of the deployment"),
         }),
       },
+      auth: {
+        strategy: "jwt",
+      },
     },
   },
   {
     method: "GET",
-    path: `/deployments`,
+    path: `/apps`,
     handler: () => {
       return utils
         .getDirectories(`${settings.assetPath}/`)
@@ -233,8 +251,8 @@ export default [
         .filter(Boolean);
     },
     options: {
-      description: "List all deployments",
-      notes: "Returns deployment names, versions, and path to deployment",
+      description: "List all apps",
+      notes: "Returns app names, versions, and path to app",
       tags: ["api"],
     },
   },
@@ -256,7 +274,7 @@ export default [
   },
 
   {
-    method: "GET",
+    method: ["GET", "DELETE"],
     path: `/${settings.basePath}/{appName}/{version}`,
     handler: (req, h) => {
       return h.redirect(`${req.path}/`).permanent();

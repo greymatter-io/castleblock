@@ -3,7 +3,6 @@ import crypto from "crypto";
 import chalk from "chalk";
 import fs from "fs";
 import tar from "tar-fs";
-import tarStream from "tar-stream";
 import Path from "path";
 import axios from "axios";
 import FormData from "form-data";
@@ -11,12 +10,13 @@ import chokidar from "chokidar";
 import childProcess from "child_process";
 import { nanoid } from "nanoid";
 import slugify from "slugify";
+import Jwt from "@hapi/jwt";
 
 const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
 
 //CLI commands and options
-const commands = ["deploy", "watch", "remove"];
+const commands = ["deploy", "watch", "remove", "login"];
 const options = cli.parse(
   {
     dist: ["d", "Directory containing the built assets", "file", "./build"],
@@ -35,6 +35,12 @@ const options = cli.parse(
     src: ["s", "Source directory to watch for changes", "file", "./src"],
     file: ["f", "Deploy an existing package", "file"],
     pack: ["p", "Save deployment package to disk", "bool", false],
+    token: ["t", "Authorization Token", "string"],
+    jwtSecret: [
+      "j",
+      "JWT Secret Key for generating a token on the fly",
+      "string",
+    ],
   },
   commands
 );
@@ -58,6 +64,18 @@ export async function init(argv) {
     cli.fatal(`${cli.command} is an unknown command`);
   }
 
+  if (options.jwtSecret) {
+    //generate a token
+    options.token = Jwt.token.generate(
+      {
+        aud: "urn:audience:castleblock-developers",
+        iss: "urn:issuer:castleblock-service",
+        username: "admin",
+      },
+      options.jwtSecret
+    );
+  }
+
   switch (cli.command) {
     case "deploy":
       await deploy();
@@ -69,6 +87,16 @@ export async function init(argv) {
       if (!args[0]) cli.fatal("Missing app URL\ncastleblock remove [URL]");
       await remove(args[0]);
       break;
+    case "login":
+      const tokensPath = Path.join(require("os").homedir(), ".castleblock");
+      let tokens = {};
+      if (fs.existsSync(tokensPath)) {
+        //get existing file
+        tokens = JSON.parse(fs.readFileSync(tokensPath));
+      }
+      tokens[options.url] = options.token;
+      fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2));
+      cli.info("Logged in");
   }
 }
 
@@ -103,6 +131,30 @@ function savePackage(pkg) {
   }
 }
 
+function appendToken(headers) {
+  if (options.token) {
+    headers = {
+      ...headers,
+      Authorization: `Bearer ${options.token}`,
+      Accept: "application/json",
+    };
+  } else {
+    // See if there are any saved tokens
+    const tokensPath = Path.join(require("os").homedir(), ".castleblock");
+    if (fs.existsSync(tokensPath)) {
+      //get existing file
+      const tokens = JSON.parse(fs.readFileSync(tokensPath));
+      if (tokens[options.url]) {
+        headers = {
+          ...headers,
+          Authorization: `Bearer ${tokens[options.url]}`,
+          Accept: "application/json",
+        };
+      }
+    }
+  }
+  return headers;
+}
 async function deploy(adhoc) {
   cli.info(`Compressing ${chalk.cyan(options.dist)}`);
   let pack;
@@ -140,10 +192,14 @@ async function deploy(adhoc) {
     form.append("env", fs.createReadStream(`./${options.env}`));
   }
 
-  cli.info(`Uploading Package`, adhoc);
+  cli.info(`Uploading Package`, adhoc, form);
+
+  let headers = form.getHeaders();
+  headers = appendToken(headers);
+
   axios
     .post(`${options.url}/deployment`, form, {
-      headers: form.getHeaders(),
+      headers: headers,
     })
     .then((response) => {
       adhocURL = response.data.url;
@@ -157,11 +213,11 @@ async function deploy(adhoc) {
 async function remove(url) {
   cli.info("Deleting Deployment", url);
   await axios
-    .delete(url)
+    .delete(url, { headers: appendToken({}) })
     .then((response) => {
       cli.info(response.data);
     })
-    .catch((error) => cli.error(error));
+    .catch((error) => cli.error(getError(error)));
 }
 
 function watch() {
