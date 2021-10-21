@@ -27,9 +27,10 @@ const settingsSchema = Joi.object({
     .default("ui")
     .description("URL basepath where all apps are hosted under"),
   jwt: Joi.object({
-    secret: Joi.string().default(
-      require("crypto").randomBytes(256).toString("base64")
-    ),
+    secret: Joi.string()
+      .description("HS256 or HS512 Secret Key.")
+      .note("Default is randomly generated.")
+      .default(require("crypto").randomBytes(256).toString("base64")),
     maxAgeSec: Joi.number().integer().min(0).default(14400), // 4 hours
     timeSkewSec: Joi.number().integer().default(15),
   }).default(),
@@ -58,7 +59,10 @@ const settingsSchema = Joi.object({
       "Expects a bell auth strategy object.",
       "See here for details. https://hapi.dev/module/bell/api?v=12.3.0#options"
     ),
-  initialAdmins: Joi.array().items(Joi.string()).default([]),
+  initialAdmins: Joi.array()
+    .items(Joi.string())
+    .description("List of usernames")
+    .default([]),
 }).unknown();
 
 export { settingsSchema };

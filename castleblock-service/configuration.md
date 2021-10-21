@@ -25,8 +25,10 @@
   (default: `ui`)
 - **`jwt`** (type: object)
 
-  - **`secret`** (type: string)
-    (default: `ly0BLECrvp22vyEytvY+iXkb+c14z+BLjkmdE5pEfLtrPK230BlrclGHZnJlOyCNfROrwTsmTfGsY6F1eiopK6bCZi6b8LGlYU3WjhrXxPEnq00SeL9bRyRPVoPvpakbNohNk3ktmJ/kJMWU1gsX+aH26xLVMgo64NqXfzjWNB4+1il1eAvsDZyirfL4V12p6eOzJKZPKvucPeQ63bfiNpIEpmB/aW89XrEsH/4oI44vgyrUDgEz4AKcZlxfMgfHjFOt4TViD3rBFN1L2xZiPWuKRmv6mMxZITaNzKacfUCFZPGnDenFXbj7hE7UKQtn1L8HNK0TqKKBSFGyipuiSA==`)
+  - **`secret`** (type: string) : HS256 or HS512 Secret Key.
+    (default: `H/3Ij/wArBL7mV+n4hkbf5pdGib2eV3BbtNglIzcXo/SscnJOYcWs9AyOX5GxWdcd+N/ZLg96d3D9XPrB6BpoSYyuhdtQmq8DwnPok+7CwfHVfay1oKTX5AiWci2vkUoNvma6R1z0eWD5Bt1/UJ2CMKnBSJDikJQIJ8yVSvdlSIFcOc1RiQaNRr7Gl8jnRHNDopwgD34eeP8cGO95/+SEE+PsVzyw9UhIHLhM59cSGZd6s4GPDujIXsgCwetyTFj1DZ5ibU8AupYRPyCVv8cbrQfVbzW6KRK5AMp7GprKRdkOZt1dtlzV09MEz/3lixEPOGgnMcevwPdwXU2f9bkLA==`)
+    **notes:** \* Default is randomly generated.
+
   - **`maxAgeSec`** (type: number)
     (default: `14400`)
   - **`timeSkewSec`** (type: number)
@@ -37,7 +39,7 @@
   - **`provider`** (type: string)
 
   - **`password`** (type: string) : The cookie encryption password. Used to encrypt the temporary state cookie used by the module in between the authorization protocol steps.
-    (default: `I5wtdAZ1WEep/aY826HqLdP6lsws92lhOB6seM5q`)
+    (default: `PRIEv82wj35glDJTZicVqyKCSSrAWnHYnP/QYedI`)
   - **`clientId`** (type: string) : the OAuth client identifier (consumer key).
 
   - **`clientSecret`** (type: string) : the OAuth client secret (consumer secret).
@@ -51,5 +53,5 @@
   - Expects a bell auth strategy object.
   - See here for details. https://hapi.dev/module/bell/api?v=12.3.0#options
 
-- **`initialAdmins`** (type: array)
+- **`initialAdmins`** (type: array) : List of usernames
   (default: `[]`)
