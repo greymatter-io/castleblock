@@ -9,19 +9,21 @@ $ castleblock
 Usage:
   castleblock [OPTIONS] <command> [ARGS]
 
-Options:
+Options: 
   -d, --dist [FILE]      Directory containing the built assets (Default is ./build)
   -u, --url [STRING]     URL to castleblock service (Default is http://localhost:3000)
-  -e, --env FILE         Include env file in deployment (accessible from
-                         ./env.json when deployed)
+  -e, --env FILE         Include env file in deployment (accessible from 
+                         ./env.json when deployed) 
   -b, --build [STRING]   Build command that is run before deployment (Default is npm run build)
   -s, --src [FILE]       Source directory to watch for changes (Default is ./src)
   -f, --file FILE        Deploy an existing package
   -p, --pack BOOL        Save deployment package to disk
+  -t, --token STRING     Authorization Token
+  -j, --jwtSecret STRING JWT Secret Key for generating a token on the fly 
   -h, --help             Display help and usage details
 
-Commands:
-  deploy, remove, watch
+Commands: 
+  deploy, login, remove, watch
 ```
 
 ## Manifest.json
@@ -49,7 +51,7 @@ INFO: URL: http://localhost:3000/ui/my-app/1.2.3
 ## Removing an app
 
 ```
-$ castleblock remove --deployURL http://localhost:3000/ui/my-app/1.2.3/
+$ castleblock remove http://localhost:3000/ui/my-app/1.2.3/
 ```
 
 ## Ad hoc Deployments
@@ -57,17 +59,30 @@ $ castleblock remove --deployURL http://localhost:3000/ui/my-app/1.2.3/
 The watch command allows you to deploy an adhoc version of your application to a randomly generated URL. Castleblock will watch your files for changes, rebuild, and deploy anytime you make a change. This allows you to share or demo a feature currently in development and test it directly against your microservices in your deployment environment..
 
 ```
-$ castleblock watch -s ./src -b "npm run build" -d ./dist
+$ castleblock watch -d public/
+{
+  dist: 'public/',
+  url: 'http://localhost:3000',
+  env: null,
+  build: 'npm run build',
+  src: './src',
+  file: null,
+  pack: false,
+  token: null,
+  jwtSecret: null
+}
 INFO: Watching For Changes
       Source Directory: "./src"
       Build Command: "npm run build"
+INFO: Compressing public/
 INFO: Building Project: npm run build
-INFO: Compressing public/ into deployment.tar.gz
-INFO: Uploading deployment.tar.gz
-INFO: SHA512:
-      4e8038713d624b43c4a137f5305a53a3abf90758c7a8cabedb8bf8a4ff8b4ca136c140193c742581c4392a1358b9e158e2a594ac8e3c391ec57de83febce82ad
-INFO: URL: http://localhost:3000/ui/my-app/few-rhythmic-spring
 
+src/main.js → public/build/bundle.js...
+created public/build/bundle.js in 429ms
+INFO: SHA512:
+      c2e2840f8a1c1b290c240ae5b15037eaf47807830862622a5d8292cc51db1c9ab51d088d33791c2414920b08303af93c81b4158d643377f7156470a21363c3fe
+INFO: Uploading Package
+INFO: URL: http://localhost:3000/ui/my-app/adhoc-vdzitr33w7g
 ```
 
 ## Environmental Variable Injection
@@ -79,4 +94,6 @@ e the `--env` option to include configurations at runtime.
 castleblock deploy --env env.json
 ```
 
-This will inject the env.json file into your deployment, so your application can `fetch(./env.json)` to load custom configuration values when the application first loads.
+### Accessing env.json from your App
+
+Castleblock will inject the env.json file into your deployment, so your application can `fetch(./env.json)` to load custom configuration values when the application first loads.
