@@ -180,8 +180,9 @@ export default [
   },
   {
     method: "DELETE",
-    path: `/${settings.basePath}/{name}/{version}/`,
+    path: `/${settings.basePath}/{name}/{version}`,
     handler: (req) => {
+      console.log("REMOVEING", req.params.name, req.params.version);
       adhoc.removeClients(req.params.name, req.params.version);
 
       //Remove specific version
@@ -219,13 +220,6 @@ export default [
       auth: {
         strategy: "jwt",
       },
-    },
-  },
-  {
-    method: "DELETE",
-    path: `/${settings.basePath}/{name}/{version}`,
-    handler: (req, h) => {
-      return h.redirect(`${req.path}/`).permanent();
     },
   },
   {

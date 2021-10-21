@@ -30,7 +30,7 @@ const settingsSchema = Joi.object({
     secret: Joi.string().default(
       require("crypto").randomBytes(256).toString("base64")
     ),
-    maxAgeSec: Joi.number().integer().min(1).default(14400), // 4 hours
+    maxAgeSec: Joi.number().integer().min(0).default(14400), // 4 hours
     timeSkewSec: Joi.number().integer().default(15),
   }).default(),
   oauth: Joi.object({

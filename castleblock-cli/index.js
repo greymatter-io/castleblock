@@ -131,6 +131,30 @@ function savePackage(pkg) {
   }
 }
 
+function appendToken(headers) {
+  if (options.token) {
+    headers = {
+      ...headers,
+      Authorization: `Bearer ${options.token}`,
+      Accept: "application/json",
+    };
+  } else {
+    // See if there are any saved tokens
+    const tokensPath = Path.join(require("os").homedir(), ".castleblock");
+    if (fs.existsSync(tokensPath)) {
+      //get existing file
+      const tokens = JSON.parse(fs.readFileSync(tokensPath));
+      if (tokens[options.url]) {
+        headers = {
+          ...headers,
+          Authorization: `Bearer ${tokens[options.url]}`,
+          Accept: "application/json",
+        };
+      }
+    }
+  }
+  return headers;
+}
 async function deploy(adhoc) {
   cli.info(`Compressing ${chalk.cyan(options.dist)}`);
   let pack;
@@ -171,27 +195,7 @@ async function deploy(adhoc) {
   cli.info(`Uploading Package`, adhoc, form);
 
   let headers = form.getHeaders();
-  if (options.token) {
-    headers = {
-      ...headers,
-      Authorization: `Bearer ${options.token}`,
-      Accept: "application/json",
-    };
-  } else {
-    // See if there are any saved tokens
-    const tokensPath = Path.join(require("os").homedir(), ".castleblock");
-    if (fs.existsSync(tokensPath)) {
-      //get existing file
-      const tokens = JSON.parse(fs.readFileSync(tokensPath));
-      if (tokens[options.url]) {
-        headers = {
-          ...headers,
-          Authorization: `Bearer ${tokens[options.url]}`,
-          Accept: "application/json",
-        };
-      }
-    }
-  }
+  headers = appendToken(headers);
 
   axios
     .post(`${options.url}/deployment`, form, {
@@ -209,11 +213,11 @@ async function deploy(adhoc) {
 async function remove(url) {
   cli.info("Deleting Deployment", url);
   await axios
-    .delete(url)
+    .delete(url, { headers: appendToken({}) })
     .then((response) => {
       cli.info(response.data);
     })
-    .catch((error) => cli.error(error));
+    .catch((error) => cli.error(getError(error)));
 }
 
 function watch() {
