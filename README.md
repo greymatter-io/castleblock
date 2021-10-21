@@ -12,6 +12,8 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps Catalog for discover
 - [Ad hoc deployments](./castleblock-cli#ad-hoc-deployments)
 - Dynamic Swagger Documentation (http://localhost:3000/documentation)
 - [manifest.json](./castleblock-cli#manifest.json) files are used to display app information in the CastleBlock UI.
+- [OAuth](https://github.com/greymatter-io/castleblock/tree/master/castleblock-service#authentication) support for many oauth [providers](https://hapi.dev/module/bell/providers) for user authentication.
+- [JWT](https://github.com/greymatter-io/castleblock/tree/master/castleblock-service#issuing-jwt-tokens) for authorization.
 - [CastleBlock UI](./castleblock-ui) for browsing deployed Apps, Microfrontends, and SPAs
 - [Reverse Proxy](./castleblock-service#reverse-proxy) for microservices in your environment
 
