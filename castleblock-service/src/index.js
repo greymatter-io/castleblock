@@ -6,7 +6,6 @@ import routes from "./routes.js";
 import setupAuth from "./authentication.js";
 
 const init = async () => {
-  console.log("Origins:", settings.originWhitelist);
   const server = Hapi.server({
     port: settings.port,
     host: settings.host,

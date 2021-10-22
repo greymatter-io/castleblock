@@ -7,8 +7,6 @@ const settingsSchema = Joi.object({
   protocol: Joi.string().default("http").valid("http", "https"),
   host: Joi.string().hostname().default("localhost"),
   port: Joi.number().port().default(3000),
-  corsProxyEnable: Joi.boolean().default(true),
-  originWhitelist: Joi.array().items(Joi.string().domain()).default([]),
   statusMonitorEnable: Joi.boolean()
     .default(true)
     .description("Enables status monitor page at /status"),
@@ -62,6 +60,21 @@ const settingsSchema = Joi.object({
     .items(Joi.string())
     .description("List of usernames")
     .default([]),
+  proxy: Joi.object({
+    enabled: Joi.boolean().default(true),
+    routes: Joi.array()
+      .items({
+        name: Joi.string().required(),
+        version: Joi.string().required(),
+        target: Joi.string().required(),
+        method: Joi.alternatives(
+          Joi.string(),
+          Joi.array().items(Joi.string())
+        ).default("*"),
+        description: Joi.string(),
+      })
+      .default([]),
+  }),
 }).unknown();
 
 export { settingsSchema };

@@ -1,5 +1,6 @@
 "use strict";
 import Vision from "@hapi/vision";
+import Wreck from "@hapi/wreck";
 import Inert from "@hapi/inert";
 import H2o2 from "@hapi/h2o2";
 import Basic from "@hapi/basic";
@@ -17,10 +18,13 @@ export default async function setupPlugins(server) {
       {
         plugin: HapiSwagger,
         options: {
+          documentationPath: "/api",
           info: {
-            title: "API Documentation",
+            title: "CastleBlock API",
             version: "0.0.1",
+            description: "CastleBlock is a Web Hosting as a Service platform.",
           },
+          grouping: "tags",
         },
       },
     ]);
@@ -38,43 +42,50 @@ export default async function setupPlugins(server) {
       },
     ]);
   }
-  if (settings.corsProxyEnable) {
+  if (settings.proxy.enabled) {
     //Allow proxying to other services
-    server.route({
-      method: "*",
-      path: `/proxy/{url*}`,
-      options: {
-        validate: {
-          params: async (value, options, next) => {
-            const url = new URL(value.url);
-            if (settings.originWhitelist.includes(url.origin)) {
-              return value;
-            } else {
-              throw Boom.badRequest(
-                `${url.origin} is not a whitelisted service. Contact your administrator.`
-              );
-            }
+
+    //Generate routes
+
+    settings.proxy.routes.forEach((route) => {
+      console.log("route", route);
+      server.route({
+        method: route.method,
+        path: `/services/${route.name}/${route.version}/{end*}`,
+        options: {
+          description: route.description
+            ? route.description
+            : `Reverse Proxy to ${route.name} microservice`,
+          tags: ["api", "services"],
+        },
+        handler: {
+          proxy: {
+            mapUri: function (request) {
+              return {
+                uri: `${route.target}/${request.params.end}`,
+              };
+            },
+
+            onResponse: async function (err, res, request, h, settings, ttl) {
+              console.log("path", request.path);
+              if (
+                request.path === `/services/${route.name}/${route.version}/`
+              ) {
+                const stream = await Wreck.read(res);
+                return utils.injectBasePath(
+                  stream.toString().replaceAll(`"/`, `"./`),
+                  `.`
+                );
+              } else {
+                return res;
+              }
+            },
+            acceptEncoding: false,
+            passThrough: true,
+            xforward: true,
           },
         },
-
-        description: "CORS Proxy",
-        notes: `Make requests to other origins. The current whitelist includes the following origins: ${settings.originWhitelist.join(
-          ", "
-        )}`,
-        tags: ["api"],
-      },
-      handler: {
-        proxy: {
-          mapUri: function (request) {
-            return {
-              uri: `${request.params.url}`,
-            };
-          },
-
-          passThrough: true,
-          xforward: true,
-        },
-      },
+      });
     });
   }
 
