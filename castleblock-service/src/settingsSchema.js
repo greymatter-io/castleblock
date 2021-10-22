@@ -62,6 +62,21 @@ const settingsSchema = Joi.object({
     .items(Joi.string())
     .description("List of usernames")
     .default([]),
+  proxy: Joi.object({
+    enabled: Joi.boolean().default(true),
+    routes: Joi.array()
+      .items({
+        name: Joi.string().required(),
+        version: Joi.string().required(),
+        target: Joi.string().required(),
+        method: Joi.alternatives(
+          Joi.string(),
+          Joi.array().items(Joi.string())
+        ).default("*"),
+        description: Joi.string(),
+      })
+      .default([]),
+  }),
 }).unknown();
 
 export { settingsSchema };
