@@ -18,6 +18,7 @@ export default async function setupPlugins(server) {
       {
         plugin: HapiSwagger,
         options: {
+          documentationPath: "/api",
           info: {
             title: "CastleBlock API",
             version: "0.0.1",

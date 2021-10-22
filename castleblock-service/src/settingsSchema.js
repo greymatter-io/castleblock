@@ -7,8 +7,6 @@ const settingsSchema = Joi.object({
   protocol: Joi.string().default("http").valid("http", "https"),
   host: Joi.string().hostname().default("localhost"),
   port: Joi.number().port().default(3000),
-  corsProxyEnable: Joi.boolean().default(true),
-  originWhitelist: Joi.array().items(Joi.string().domain()).default([]),
   statusMonitorEnable: Joi.boolean()
     .default(true)
     .description("Enables status monitor page at /status"),

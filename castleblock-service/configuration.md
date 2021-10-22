@@ -8,11 +8,6 @@
   (default: `localhost`)
 - **`port`** (type: number)
   (default: `3000`)
-- **`corsProxyEnable`** (type: boolean)
-  (default: `true`)
-- **`originWhitelist`** (type: array)
-  (default: `[]`)
-
 - **`statusMonitorEnable`** (type: boolean) : Enables status monitor page at /status
   (default: `true`)
 - **`swaggerDocsEnable`** (type: boolean) : Enables swagger API documentation page at /documentation
@@ -26,7 +21,7 @@
 - **`jwt`** (type: object)
 
   - **`secret`** (type: string) : HS256 or HS512 Secret Key. Default is randomly generated.
-    (default: `2KxFM1MzMSjBfR8qZ+XcFXHurbxa6xLCzkpsc4QCx9j6i767YLPbgORtoi3N8uA5+J+QxlYqTweFAqttptQUM8nOFacTc3Ae9HIqnpN0p8zt/Sct3OErhgKOlx2u59WMSp+9ib3Bo5G3/WCQ0sZuX84xo1Euee68vfI0taK3eQe8i3bfoVqCHXeEGmwiNSqGKA+Kmt/mJtVmekRPvqoxTgFsCtIOBITvIB9Oud7FDk24k6Km30aYCEBmLDzWwcEh0/qmc4z+AeBrdJOQfi5sV2W6WjZ90IGpHEIF/yb8YJGzDkOSVSpzSdNd7W2OT4ltHC90/rPNSY2nu94i2N4Dng==`)
+    (default: `Eg//9wtmt25kB+ZLwPRwmVf/N/U4iJl36y70PWwe0Mbuprx6g9jdV28FDXp4NtduXoAONodShx4DziJcXLI2zeXza7Xh8il0wwjCHEUrpUewI2LDGCPuQ2WrCNzfmvDHRsJ4lYNLZEenqOxo/+KAvUz2BnfhIU7glybx6fY6c9s6DIEGhDsOAQjospMCDh8zij4PBOPykVP2vpCsmDcvJtmTxZtBmu8roXl5Y9wqznvykIwMo+6ZkSqV1EGPOojyxUu2HfYy3FZSXUVZAgK2C5ETZMFFY9l1r0fbsQnaGayZo8qsaZWVfSlpBOOKy3bgaPqXIRNF0ll2g2tXCzNfTw==`)
   - **`maxAgeSec`** (type: number)
     (default: `14400`)
   - **`timeSkewSec`** (type: number)
@@ -37,7 +32,7 @@
   - **`provider`** (type: string)
 
   - **`password`** (type: string) : The cookie encryption password. Used to encrypt the temporary state cookie used by the module in between the authorization protocol steps.
-    (default: `4tyDVHno0HxIOBzlw8648aI4uK1tyfQgqwLiHp+t`)
+    (default: `v8oMpTvZBj2LcWuBOQ8u/s6hZLcqR5VbIHM8JX1j`)
   - **`clientId`** (type: string) : the OAuth client identifier (consumer key).
 
   - **`clientSecret`** (type: string) : the OAuth client secret (consumer secret).

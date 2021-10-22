@@ -41,7 +41,7 @@ onMount(() => {
       <a href="https://github.com/greymatter-io/castleblock#readme">Docs</a>
     </div>
     <div class="navbar-item">
-      <a href="/documentation">API</a>
+      <a href="/api">API</a>
     </div>
     <div class="navbar-item">
       <div class="buttons">
