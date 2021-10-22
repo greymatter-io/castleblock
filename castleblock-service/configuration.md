@@ -21,7 +21,7 @@
 - **`jwt`** (type: object)
 
   - **`secret`** (type: string) : HS256 or HS512 Secret Key. Default is randomly generated.
-    (default: `tq15RRsX2FoP2GOgAW+zuZJTzDj4J6/q7/3NIFz71CVFa3NFNOAmb9SZsKhJuBgP7r9epHkh6ytPnS2mJU0Ww/++zqPkwHhlUwf4hNqv7AAa6EQedgcMUjcQ2epGnyTXLipG/6o/x6sWo6ojULazZuaulWpiMb/GvP6/oh17jq6FjevCkIg92Gd068FD5dTRLjizUrAB0XhdwSbK5XQrJhKxYGwh8QfldZ4AEnmNKU9L54LRzpkVtHMeHEcd2bhHB7JH/ECNjtaHqqPhwOLQYWc4SSV+6jNH71MSbuwsZngtS55lr48v4UsTYKazwzOCCZgjDoKZlz3a9WZWWtgKow==`)
+    (default: `aYfFrlvzERJ4b4x8sGxlNubbYZng6fWCrt9rVzBZT3zkcPAevVktSsUgxnfBaGmEp9oMLafAfHYHOFO0i7tTMc1EW7TyO9Y3R/7bWnTZ5kJRUdUMY+dxEJZ0kUKRWyC3VyE0XXoJK5UCxsvzhJgjRxH7Vi6wYoDjobJthuVkvVow3j8mIf3JCgNCegd0/cEKkb9iMbo99K81/iUl+Hhq2A9HsXrf9fTfhLmf94MW2g+oJdTYTkcSC+dFFhi698L913LKcs54ek0+MlvDbdZf8poi3IOrUtMKp4tiXA4DvOkrqbO+vUg5XCojNcHxryKErPa87E8mlZO0AnoNpyK/uQ==`)
   - **`maxAgeSec`** (type: number)
     (default: `14400`)
   - **`timeSkewSec`** (type: number)
@@ -32,7 +32,7 @@
   - **`provider`** (type: string)
 
   - **`password`** (type: string) : The cookie encryption password. Used to encrypt the temporary state cookie used by the module in between the authorization protocol steps.
-    (default: `YwfV4jRN3JWkREF6vBxez8RAqn1eExitxa315rrO`)
+    (default: `Sfe2DNTV5MUyBdfSNj2o7DTuFbEvALA0uCXfvgjO`)
   - **`clientId`** (type: string) : the OAuth client identifier (consumer key).
 
   - **`clientSecret`** (type: string) : the OAuth client secret (consumer secret).

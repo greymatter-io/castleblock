@@ -7,6 +7,7 @@ import Basic from "@hapi/basic";
 import susie from "susie";
 import HapiSwagger from "hapi-swagger";
 import Status from "hapijs-status-monitor";
+import _ from "lodash";
 
 import utils from "./utils.js";
 import settings from "./settings.js";
@@ -42,7 +43,7 @@ export default async function setupPlugins(server) {
       },
     ]);
   }
-  if (settings.proxy.enabled) {
+  if (_.get(settings, "proxy.enabled")) {
     //Allow proxying to other services
 
     //Generate routes
