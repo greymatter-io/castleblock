@@ -9,3 +9,5 @@ The UI is a dashboard for finding deployed applications, microfrontends, and web
 1. build castleblock-ui `npm run build`
 1. Run `castleblock -n castleblock-ui -d ./public -e exampleEnv.json`
 1. Go to http://localhost:3000/ and you should see the castleblock-ui
+
+![screenshot of castleblock-ui](./castleblock-ui-screenshot.png "Castleblock UI Screenshot")
