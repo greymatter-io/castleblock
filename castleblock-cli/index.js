@@ -47,6 +47,23 @@ const options = cli.parse(
 console.log(options);
 const args = cli.args;
 
+function validateHtml(path) {
+  if (!fs.existsSync(path)) {
+    cli.fatal(
+      "Missing index.html file. This file is the required entry point to your application."
+    );
+  } else {
+    const htmlString = fs.readFileSync(path);
+    if (htmlString.includes(`'/`) || htmlString.includes(`"/`)) {
+      cli.error(
+        "The index.html file appears to have absolute paths. Please make them relative paths."
+      );
+    } else {
+      cli.info("index.html checks out fine.");
+    }
+  }
+}
+
 //Print specific error if it exists
 function getError(error) {
   return error &&
@@ -166,6 +183,7 @@ async function deploy(adhoc) {
         ` dist directory: "${Path.join(options.dist)}" does not exists!`
       );
     }
+    validateHtml(Path.join(options.dist, "index.html"));
     pack = tar.pack(`${Path.join(options.dist)}`);
     savePackage(pack);
   }
