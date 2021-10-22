@@ -264,6 +264,7 @@ export default [
       directory: {
         path: Path.normalize(`${settings.assetPath}`),
         listing: true,
+        etagMethod: "hash",
       },
     },
     options: {
@@ -304,7 +305,9 @@ export default [
         );
       }
 
-      return h.file(pathToFile);
+      return h.file(pathToFile, {
+        etagMethod: "hash",
+      });
     },
     options: {
       description: `Fetch ${settings.basePath} assets for the latest version of the deployment`,
