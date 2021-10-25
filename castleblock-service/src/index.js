@@ -1,5 +1,7 @@
 "use strict";
 import Hapi from "@hapi/hapi";
+import fs from "fs";
+
 import setupPlugins from "./plugins.js";
 import settings from "./settings.js";
 import routes from "./routes.js";
@@ -9,6 +11,12 @@ const init = async () => {
   const server = Hapi.server({
     port: settings.port,
     host: settings.host,
+    tls: settings.tls
+      ? {
+          key: settings.tls.key,
+          cert: settings.tls.cert,
+        }
+      : null,
   });
 
   await setupAuth(server);
