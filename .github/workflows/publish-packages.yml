@@ -42,6 +42,9 @@ jobs:
         with:
           file-name: ./castleblock-cli/package.json
           file-url: https://unpkg.com/castleblock/package.json
+          diff-search: true
+          assume-same-version: old
+          static-checking: localIsNew
       - name: Version update detected
         if: steps.check.outputs.changed == 'true'
         run: npm publish ./castleblock-cli/
