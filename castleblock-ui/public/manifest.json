@@ -1,0 +1,13 @@
+{
+  "name": "Castleblock UI",
+  "short_name": "castleblock-ui",
+  "version": "1.2.0",
+  "description": "A dashboard for this service.",
+  "icons": [
+    {
+      "src": "Mark.png",
+      "sizes": "48x48",
+      "type": "image/png"
+    }
+  ]
+}

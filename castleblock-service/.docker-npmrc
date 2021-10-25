@@ -1,0 +1,3 @@
+always-auth=true
+registry=https://artifactory.code.dicelab.net/artifactory/api/npm/npm/
+//artifactory.code.dicelab.net/artifactory/api/npm/npm/:_authToken=${NPM_TOKEN}
