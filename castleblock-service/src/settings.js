@@ -10,8 +10,6 @@ const options = cli.parse({
   config: ["c", "JSON Configuration file for castleblock", "file"],
 });
 
-console.debug("cli options", options, process.argv);
-
 let settings = {};
 if (options.config) {
   try {
@@ -39,6 +37,7 @@ console.debug = function () {
   }
 };
 
-console.log("Settings:", JSON.stringify(settings, null, 2));
+console.debug("CLI options", options, process.argv);
+console.debug("Settings:", JSON.stringify(settings, null, 2));
 
 export default settings;
