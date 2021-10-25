@@ -14,7 +14,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+    - name: Set Version
+      run: echo "VERSION=$(cat ./castleblock-service/package.json | grep '"version"' | head -n 1 | awk '{print $2}' | sed 's/"//g; s/,//g')" >> $GITHUB_ENV
+    - name: Print Version
+      run: echo $VERSION
     - name: Build Docker image
       run: docker build ./castleblock-service -t "castleblock:${VERSION}"
-      env:
-        VERSION: $(cat ./castleblock-service/package.json | grep '"version"' | head -n 1 | awk '{print $2}' | sed 's/"//g; s/,//g')
