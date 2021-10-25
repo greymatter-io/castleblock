@@ -14,9 +14,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Install Node.js
-      run: sudo apt update; sudo apt install nodejs;
     - name: Get version number
-      run: VERSION=$(node -p "require('./castleblock-service/package.json').version")
+      run: VERSION=$(cat ./castleblock-service/package.json | grep '"version"' | head -n 1 | awk '{print $2}' | sed 's/"//g; s/,//g')
     - name: Build Docker image
       run: docker build ./castleblock-service -t "castleblock:${VERSION}"
