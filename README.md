@@ -16,6 +16,7 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps Catalog for discover
 - [JWT](https://github.com/greymatter-io/castleblock/tree/master/castleblock-service#issuing-jwt-tokens) for authorization.
 - [CastleBlock UI](./castleblock-ui) for browsing deployed Apps, Microfrontends, and SPAs
 - [Reverse Proxy](./castleblock-service#reverse-proxy) for microservices in your environment
+- [TLS Support](./castleblock-service#tls)
 
 ## Quick Start
 

@@ -23,7 +23,7 @@ Options:
   -h, --help             Display help and usage details
 
 Commands:
-  deploy, login, remove, watch
+  deploy, login, remove, version, watch
 ```
 
 ## Manifest.json

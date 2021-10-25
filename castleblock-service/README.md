@@ -17,6 +17,10 @@ To override the default configuration, a json file can be created. See the [sche
 
 To load a configuration run `npm run dev -- --config <path-to-config>`. You can run castleblock with no configuration file and it will just use the default values.
 
+## TLS
+
+See the tls section in the [configuration](./configuration.md). Generate self-signed certs by running `npm run genSelfSignedCerts`.
+
 ## Authentication
 
 Castleblock uses oauth providers for authentication. See the [@hapi/bell providers](https://hapi.dev/module/bell/providers) for details on how to configure the `auth` section of the [castleblock.json](./configuration.md) file.
