@@ -2,7 +2,7 @@ import fs from "fs";
 
 let adhocClients = [];
 export function updateClients(appPath) {
-  console.log("ADHOC Clients:", adhocClients.length);
+  console.debug("ADHOC Clients:", adhocClients.length);
   adhocClients = adhocClients
     .map((c) => {
       console.log("cinfo", c.request.info.referrer);
@@ -17,7 +17,7 @@ export function updateClients(appPath) {
     })
     .filter(Boolean);
 
-  console.log("ADHOC Clients:", adhocClients.length);
+  console.debug("ADHOC Clients:", adhocClients.length);
 }
 export function injectHotReloadClient(path) {
   let htmlFile = fs.readFileSync(path);
@@ -26,7 +26,7 @@ export function injectHotReloadClient(path) {
   htmlFile = `${htmlFile}`.replace(
     "</body>",
     `<script>
-    var source = new EventSource('/refresh');source.onmessage = function(e) { console.log(e); if(e.data=="refresh"){ location.reload();}}</script></body>`
+    var source = new EventSource('/refresh');source.onmessage = function(e) { if(e.data=="refresh"){ location.reload();}}</script></body>`
   );
 
   //save file
@@ -35,16 +35,16 @@ export function injectHotReloadClient(path) {
 
 export function addClient(client) {
   adhocClients = adhocClients.concat([client]);
-  console.log("ADHOC Clients:", adhocClients.length);
+  console.debug("ADHOC Clients:", adhocClients.length);
 }
 
 export function removeClients(name, version) {
-  console.log(`REMOVING: ${name} version: ${version}`);
+  console.debug(`REMOVING: ${name} version: ${version}`);
   adhocClients = adhocClients.filter(
     (c) => !c.request.info.referrer.includes(`${name}/${version}`)
   );
 
-  console.log("ADHOC Clients:", adhocClients.length);
+  console.debug("ADHOC Clients:", adhocClients.length);
 }
 
 export default {

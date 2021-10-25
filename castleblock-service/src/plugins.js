@@ -49,7 +49,7 @@ export default async function setupPlugins(server) {
     //Generate routes
 
     settings.proxy.routes.forEach((route) => {
-      console.log("route", route);
+      console.debug("route", route);
       server.route({
         method: route.method,
         path: `/services/${route.name}/${route.version}/{end*}`,
@@ -68,7 +68,7 @@ export default async function setupPlugins(server) {
             },
 
             onResponse: async function (err, res, request, h, settings, ttl) {
-              console.log("path", request.path);
+              console.debug("path", request.path);
               if (
                 request.path === `/services/${route.name}/${route.version}/`
               ) {

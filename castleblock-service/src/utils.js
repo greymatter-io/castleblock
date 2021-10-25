@@ -40,7 +40,7 @@ export function latestVersion(appName, path) {
 }
 
 export function nextVersion(version, action) {
-  console.log("currentVesion", version);
+  console.debug("currentVesion", version);
   let patch = semverPatch(version);
   let minor = semverMinor(version);
   let major = semverMajor(version);
@@ -84,10 +84,9 @@ export function createPath(p, clearExisting) {
 }
 export async function writeStream(stream, filePath) {
   return new Promise((resolve, reject) => {
-    console.log("test", filePath);
     const s = stream.pipe(fs.createWriteStream(filePath));
     s.on("finish", function () {
-      console.log("finished writing", filePath);
+      console.debug("finished writing", filePath);
       resolve();
     });
   });
@@ -96,7 +95,7 @@ export function readStream(stream) {
   let data;
   return new Promise((resolve, reject) => {
     stream.on("data", (chunk) => {
-      console.log(`Received ${chunk.length} bytes of data.`);
+      console.debug(`Received ${chunk.length} bytes of data.`);
       data = data ? data + chunk : chunk;
     });
     stream.on("end", () => {
@@ -112,10 +111,10 @@ export async function getManifest(oldTarballStream) {
   let extract = tarStream.extract();
   let manifest;
   await new Promise((resolve, reject) => {
-    console.log("get man");
+    console.debug("get man");
     extract.on("entry", async function (header, stream, next) {
       // write the new entry to the pack stream
-      console.log(header.name);
+      console.debug(header.name);
       if (header.name == "manifest.json") {
         manifest = JSON.parse(await readStream(stream));
         resolve();

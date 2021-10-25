@@ -29,7 +29,7 @@ export default [
     },
 
     handler: (request, h) => {
-      console.log(
+      console.debug(
         Path.join(
           `${settings.assetPath}/${settings.homepage}/${utils.latestVersion(
             settings.homepage,
@@ -97,7 +97,7 @@ export default [
       } catch (error) {
         return Boom.badRequest(error);
       }
-      console.log(manifest);
+      console.debug(manifest);
 
       // Validate the manifest.json
       const manifestValidation = schemas.manifest.validate(manifest);
@@ -116,7 +116,7 @@ export default [
       utils.createPath(destination, true);
 
       // Extract tarball
-      console.log("Starting Extraction");
+      console.debug("Starting Extraction");
       stream2.pipe(tarFS.extract(destination));
 
       //Save original tar file to disk for archive
@@ -128,7 +128,7 @@ export default [
         )
       );
 
-      console.log(req.auth.artifacts.decoded.payload.username);
+      console.debug(req.auth.artifacts.decoded.payload.username);
       // Generate metadata info.json
       const info = {
         deploymentDate: new Date(),
@@ -151,7 +151,7 @@ export default [
         );
       }
 
-      console.log(info);
+      console.debug(info);
 
       if (req.payload.adhoc) {
         // Inject hot-reloading client and refresh any connected clients for this app..
@@ -187,7 +187,7 @@ export default [
     method: "DELETE",
     path: `/${settings.basePath}/{name}/{version}/`,
     handler: (req) => {
-      console.log("REMOVEING", req.params.name, req.params.version);
+      console.debug("REMOVEING", req.params.name, req.params.version);
       adhoc.removeClients(req.params.name, req.params.version);
 
       //Remove specific version
