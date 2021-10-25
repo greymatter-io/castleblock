@@ -1,0 +1,15 @@
+version: "3.9"
+   
+services:
+  web:
+    build: .
+    #environment:
+      #- CONFIG=/castleblock/myconfig.json
+    volumes:
+      - ./assets/:/castleblock/assets/
+      #- ./myconfig.json:/castleblock/myconfig.json
+    ports:
+      - "3000:3000"
+    network_mode: host
+volumes:
+  web:
