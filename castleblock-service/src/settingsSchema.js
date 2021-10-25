@@ -1,4 +1,5 @@
 import Joi from "joi";
+import fs from "fs";
 
 const settingsSchema = Joi.object({
   debug: Joi.boolean()
@@ -7,6 +8,26 @@ const settingsSchema = Joi.object({
   protocol: Joi.string().default("http").valid("http", "https"),
   host: Joi.string().hostname().default("localhost"),
   port: Joi.number().port().default(3000),
+  tls: Joi.object({
+    key: Joi.any()
+      .custom((value, helper) => {
+        if (!fs.existsSync(value)) {
+          throw new Error(`Key file does not exists: ${value}`);
+        } else {
+          return fs.readFileSync(value);
+        }
+      }, "TLS Key Validation")
+      .required(),
+    cert: Joi.string()
+      .custom((value, helper) => {
+        if (!fs.existsSync(value)) {
+          throw new Error(`Cert file does not exists: ${value}`);
+        } else {
+          return fs.readFileSync(value);
+        }
+      }, "TLS Cert Validation")
+      .required(),
+  }).optional(),
   statusMonitorEnable: Joi.boolean()
     .default(true)
     .description("Enables status monitor page at /status"),

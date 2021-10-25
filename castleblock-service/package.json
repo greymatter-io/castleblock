@@ -9,7 +9,8 @@
     "build": "docker-compose build",
     "docker": "docker-compose run web",
     "jwtSecret": "node -e \"console.log(require('crypto').randomBytes(256).toString('base64'));\"",
-    "genDocs": "babel-node genDocs.js"
+    "genDocs": "babel-node genDocs.js",
+    "genCerts": "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost' -nodes"
   },
   "nodemonConfig": {
     "ignore": [
