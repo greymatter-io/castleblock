@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "nodemon --watch src --watch settings.json --exec babel-node src/index.js --",
     "start": "babel-node src/index.js",
-    "build": "docker build . --build-arg NPM_TOKEN=${NPM_TOKEN} --no-cache -t castleblock-service",
-    "docker": "docker run  -p 3000:3000 --net=host castleblock-service ",
+    "build": "docker-compose build",
+    "docker": "docker-compose run web",
     "jwtSecret": "node -e \"console.log(require('crypto').randomBytes(256).toString('base64'));\"",
     "genDocs": "babel-node genDocs.js"
   },
