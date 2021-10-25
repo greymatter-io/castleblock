@@ -12,13 +12,15 @@ import { nanoid } from "nanoid";
 import slugify from "slugify";
 import Jwt from "@hapi/jwt";
 
+import overrideDefaults from "./overrideDefaults.js";
+
 const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
-
 //CLI commands and options
 const commands = ["deploy", "watch", "remove", "login", "version"];
-const options = cli.parse(
-  {
+
+let options = cli.parse(
+  overrideDefaults({
     dist: ["d", "Directory containing the built assets", "file", "./build"],
     url: ["u", "URL to castleblock service", "string", "http://localhost:3000"],
     env: [
@@ -41,9 +43,10 @@ const options = cli.parse(
       "JWT Secret Key for generating a token on the fly",
       "string",
     ],
-  },
+  }),
   commands
 );
+
 const args = cli.args;
 
 function validateHtml(path) {
@@ -106,7 +109,10 @@ export async function init(argv) {
       await remove(args[0]);
       break;
     case "login":
-      const tokensPath = Path.join(require("os").homedir(), ".castleblock");
+      const tokensPath = Path.join(
+        require("os").homedir(),
+        ".castleblock.json"
+      );
       let tokens = {};
       if (fs.existsSync(tokensPath)) {
         //get existing file
@@ -161,7 +167,7 @@ function appendToken(headers) {
     };
   } else {
     // See if there are any saved tokens
-    const tokensPath = Path.join(require("os").homedir(), ".castleblock");
+    const tokensPath = Path.join(require("os").homedir(), ".castleblock.json");
     if (fs.existsSync(tokensPath)) {
       //get existing file
       const tokens = JSON.parse(fs.readFileSync(tokensPath));
