@@ -16,7 +16,7 @@ const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
 
 //CLI commands and options
-const commands = ["deploy", "watch", "remove", "login"];
+const commands = ["deploy", "watch", "remove", "login", "version"];
 const options = cli.parse(
   {
     dist: ["d", "Directory containing the built assets", "file", "./build"],
@@ -44,7 +44,6 @@ const options = cli.parse(
   },
   commands
 );
-console.log(options);
 const args = cli.args;
 
 function validateHtml(path) {
@@ -95,9 +94,11 @@ export async function init(argv) {
 
   switch (cli.command) {
     case "deploy":
+      console.log(options);
       await deploy();
       break;
     case "watch":
+      console.log(options);
       watch();
       break;
     case "remove":
@@ -114,6 +115,9 @@ export async function init(argv) {
       tokens[options.url] = options.token;
       fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2));
       cli.info("Logged in");
+    case "version":
+      cli.info("v" + require("./package.json").version);
+      process.exit();
   }
 }
 
