@@ -36,6 +36,13 @@ jobs:
         with:
           node-version: 14
           registry-url: https://registry.npmjs.org/
-      - run: npm publish ./castleblock-cli/
+      - name: Check version changes
+        uses: EndBug/version-check@v1
+        id: check
+        with:
+          file-name: ./castleblock-cli/package.json
+      - name: Version update detected
+        if: steps.check.outputs.changed == 'true'
+        run: npm publish ./castleblock-cli/
         env:
           NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
