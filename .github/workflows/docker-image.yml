@@ -30,6 +30,6 @@ jobs:
         context: ./castleblock-service/
         file: ./Dockerfile
         push: true
-        tags: ${{ secrets.DOCKER_HUB_USERNAME }}/castleblock:${VERSION}
+        tags: "${{ secrets.DOCKER_HUB_USERNAME }}/castleblock:$VERSION"
     - name: Image digest
       run: echo ${{ steps.docker_build.outputs.digest }}
