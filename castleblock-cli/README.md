@@ -93,12 +93,12 @@ Sometimes your application needs to be configurable after it has already been bu
 e the `--env` option to include configurations at runtime.
 
 ```
-castleblock deploy --env env.json
+castleblock deploy --env mysettings.json
 ```
 
 ### Accessing env.json from your App
 
-Castleblock will inject the env.json file into your deployment, so your application can `fetch(./env.json)` to load custom configuration values when the application first loads.
+Castleblock will inject the env.json file into your deployment, so your application can `fetch(./env.json)` to load custom configuration values when the application first loads. The file is always `env.json`, regardless of what the original filename was.
 
 ## Default CLI Options
 
