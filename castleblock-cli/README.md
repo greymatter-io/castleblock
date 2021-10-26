@@ -1,4 +1,4 @@
-# castleblock-cli
+# castleblock
 
 The castleblock-cli interfaces with the castleblock-service API and deploys apps via a command line interface.
 
@@ -37,6 +37,8 @@ Castleblock relies on your app's [manifest.json](https://developer.mozilla.org/e
 - [icons](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/icons)
 
 ## Deploying an app
+
+First make sure you have the [service](../castleblock-service) running. In this example the service is running at http://localhost:3000
 
 ```
 $ castleblock deploy -d ./dist
