@@ -24,7 +24,9 @@ jobs:
           context: ./castleblock-service/
           file: ./castleblock-service/Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/castleblock:${{ env.VERSION }}
+          tags: |
+              ${{ secrets.DOCKER_HUB_USERNAME }}/castleblock:${{ env.VERSION }}
+              ${{ secrets.DOCKER_HUB_USERNAME }}/castleblock:latest
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
   npm-publish:
