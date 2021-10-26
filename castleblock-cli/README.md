@@ -99,3 +99,21 @@ castleblock deploy --env env.json
 ### Accessing env.json from your App
 
 Castleblock will inject the env.json file into your deployment, so your application can `fetch(./env.json)` to load custom configuration values when the application first loads.
+
+## Default CLI Options
+
+Castleblock allows you to save your own default options in a `.castleblock.json` file either in your home directory (globally) or in your project directory. Any of the CLI options can be set to alternative default values. See below for an example.
+
+```
+{
+  "config": {
+    "dist":"./public",
+    "url":"http://myproductionsite.xyz"
+    "env":"productionsettings.json",
+    "build":"npm run build -- --prod",
+    "src":"./src",
+    "pack":true
+  }
+}
+
+```
