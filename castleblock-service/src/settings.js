@@ -3,6 +3,7 @@ import Joi from "joi";
 import fs from "fs";
 import _ from "lodash";
 import cli from "cli";
+import util from "util";
 
 import { settingsSchema } from "./settingsSchema.js";
 
@@ -11,14 +12,17 @@ const options = cli.parse({
 });
 
 let settings = {};
-if (options.config) {
+if (options.config && fs.existsSync(options.config)) {
   try {
     settings = JSON.parse(fs.readFileSync(options.config));
   } catch (error) {
     console.error(chalk.red(`Problem reading ${options.config} file.`));
     console.error(error);
-    process.exit(1);
   }
+} else {
+  console.error(
+    chalk.red(`Problem reading ${options.config} file. Does not exist`)
+  );
 }
 
 //console.log(joiToDoc(settingsSchema, 0, "", "Castleblock settings.json"));
@@ -37,7 +41,31 @@ console.debug = function () {
   }
 };
 
+function hide(data, secrets) {
+  let newData = data;
+  Object.keys(newData).forEach((key) => {
+    if (typeof newData[key] === "object") {
+      return hide(newData[key], secrets);
+    }
+
+    const hasSecret = secrets.some((secret) => {
+      return key.toLowerCase().includes(secret);
+    });
+    if (hasSecret) {
+      newData[key] = "*******Hidden*******";
+    }
+  });
+  return newData;
+}
+
 console.debug("CLI options", options, process.argv);
-console.debug("Settings:", JSON.stringify(settings, null, 2));
+console.log(
+  "Settings:",
+  util.inspect(hide(settings, ["secret", "password"]), {
+    showHidden: false,
+    depth: null,
+    colors: true,
+  })
+);
 
 export default settings;
