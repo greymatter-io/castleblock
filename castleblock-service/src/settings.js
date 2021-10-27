@@ -45,9 +45,8 @@ function hide(data, secrets) {
   let newData = _.cloneDeep(data);
   Object.keys(newData).forEach((key) => {
     if (typeof newData[key] === "object") {
-      return hide(newData[key], secrets);
+      newData[key] = hide(newData[key], secrets);
     }
-
     const hasSecret = secrets.some((secret) => {
       return key.toLowerCase().includes(secret);
     });
