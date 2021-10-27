@@ -42,7 +42,7 @@ console.debug = function () {
 };
 
 function hide(data, secrets) {
-  let newData = data;
+  let newData = _.cloneDeep(data);
   Object.keys(newData).forEach((key) => {
     if (typeof newData[key] === "object") {
       return hide(newData[key], secrets);
@@ -67,5 +67,4 @@ console.log(
     colors: true,
   })
 );
-
 export default settings;
