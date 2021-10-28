@@ -1,6 +1,6 @@
 {
   "name": "castleblock-service",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -10,7 +10,8 @@
     "docker": "docker-compose run web",
     "jwtSecret": "node -e \"console.log(require('crypto').randomBytes(256).toString('base64'));\"",
     "genDocs": "babel-node genDocs.js",
-    "genSelfSignedCerts": "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost' -nodes"
+    "genSelfSignedCerts": "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost' -nodes",
+    "genHelmChart": "kompose convert -c -f docker-compose.yml; mv docker-compose helm-chart"
   },
   "nodemonConfig": {
     "ignore": [
