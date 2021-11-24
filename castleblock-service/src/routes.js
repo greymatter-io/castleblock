@@ -14,7 +14,6 @@ import utils from "./utils.js";
 import setupPlugins from "./plugins.js";
 import settings from "./settings.js";
 import schemas from "./schemas.js";
-import routes from "./routes.js";
 
 import adhoc from "./adhoc.js";
 
@@ -93,7 +92,7 @@ export default [
       //Fetch manifest from package
       let manifest;
       try {
-        manifest = await utils.getManifest(stream1);
+        manifest = await utils.extractManifest(stream1);
       } catch (error) {
         return Boom.badRequest(error);
       }
@@ -235,17 +234,20 @@ export default [
         .getDirectories(`${settings.assetPath}/`)
         .map((deployment) => {
           if (utils.versions(deployment, settings.assetPath).length) {
-            return {
-              name: deployment,
-              versions: utils.versions(deployment, settings.assetPath),
-              path: `/${settings.basePath}/${deployment}`,
-              latestManifest: Path.join(
-                `${settings.basePath}`,
-                `${deployment}`,
-                `${utils.latestVersion(deployment, settings.assetPath)}`,
-                "manifest.json"
-              ),
-            };
+            const m = utils.readManifest(deployment);
+            if (!m.webcomponent) {
+              return {
+                name: deployment,
+                versions: utils.versions(deployment, settings.assetPath),
+                path: `/${settings.basePath}/${deployment}`,
+                latestManifest: Path.join(
+                  `${settings.basePath}`,
+                  `${deployment}`,
+                  `${utils.latestVersion(deployment, settings.assetPath)}`,
+                  "manifest.json"
+                ),
+              };
+            }
           }
         })
         .filter(Boolean);
@@ -256,7 +258,39 @@ export default [
       tags: ["api"],
     },
   },
-
+  {
+    method: "GET",
+    path: `/webcomponents`,
+    handler: () => {
+      return utils
+        .getDirectories(`${settings.assetPath}/`)
+        .map((deployment) => {
+          if (utils.versions(deployment, settings.assetPath).length) {
+            const m = utils.readManifest(deployment);
+            if (m.webcomponent) {
+              return {
+                name: deployment,
+                versions: utils.versions(deployment, settings.assetPath),
+                path: `/${settings.basePath}/${deployment}`,
+                latestManifest: Path.join(
+                  `${settings.basePath}`,
+                  `${deployment}`,
+                  `${utils.latestVersion(deployment, settings.assetPath)}`,
+                  "manifest.json"
+                ),
+              };
+            }
+          }
+        })
+        .filter(Boolean);
+    },
+    options: {
+      description: "List all webcomponents",
+      notes:
+        "Returns webcomponent names, versions, and path to example documentation page",
+      tags: ["api"],
+    },
+  },
   {
     method: "GET",
     path: `/${settings.basePath}/{file*}`,
