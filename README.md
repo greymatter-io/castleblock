@@ -6,15 +6,9 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps/WebComponent Catalog
 
 ![diagram of castleblock high level concept](./castleblock-concept.png "Castleblock high-level concept")
 
-## Sharing Web Components
-
-CastleBlock lets you deploy webcomponents that can then be integrated into your web applications. Rather than transpiling the web-component directly into each web application you can deploy the individual web components and load them at runtime. This allows the web-componetns to be developed and redeployed indepentantly of your web applications.
-
-![diagram of shared web-components](./web-components.png "Castleblock web component sharing")
-
 ## Features:
 
-- Web Component delievery to downstream web applications
+- [Web Component delievery](./#sharing-web-components) to downstream web applications
 - [CLI](./castleblock-cli) for manual deployments or continuous delivery
 - Deployment versioning using [Semantic Versioning](https://semver.org/)
 - [Environmental Variable Injection](./castleblock-cli#environmental-variable-injection)
@@ -38,6 +32,12 @@ castleblock deploy
 ```
 
 ![diagram of how to use castleblock](./castleblock-usage-diagram.png "Castleblock usage diagram")
+
+## Sharing Web Components
+
+CastleBlock lets you deploy webcomponents that can then be integrated into your web applications. Rather than transpiling the web-component directly into each web application you can deploy the individual web components and load them at runtime. This allows the web-componetns to be developed and redeployed indepentantly of your web applications.
+
+![diagram of shared web-components](./web-components.png "Castleblock web component sharing")
 
 ### Example Svelte Web Component
 
