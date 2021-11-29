@@ -2,7 +2,7 @@
 
 CastleBlock is a Web App platform to host web applications and shared web components in one place. CastleBlock is ideal for enterprise environments with multiple web applications that share common web components.
 
-CastleBlock consists of a command line interface, a service, and a UI dashboard. The CLI packages and uploads the web assets to the Service. The Service organizes the applications and web components and supports multiple hosted versions. The UI Dashboard displays all of the deployed Web Apps and Web Components in a catalog so share components can be discovered and reused by other app developers. CastleBlock leverages a manifest.json file for metadata about the Web Application / Web Component.
+CastleBlock consists of a [command line interface](./castleblock-cli), a [service](./castleblock-service), and a [dashboard user interface](./castleblock-ui). The CLI packages and uploads the web assets to the Service. The Service organizes the applications and web components and supports multiple hosted versions. The UI Dashboard displays all of the deployed Web Apps and [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) in a catalog so share components can be discovered and reused by other app developers. CastleBlock leverages a manifest.json file for metadata about the Web Application / Web Component.
 
 ![diagram of castleblock high level concept](./castleblock-concept.png "Castleblock high-level concept")
 
@@ -31,11 +31,9 @@ CastleBlock consists of a command line interface, a service, and a UI dashboard.
 castleblock deploy
 ```
 
-![diagram of how to use castleblock](./castleblock-usage-diagram.png "Castleblock usage diagram")
-
 ## Sharing Web Components
 
-CastleBlock lets you deploy webcomponents that can then be integrated into your web applications. Rather than transpiling the web-component directly into each web application you can deploy the individual web components and load them at runtime. This allows the web-componetns to be developed and redeployed indepentantly of your web applications.
+CastleBlock lets you deploy web components that can then be integrated into your web applications. Rather than transpiling the web-component directly into each web application you can deploy the individual web components and load them at runtime. This allows the web-componetns to be developed and redeployed indepentantly of your web applications.
 
 ![diagram of shared web-components](./web-components.png "Castleblock web component sharing")
 
@@ -69,7 +67,7 @@ Making really small light weight web compoennts in Svelte is easy, just define t
 
 ### Integrating Web Components
 
-Just include the bundled web componet in the index.html file of your web application and then you can use the tag anywhere in your web app. Then at load-time, the latest version of the webcomponetn will be loaded. There is no need to rebuild the downstream app anytime the webcomponet gets updated.
+Just include the bundled web componet in the index.html file of your web application and then you can use the tag anywhere in your web app. Then at load-time, the latest version of the web components will be loaded. There is no need to rebuild the downstream app anytime the web componet gets updated.
 
 ```html
 <html>
