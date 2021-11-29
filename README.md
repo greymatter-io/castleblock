@@ -33,13 +33,13 @@ castleblock deploy
 
 ## Sharing Web Components
 
-CastleBlock lets you deploy web components that can then be integrated into your web applications. Rather than transpiling the web-component directly into each web application you can deploy the individual web components and load them at runtime. This allows the web-componetns to be developed and redeployed indepentantly of your web applications.
+CastleBlock lets you deploy web components that can then be integrated into your web applications. Rather than transpiling the web-component directly into each web application you can deploy the individual web components and load them at runtime. This allows the web components to be developed and redeployed independently of your web applications.
 
 ![diagram of shared web-components](./web-components.png "Castleblock web component sharing")
 
 ### Example Svelte Web Component
 
-Making really small light weight web compoennts in Svelte is easy, just define the tag at the top of your component. For an full example see [simple-clock](https://github.com/jmcudd/simple-clock).
+Making really small light weight web components in Svelte is easy, just define the tag at the top of your component. For an full example see [simple-clock](https://github.com/jmcudd/simple-clock).
 
 ```svelte
 <svelte:options tag="simple-clock" />
@@ -67,7 +67,7 @@ Making really small light weight web compoennts in Svelte is easy, just define t
 
 ### Integrating Web Components
 
-Just include the bundled web componet in the index.html file of your web application and then you can use the tag anywhere in your web app. Then at load-time, the latest version of the web components will be loaded. There is no need to rebuild the downstream app anytime the web componet gets updated.
+Just include the bundled web component in the index.html file of your web application and then you can use the tag anywhere in your web app. Then at load-time, the latest version of the web components will be loaded. There is no need to rebuild the downstream app anytime the web component gets updated.
 
 ```html
 <html>
