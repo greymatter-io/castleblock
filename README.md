@@ -73,7 +73,7 @@ Just include the bundled web component in the index.html file of your web applic
 <html>
   <head>
     <title>Web App A</title>
-    <script src="https://castleblock.io/ui/simple-clock/latest/simple-clock.js"></script>
+    <script src="./ui/simple-clock/latest/simple-clock.js"></script>
   </head>
   <body>
     <simple-clock></simple-clock>
