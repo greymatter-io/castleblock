@@ -1,15 +1,18 @@
 <img src="./assets/brand/Logo.png" height="80px" />
 
-CastleBlock a UI development and deployment platform. Deploy multiple web apps into the same environment and share web-components between them. Use the CLI to deploy any web app directly into production, or ad hoc deploymenets with hot-reloading. Deploy multiple versions of the same application or web-component.
+CastleBlock is a Web App platform to house all your web applications and shared web components in one place. CastleBlock is ideal for enterprise environments with multiple web applications that share common web components.
 
-CastleBlock is Web Hosting as a Service with a CLI and Apps/WebComponent Catalog for discovery of deployed applications, microfrontends, and web components.
+## Core Components
+
+CastleBlock consists of a command line interface, a service, and a UI dashboard. The CLI packages and uploads the web assets to the Service and the CastleBlock UI Dashboard displays all of the deployed Web Apps and Web Components in a catalog. CastleBlock leverages the manifest.json file for metadata about the Web Application / Web Component.
 
 ![diagram of castleblock high level concept](./castleblock-concept.png "Castleblock high-level concept")
 
 ## Features:
 
-- [Web Component delievery](./#sharing-web-components) to downstream web applications
 - [CLI](./castleblock-cli) for manual deployments or continuous delivery
+- [CastleBlock UI Dashboard](./castleblock-ui) for browsing deployed Apps and Web Components.
+- [Web Component delievery](./#sharing-web-components) to downstream web applications
 - Deployment versioning using [Semantic Versioning](https://semver.org/)
 - [Environmental Variable Injection](./castleblock-cli#environmental-variable-injection)
 - [Ad hoc deployments](./castleblock-cli#ad-hoc-deployments)
@@ -17,7 +20,6 @@ CastleBlock is Web Hosting as a Service with a CLI and Apps/WebComponent Catalog
 - [manifest.json](./castleblock-cli#manifest.json) files are used to display app information in the CastleBlock UI.
 - [OAuth](https://github.com/greymatter-io/castleblock/tree/master/castleblock-service#authentication) support for many oauth [providers](https://hapi.dev/module/bell/providers) for user authentication.
 - [JWT](https://github.com/greymatter-io/castleblock/tree/master/castleblock-service#issuing-jwt-tokens) for authorization.
-- [CastleBlock UI](./castleblock-ui) for browsing deployed Apps, Microfrontends, and SPAs
 - [Reverse Proxy](./castleblock-service#reverse-proxy) for microservices in your environment
 - [TLS Support](./castleblock-service#tls)
 
