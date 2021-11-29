@@ -30,10 +30,24 @@ Commands:
 
 Castleblock relies on your app's [manifest.json](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json) file to deploy your app.
 
+```json
+{
+  "[short_name](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/short_name)": "my-app",  # (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`
+  "[version](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/version)": "1.2.5", # (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`. The version must follow the [semver standard](https://semver.org/)
+  "[name](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/name)": "My Application", #Used in castleblock-ui app cards
+  "[description](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/description)": "A description of the application.", # Used in castleblock-ui
+  "webcomponent": false, # Set to "true" if the deployment is a web component
+  "[icons](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/icons)": [
+    { "src": "./my-app-icon.png" }
+  ]
+}
+```
+
 - [short_name](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/short_name) - (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`
 - [version](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/version) - (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`. The version must follow the [semver standard](https://semver.org/)
 - [name](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/name) - Used in castleblock-ui app cards
 - [description](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/description) - Used in castleblock-ui
+- webcomponent - Set to "true" if the deployment is a web component
 - [icons](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/icons)
 
 ## Deploying an app
