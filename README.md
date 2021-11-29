@@ -1,10 +1,8 @@
 <img src="./assets/brand/Logo.png" height="80px" />
 
-CastleBlock is a Web App platform to house all your web applications and shared web components in one place. CastleBlock is ideal for enterprise environments with multiple web applications that share common web components.
+CastleBlock is a Web App platform to host web applications and shared web components in one place. CastleBlock is ideal for enterprise environments with multiple web applications that share common web components.
 
-## Core Components
-
-CastleBlock consists of a command line interface, a service, and a UI dashboard. The CLI packages and uploads the web assets to the Service and the CastleBlock UI Dashboard displays all of the deployed Web Apps and Web Components in a catalog. CastleBlock leverages the manifest.json file for metadata about the Web Application / Web Component.
+CastleBlock consists of a command line interface, a service, and a UI dashboard. The CLI packages and uploads the web assets to the Service. The Service organizes the applications and web components and supports multiple hosted versions. The UI Dashboard displays all of the deployed Web Apps and Web Components in a catalog so share components can be discovered and reused by other app developers. CastleBlock leverages a manifest.json file for metadata about the Web Application / Web Component.
 
 ![diagram of castleblock high level concept](./castleblock-concept.png "Castleblock high-level concept")
 
