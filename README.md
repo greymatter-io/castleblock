@@ -10,7 +10,7 @@ CastleBlock consists of a [command line interface](./castleblock-cli), a [servic
 
 - [CLI](./castleblock-cli) for manual deployments or continuous delivery
 - [CastleBlock UI Dashboard](./castleblock-ui) for browsing deployed Apps and Web Components.
-- [Web Component delievery](./#sharing-web-components) to downstream web applications
+- [Web Component delivery](./#sharing-web-components) to downstream web applications
 - Deployment versioning using [Semantic Versioning](https://semver.org/)
 - [Environmental Variable Injection](./castleblock-cli#environmental-variable-injection)
 - [Ad hoc deployments](./castleblock-cli#ad-hoc-deployments)
