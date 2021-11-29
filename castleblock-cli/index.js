@@ -17,7 +17,7 @@ import overrideDefaults from "./overrideDefaults.js";
 const adhocVersion = "adhoc-" + Math.random().toString(36).slice(2);
 let adhocURL = "";
 //CLI commands and options
-const commands = ["deploy", "watch", "remove", "login", "version"];
+const commands = ["deploy", "watch", "remove", "login", "version", "list"];
 
 let options = cli.parse(
   overrideDefaults({
@@ -124,6 +124,35 @@ export async function init(argv) {
     case "version":
       cli.info("v" + require("./package.json").version);
       process.exit();
+    case "list":
+      function formatList(response, wc = false) {
+        response.data.map((app) => {
+          let out = `${chalk.bold.cyan(app.name)}${
+            wc ? chalk.green(" (wc)") : ""
+          }\n`;
+          out += `  ${options.url}/ui/${app.name}/latest\n`;
+          app.versions.map((v) => {
+            out += `  ${options.url}/ui/${app.name}/${v}\n`;
+          });
+          console.log(out);
+        });
+      }
+      axios
+        .get(`${options.url}/apps`)
+        .then((response) => {
+          formatList(response);
+        })
+        .catch((error) => {
+          cli.fatal(getError(error));
+        });
+      axios
+        .get(`${options.url}/webcomponents`)
+        .then((response) => {
+          formatList(response, true);
+        })
+        .catch((error) => {
+          cli.fatal(getError(error));
+        });
   }
 }
 
