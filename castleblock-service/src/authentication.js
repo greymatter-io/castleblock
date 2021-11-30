@@ -30,7 +30,13 @@ export default async function setupAuth(server) {
       },
       validate: false,
     });
-
+    server.route({
+      method: ["GET"],
+      path: `/login`,
+      handler: (req, h) => {
+        return h.redirect(`/token`).permanent();
+      },
+    });
     server.route({
       method: ["GET", "POST"], // Must handle both GET and POST
       path: "/token", // The callback endpoint registered with the provider

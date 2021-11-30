@@ -11,6 +11,12 @@ let packages = new Promise((resolve, reject) => {
     .get(`${window.location.origin}/apps`)
     .then((results) => resolve(results.data));
 });
+
+let webcomponents = new Promise((resolve, reject) => {
+  return axios
+    .get(`${window.location.origin}/webcomponents`)
+    .then((results) => resolve(results.data));
+});
 let hash = window.location.hash;
 onMount(() => {
   window.addEventListener(
@@ -38,6 +44,14 @@ onMount(() => {
   </div>
   <div class="navbar-end">
     <div class="navbar-item">
+      <a href="#">Apps</a>
+    </div>
+
+    <div class="navbar-item">
+      <a href="#web-components">Web Components</a>
+    </div>
+
+    <div class="navbar-item">
       <a href="https://github.com/greymatter-io/castleblock#readme">Docs</a>
     </div>
     <div class="navbar-item">
@@ -52,15 +66,27 @@ onMount(() => {
     </div>
   </div>
 </nav>
-<div class="container flex-wrap">
-  {#await packages}
-    <div>Loading</div>
-  {:then results}
-    {#each results as pack}
-      <Card pack="{pack}" />
-    {/each}
-  {/await}
-</div>
+{#if hash != "#web-components"}
+  <div class="container flex-wrap">
+    {#await packages}
+      <div>Loading</div>
+    {:then results}
+      {#each results as pack}
+        <Card pack="{pack}" />
+      {/each}
+    {/await}
+  </div>
+{:else}
+  <div class="container flex-wrap">
+    {#await webcomponents}
+      <div>Loading</div>
+    {:then results}
+      {#each results as pack}
+        <Card pack="{pack}" />
+      {/each}
+    {/await}
+  </div>
+{/if}
 
 <style>
 .flex-wrap {

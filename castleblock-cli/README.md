@@ -34,8 +34,22 @@ Castleblock relies on your app's [manifest.json](https://developer.mozilla.org/e
 - [version](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/version) - (required) Used in the url `<castleblock-service-url>/ui/<short_name>/<version>/`. The version must follow the [semver standard](https://semver.org/)
 - [name](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/name) - Used in castleblock-ui app cards
 - [description](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/description) - Used in castleblock-ui
+- webcomponent - Set to "true" if the deployment is a web component
 - [icons](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/icons)
 
+*Example:*
+```json
+{
+  "short_name": "my-app", 
+  "version": "1.2.5", 
+  "name": "My Application", 
+  "description": "A description of the application.",
+  "webcomponent": false,
+  "icons": [
+    { "src": "./my-app-icon.png" }
+  ]
+}
+```
 ## Deploying an app
 
 First make sure you have the [service](../castleblock-service) running. In this example the service is running at http://localhost:3000

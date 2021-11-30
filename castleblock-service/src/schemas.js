@@ -17,6 +17,7 @@ const manifest = Joi.object({
       src: Joi.string().required(),
     }).unknown(true)
   ),
+  webcomponent: Joi.boolean().default(false),
 }).unknown(true);
 
 export default { manifest };

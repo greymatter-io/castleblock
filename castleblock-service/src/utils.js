@@ -1,5 +1,6 @@
 "use strict";
 import fs from "fs";
+import Path from "path";
 import _ from "lodash";
 import semver from "semver";
 import semverGt from "semver/functions/gt.js";
@@ -10,6 +11,8 @@ import semverPatch from "semver/functions/patch.js";
 import semverInc from "semver/functions/inc.js";
 import crypto from "crypto";
 import tarStream from "tar-stream";
+
+import settings from "./settings.js";
 
 export function getDirectories(source) {
   if (!fs.existsSync(source)) {
@@ -107,7 +110,7 @@ export function readStream(stream) {
     });
   });
 }
-export async function getManifest(oldTarballStream) {
+export async function extractManifest(oldTarballStream) {
   let extract = tarStream.extract();
   let manifest;
   await new Promise((resolve, reject) => {
@@ -136,6 +139,18 @@ export async function getManifest(oldTarballStream) {
   });
   return manifest;
 }
+export function readManifest(appName) {
+  return JSON.parse(
+    fs.readFileSync(
+      Path.join(
+        `${settings.assetPath}`,
+        `${appName}`,
+        `${latestVersion(appName, settings.assetPath)}`,
+        "manifest.json"
+      )
+    )
+  );
+}
 export function injectBasePath(htmlString, relPath) {
   return `${htmlString}`.replace("<head>", `<head><base href="${relPath}" />`);
 }
@@ -148,6 +163,7 @@ export default {
   createPath,
   readStream,
   writeStream,
-  getManifest,
+  extractManifest,
+  readManifest,
   injectBasePath,
 };
