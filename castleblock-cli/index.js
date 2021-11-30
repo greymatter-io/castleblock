@@ -53,16 +53,21 @@ async function getRemote() {
   fs.rmSync("/tmp/castleblock", { recursive: true, force: true });
   if (options.remote.endsWith(".tar")) {
     cli.info(`Downloading ${options.remote}`);
-    await axios({
-      method: "get",
-      url: options.remote,
-      responseType: "stream",
-    }).then(function (response) {
-      response.data.pipe(
-        fs.createWriteStream("/tmp/castleblock-deployment.tar")
-      );
-      options.file = "/tmp/castleblock-deployment.tar";
-      options.remote = null;
+    await new Promise((resolve, reject) => {
+      axios({
+        method: "get",
+        url: options.remote,
+        responseType: "stream",
+      }).then(function (response) {
+        const file = fs.createWriteStream("/tmp/castleblock-deployment.tar");
+        response.data.pipe(file);
+        options.file = "/tmp/castleblock-deployment.tar";
+        options.remote = null;
+        file.on("finish", function () {
+          file.close();
+          resolve();
+        });
+      });
     });
   } else {
     cli.info(`Cloning ${options.remote}`);
