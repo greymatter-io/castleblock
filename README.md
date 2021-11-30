@@ -23,7 +23,6 @@ CastleBlock consists of a [CLI](./castleblock-cli), a [service](./castleblock-se
 
 ## Quick Start
 
-- Bundle your project
 - Run [castleblock-service](./castleblock-service) or use an existing instance
 - Deploy your project with [castleblock-cli](./castleblock-cli)
 
