@@ -246,7 +246,6 @@ async function deploy(adhoc) {
   cli.info(`Compressing ${chalk.cyan(options.dist)}`);
   let pack;
   if (options.remote) {
-    console.log("GETTING REMOTE");
     await getRemote();
   }
   if (!options.file) {
