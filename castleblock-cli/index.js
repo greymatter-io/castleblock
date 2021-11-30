@@ -11,6 +11,7 @@ import childProcess from "child_process";
 import { nanoid } from "nanoid";
 import slugify from "slugify";
 import Jwt from "@hapi/jwt";
+import clone from "git-clone/promise";
 
 import overrideDefaults from "./overrideDefaults.js";
 
@@ -43,9 +44,34 @@ let options = cli.parse(
       "JWT Secret Key for generating a token on the fly",
       "string",
     ],
+    remote: ["r", "Deploy a remote git repo or tarball", "string"],
   }),
   commands
 );
+
+async function getRemote() {
+  fs.rmSync("/tmp/castleblock", { recursive: true, force: true });
+  if (options.remote.endsWith(".tar")) {
+    cli.info(`Downloading ${options.remote}`);
+    await axios({
+      method: "get",
+      url: options.remote,
+      responseType: "stream",
+    }).then(function (response) {
+      response.data.pipe(
+        fs.createWriteStream("/tmp/castleblock-deployment.tar")
+      );
+      options.file = "/tmp/castleblock-deployment.tar";
+      options.remote = null;
+    });
+  } else {
+    cli.info(`Cloning ${options.remote}`);
+    await clone(options.remote, "/tmp/castleblock");
+    process.chdir("/tmp/castleblock");
+    cli.info(`Installing npm packages`);
+    await execWithPromise("npm i");
+  }
+}
 
 const args = cli.args;
 
@@ -159,7 +185,7 @@ export async function init(argv) {
 const execWithPromise = async (command) => {
   return new Promise(async (resolve, reject) => {
     try {
-      resolve(childProcess.execSync(command));
+      resolve(childProcess.execSync(command, { cwd: process.cwd() }));
     } catch (error) {
       reject(error);
     }
@@ -214,6 +240,10 @@ function appendToken(headers) {
 async function deploy(adhoc) {
   cli.info(`Compressing ${chalk.cyan(options.dist)}`);
   let pack;
+  if (options.remote) {
+    console.log("GETTING REMOTE");
+    await getRemote();
+  }
   if (!options.file) {
     cli.info(`Building Project: ${options.build}`);
     await execWithPromise(options.build);
@@ -230,10 +260,10 @@ async function deploy(adhoc) {
   var form = new FormData();
 
   if (options.file) {
-    form.append("tarball", fs.createReadStream(`./${options.file}`));
+    form.append("tarball", fs.createReadStream(options.file));
     cli.info(
       `${chalk.bold("SHA512:")}\n      ${chalk.cyan(
-        await hash(fs.createReadStream(`./${options.file}`))
+        await hash(fs.createReadStream(`${options.file}`))
       )}`
     );
   } else {
@@ -263,6 +293,9 @@ async function deploy(adhoc) {
       cli.info(`URL: ${response.data.url}`);
     })
     .catch((error) => {
+      if (getError(error) == "Token maximum age exceeded") {
+        cli.info(`Get a new token: ${options.url}/login`);
+      }
       cli.fatal(getError(error));
     });
 }
