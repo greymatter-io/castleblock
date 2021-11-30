@@ -1,6 +1,6 @@
 {
   "name": "castleblock",
-  "version": "2.4.1",
+  "version": "2.5.0",
   "description": "CLI Program for the CastleBlock service.",
   "license": "MIT",
   "homepage": "https://github.com/greymatter-io/castleblock/tree/master/castleblock-cli",
@@ -28,6 +28,7 @@
     "cli": "^1.0.1",
     "esm": "^3.2.25",
     "form-data": "^3.0.1",
+    "git-clone": "^0.2.0",
     "nanoid": "^3.1.25",
     "slugify": "^1.6.0",
     "tar-fs": "^2.1.1"

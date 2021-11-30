@@ -20,6 +20,7 @@ Options:
   -p, --pack BOOL        Save deployment package to disk
   -t, --token STRING     Authorization Token
   -j, --jwtSecret STRING JWT Secret Key for generating a token on the fly
+  -r, --remote STRING    Deploy a remote git repo or tarball
   -h, --help             Display help and usage details
 
 Commands:
