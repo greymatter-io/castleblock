@@ -23,7 +23,7 @@ Options:
   -h, --help             Display help and usage details
 
 Commands:
-  deploy, login, remove, version, watch
+  deploy, list, login, remove, version, watch
 ```
 
 ## Manifest.json
@@ -37,19 +37,19 @@ Castleblock relies on your app's [manifest.json](https://developer.mozilla.org/e
 - webcomponent - Set to "true" if the deployment is a web component
 - [icons](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/icons)
 
-*Example:*
+_Example:_
+
 ```json
 {
-  "short_name": "my-app", 
-  "version": "1.2.5", 
-  "name": "My Application", 
+  "short_name": "my-app",
+  "version": "1.2.5",
+  "name": "My Application",
   "description": "A description of the application.",
   "webcomponent": false,
-  "icons": [
-    { "src": "./my-app-icon.png" }
-  ]
+  "icons": [{ "src": "./my-app-icon.png" }]
 }
 ```
+
 ## Deploying an app
 
 First make sure you have the [service](../castleblock-service) running. In this example the service is running at http://localhost:3000
