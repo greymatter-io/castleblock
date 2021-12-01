@@ -82,10 +82,6 @@ Just include the bundled web component in the index.html file of your web applic
 </html>
 ```
 
-## Development Environment
-
-Spin up the [nix](https://nixos.org/guides/install-nix.html) shell by running `nix-shell` in the root of the project.
-
 ## Contribute
 
 Check out the backlog of [planned features](https://github.com/greymatter-io/castleblock/issues?q=is%3Aopen+is%3Aissue+label%3Aenhancement), PRs are welcome.
