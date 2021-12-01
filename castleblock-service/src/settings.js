@@ -1,5 +1,4 @@
 import chalk from "chalk";
-import Joi from "joi";
 import fs from "fs";
 import _ from "lodash";
 import cli from "cli";

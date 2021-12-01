@@ -1,6 +1,5 @@
 "use strict";
 import Hapi from "@hapi/hapi";
-import fs from "fs";
 
 import setupPlugins from "./plugins.js";
 import settings from "./settings.js";
