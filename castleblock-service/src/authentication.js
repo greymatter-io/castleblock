@@ -50,7 +50,7 @@ export default async function setupAuth(server) {
               strategy: "main",
             }
           : null,
-        handler: function (request, h) {
+        handler: function (request) {
           if (request.auth.strategy && !request.auth.isAuthenticated) {
             return `Authentication failed due to: ${request.auth.error.message}`;
           }
@@ -80,7 +80,6 @@ export default async function setupAuth(server) {
           } else {
             return "Not issuing tokens at this time. Ask your administrator for a castleblock token.";
           }
-          return h.redirect("/");
         },
       },
     });

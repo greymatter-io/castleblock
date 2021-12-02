@@ -3,12 +3,10 @@ import fs from "fs";
 import Path from "path";
 import _ from "lodash";
 import semver from "semver";
-import semverGt from "semver/functions/gt.js";
 import semverSort from "semver/functions/sort.js";
 import semverMajor from "semver/functions/major.js";
 import semverMinor from "semver/functions/minor.js";
 import semverPatch from "semver/functions/patch.js";
-import semverInc from "semver/functions/inc.js";
 import crypto from "crypto";
 import tarStream from "tar-stream";
 
@@ -69,7 +67,7 @@ export function nextVersion(version, action) {
 }
 
 export function hash(stream) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const hasher = crypto.createHash("sha512");
     hasher.setEncoding("hex");
     stream.pipe(hasher).on("finish", function () {
@@ -86,7 +84,7 @@ export function createPath(p, clearExisting) {
   return p;
 }
 export async function writeStream(stream, filePath) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const s = stream.pipe(fs.createWriteStream(filePath));
     s.on("finish", function () {
       console.debug("finished writing", filePath);

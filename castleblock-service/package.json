@@ -11,7 +11,8 @@
     "jwtSecret": "node -e \"console.log(require('crypto').randomBytes(256).toString('base64'));\"",
     "genDocs": "babel-node genDocs.js",
     "genSelfSignedCerts": "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost' -nodes",
-    "genHelmChart": "kompose convert -c -f docker-compose.yml; mv docker-compose helm-chart"
+    "genHelmChart": "kompose convert -c -f docker-compose.yml; mv docker-compose helm-chart",
+    "lint": "eslint src/"
   },
   "nodemonConfig": {
     "ignore": [
@@ -54,6 +55,7 @@
     "@babel/core": "^7.15.0",
     "@babel/node": "^7.14.9",
     "@babel/preset-env": "^7.15.0",
+    "eslint": "^8.3.0",
     "nodemon": "^2.0.12"
   }
 }

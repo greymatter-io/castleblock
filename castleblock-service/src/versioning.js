@@ -1,12 +1,10 @@
 import fs from "fs";
 import _ from "lodash";
 import semver from "semver";
-import semverGt from "semver/functions/gt";
 import semverSort from "semver/functions/sort";
 import semverMajor from "semver/functions/major";
 import semverMinor from "semver/functions/minor";
 import semverPatch from "semver/functions/patch";
-import semverInc from "semver/functions/inc";
 
 export function getDirectories(source) {
   if (!fs.existsSync(source)) {

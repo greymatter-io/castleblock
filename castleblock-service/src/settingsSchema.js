@@ -10,7 +10,7 @@ const settingsSchema = Joi.object({
   port: Joi.number().port().default(3000),
   tls: Joi.object({
     key: Joi.any()
-      .custom((value, helper) => {
+      .custom((value) => {
         if (!fs.existsSync(value)) {
           throw new Error(`Key file does not exists: ${value}`);
         } else {
@@ -19,7 +19,7 @@ const settingsSchema = Joi.object({
       }, "TLS Key Validation")
       .required(),
     cert: Joi.string()
-      .custom((value, helper) => {
+      .custom((value) => {
         if (!fs.existsSync(value)) {
           throw new Error(`Cert file does not exists: ${value}`);
         } else {

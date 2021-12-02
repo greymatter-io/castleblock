@@ -1,17 +1,12 @@
 import ReadableStreamClone from "readable-stream-clone";
 import fs from "fs";
-import Hapi from "@hapi/hapi";
-import crypto from "crypto";
 import tarFS from "tar-fs";
-import H2o2 from "@hapi/h2o2";
 import Boom from "@hapi/boom";
 import Joi from "joi";
 import Path from "path";
 import slugify from "slugify";
-import semver from "semver";
 
 import utils from "./utils.js";
-import setupPlugins from "./plugins.js";
 import settings from "./settings.js";
 import schemas from "./schemas.js";
 
@@ -27,7 +22,7 @@ export default [
       tags: ["api"],
     },
 
-    handler: (request, h) => {
+    handler: () => {
       console.debug(
         Path.join(
           `${settings.assetPath}/${settings.homepage}/${utils.latestVersion(
@@ -84,7 +79,7 @@ export default [
         strategy: "jwt",
       },
     },
-    handler: async (req, h) => {
+    handler: async (req) => {
       const stream1 = new ReadableStreamClone(req.payload.tarball);
       const stream2 = new ReadableStreamClone(req.payload.tarball);
       const stream3 = new ReadableStreamClone(req.payload.tarball);

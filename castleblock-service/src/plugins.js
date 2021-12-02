@@ -3,7 +3,6 @@ import Vision from "@hapi/vision";
 import Wreck from "@hapi/wreck";
 import Inert from "@hapi/inert";
 import H2o2 from "@hapi/h2o2";
-import Basic from "@hapi/basic";
 import susie from "susie";
 import HapiSwagger from "hapi-swagger";
 import Status from "hapijs-status-monitor";
@@ -67,7 +66,7 @@ export default async function setupPlugins(server) {
               };
             },
 
-            onResponse: async function (err, res, request, h, settings, ttl) {
+            onResponse: async function (err, res, request) {
               console.debug("path", request.path);
               if (
                 request.path === `/services/${route.name}/${route.version}/`
