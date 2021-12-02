@@ -4,6 +4,8 @@ CastleBlock is a platform to host web applications and [web components](https://
 
 CastleBlock consists of a [CLI](./castleblock-cli), a [service](./castleblock-service), and a [dashboard](./castleblock-ui). The CLI packages and uploads the web assets to the service. The service organizes the web assets and supports multiple hosted versions. The dashboard displays all of the deployed web assets in a catalog so components can be discovered and reused by other application developers.
 
+With the `castleblock watch` command developers can do development work in the cloud. CastleBlock enables hot-reloading and deployments to staging and production environments in real-time. Gone are the days of running microservice dependencies locally or setting up a reverse proxy to microservices.
+
 ![diagram of castleblock high level concept](./castleblock-concept.png "Castleblock high-level concept")
 
 ## Features
@@ -23,7 +25,6 @@ CastleBlock consists of a [CLI](./castleblock-cli), a [service](./castleblock-se
 
 ## Quick Start
 
-- Bundle your project
 - Run [castleblock-service](./castleblock-service) or use an existing instance
 - Deploy your project with [castleblock-cli](./castleblock-cli)
 
@@ -73,17 +74,13 @@ Just include the bundled web component in the index.html file of your web applic
 <html>
   <head>
     <title>Web App A</title>
-    <script src="./ui/simple-clock/latest/simple-clock.js"></script>
+    <script src="/ui/simple-clock/latest/simple-clock.js"></script>
   </head>
   <body>
     <simple-clock></simple-clock>
   </body>
 </html>
 ```
-
-## Development Environment
-
-Spin up the [nix](https://nixos.org/guides/install-nix.html) shell by running `nix-shell` in the root of the project.
 
 ## Contribute
 
