@@ -1,10 +1,6 @@
-<img src="./assets/brand/Logo.png" height="80px" />
-
-
 <img src="https://github.com/greymatter-io/castleblock/actions/workflows/lint.yml/badge.svg" style="display: inline-block;" /> <img src="https://github.com/greymatter-io/castleblock/actions/workflows/publish-packages.yml/badge.svg" style="display: inline-block;" />
 
-
-
+<img src="./assets/brand/Logo.png" height="80px" />
 
 CastleBlock is a platform to host web applications and [web components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) in one place. It's ideal for enterprise environments with multiple web applications that share common web components (with multiple versions).
 
