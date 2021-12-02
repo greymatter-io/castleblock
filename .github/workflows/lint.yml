@@ -34,7 +34,7 @@ jobs:
           cd castleblock-service
           ls
           echo "running eslint"
-          npx eslint src /
+          npm run lint
       - name: Lint service
         run: |
           echo Add other actions to build,
