@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: CI
+name: Linting
 
 # Controls when the workflow will run
 on:
@@ -31,9 +31,8 @@ jobs:
         run: |
           cd castleblock-service
           ls
-          npm ci
-          npm run lint
-          echo "running lint"
+          echo "running eslint"
+          npx eslint src /
       - name: Lint service
         run: |
           echo Add other actions to build,
