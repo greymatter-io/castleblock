@@ -29,13 +29,18 @@ jobs:
           node-version: "14"
 
       # Runs a set of commands using the runners shell
-      - name: Lint service
+      - name: Service Lint
         run: |
           cd castleblock-service
           npm ci
           npm run lint
-      - name: Lint CLI
+      - name: CLI Lint
         run: |
           cd castleblock-cli
+          npm ci
+          npm run lint
+      - name: UI Dashboard Lint
+        run: |
+          cd castleblock-ui
           npm ci
           npm run lint

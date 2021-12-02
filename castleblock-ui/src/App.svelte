@@ -44,7 +44,7 @@ onMount(() => {
   </div>
   <div class="navbar-end">
     <div class="navbar-item">
-      <a href="#">Apps</a>
+      <a href="./#">Apps</a>
     </div>
 
     <div class="navbar-item">
