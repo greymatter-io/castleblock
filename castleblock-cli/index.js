@@ -8,10 +8,9 @@ import axios from "axios";
 import FormData from "form-data";
 import chokidar from "chokidar";
 import childProcess from "child_process";
-import { nanoid } from "nanoid";
-import slugify from "slugify";
 import Jwt from "@hapi/jwt";
 import clone from "git-clone/promise";
+import os from "os";
 
 import overrideDefaults from "./overrideDefaults.js";
 
@@ -53,7 +52,7 @@ async function getRemote() {
   fs.rmSync("/tmp/castleblock", { recursive: true, force: true });
   if (options.remote.endsWith(".tar")) {
     cli.info(`Downloading ${options.remote}`);
-    await new Promise((resolve, reject) => {
+    await new Promise((resolve) => {
       axios({
         method: "get",
         url: options.remote,
@@ -108,7 +107,7 @@ function getError(error) {
 }
 
 //This script is run in /bin/castleblock
-export async function init(argv) {
+export async function init() {
   //Check for valid command
   if (!commands.includes(cli.command)) {
     cli.fatal(`${cli.command} is an unknown command`);
@@ -125,7 +124,18 @@ export async function init(argv) {
       options.jwtSecret
     );
   }
-
+  function formatList(response, wc = false) {
+    response.data.map((app) => {
+      let out = `${chalk.bold.cyan(app.name)}${
+        wc ? chalk.green(" (wc)") : ""
+      }\n`;
+      out += `  ${options.url}/ui/${app.name}/latest\n`;
+      app.versions.map((v) => {
+        out += `  ${options.url}/ui/${app.name}/${v}\n`;
+      });
+      console.log(out);
+    });
+  }
   switch (cli.command) {
     case "deploy":
       console.log(options);
@@ -139,11 +149,8 @@ export async function init(argv) {
       if (!args[0]) cli.fatal("Missing app URL\ncastleblock remove [URL]");
       await remove(args[0]);
       break;
-    case "login":
-      const tokensPath = Path.join(
-        require("os").homedir(),
-        ".castleblock.json"
-      );
+    case "login": {
+      const tokensPath = Path.join(os.homedir(), ".castleblock.json");
       let tokens = {};
       if (fs.existsSync(tokensPath)) {
         //get existing file
@@ -152,22 +159,14 @@ export async function init(argv) {
       tokens[options.url] = options.token;
       fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2));
       cli.info("Logged in");
-    case "version":
+      break;
+    }
+    case "version": {
       cli.info("v" + require("./package.json").version);
       process.exit();
-    case "list":
-      function formatList(response, wc = false) {
-        response.data.map((app) => {
-          let out = `${chalk.bold.cyan(app.name)}${
-            wc ? chalk.green(" (wc)") : ""
-          }\n`;
-          out += `  ${options.url}/ui/${app.name}/latest\n`;
-          app.versions.map((v) => {
-            out += `  ${options.url}/ui/${app.name}/${v}\n`;
-          });
-          console.log(out);
-        });
-      }
+      break;
+    }
+    case "list": {
       axios
         .get(`${options.url}/apps`)
         .then((response) => {
@@ -184,11 +183,12 @@ export async function init(argv) {
         .catch((error) => {
           cli.fatal(getError(error));
         });
+    }
   }
 }
 
 const execWithPromise = async (command) => {
-  return new Promise(async (resolve, reject) => {
+  return new Promise((resolve, reject) => {
     try {
       resolve(childProcess.execSync(command, { cwd: process.cwd() }));
     } catch (error) {
@@ -197,7 +197,7 @@ const execWithPromise = async (command) => {
   });
 };
 function hash(stream) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const hasher = crypto.createHash("sha512");
     hasher.setEncoding("hex");
     stream.pipe(hasher).on("finish", function () {
@@ -227,7 +227,7 @@ function appendToken(headers) {
     };
   } else {
     // See if there are any saved tokens
-    const tokensPath = Path.join(require("os").homedir(), ".castleblock.json");
+    const tokensPath = Path.join(os.homedir(), ".castleblock.json");
     if (fs.existsSync(tokensPath)) {
       //get existing file
       const tokens = JSON.parse(fs.readFileSync(tokensPath));
