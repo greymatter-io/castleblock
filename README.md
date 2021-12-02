@@ -1,5 +1,11 @@
 <img src="./assets/brand/Logo.png" height="80px" />
 
+
+<img src="https://github.com/greymatter-io/castleblock/actions/workflows/lint.yml/badge.svg" style="display: inline-block;" /> <img src="https://github.com/greymatter-io/castleblock/actions/workflows/publish-packages.yml/badge.svg" style="display: inline-block;" />
+
+
+
+
 CastleBlock is a platform to host web applications and [web components](https://developer.mozilla.org/en-US/docs/Web/Web_Components) in one place. It's ideal for enterprise environments with multiple web applications that share common web components (with multiple versions).
 
 CastleBlock consists of a [CLI](./castleblock-cli), a [service](./castleblock-service), and a [dashboard](./castleblock-ui). The CLI packages and uploads the web assets to the service. The service organizes the web assets and supports multiple hosted versions. The dashboard displays all of the deployed web assets in a catalog so components can be discovered and reused by other application developers.
