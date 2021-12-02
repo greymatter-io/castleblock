@@ -32,8 +32,7 @@ jobs:
       - name: Lint service
         run: |
           cd castleblock-service
-          ls
-          echo "running eslint"
+          npm ci
           npm run lint
       - name: Lint service
         run: |
