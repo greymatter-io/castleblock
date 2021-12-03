@@ -34,3 +34,11 @@ jobs:
           cd castleblock-service
           npm ci
           npm run coverage
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate coverage badge
+        uses: tj-actions/coverage-badge-js@v1.3
+        with:
+          path: ./castleblock-service
+          output_path: ./coverage/service-coverage.svg
+          report_path: ./coverage/service-coverage-summary.json
