@@ -1,5 +1,6 @@
 import Joi from "joi";
 import fs from "fs";
+import crypto from "crypto";
 
 const settingsSchema = Joi.object({
   debug: Joi.boolean()
@@ -48,14 +49,14 @@ const settingsSchema = Joi.object({
   jwt: Joi.object({
     secret: Joi.string()
       .description("HS256 or HS512 Secret Key. Default is randomly generated.")
-      .default(require("crypto").randomBytes(256).toString("base64")),
+      .default(crypto.randomBytes(256).toString("base64")),
     maxAgeSec: Joi.number().integer().min(0).default(14400), // 4 hours
     timeSkewSec: Joi.number().integer().default(15),
   }).default(),
   oauth: Joi.object({
     provider: Joi.string().required(),
     password: Joi.string()
-      .default(require("crypto").randomBytes(30).toString("base64"))
+      .default(crypto.randomBytes(30).toString("base64"))
       .description(
         "The cookie encryption password. Used to encrypt the temporary state cookie used by the module in between the authorization protocol steps."
       ),
