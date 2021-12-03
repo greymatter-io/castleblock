@@ -34,7 +34,6 @@ jobs:
           cd castleblock-service
           npm ci
           npm run coverage
-    steps:
       - name: Generate coverage badge
         uses: tj-actions/coverage-badge-js@v1.3
         with:
