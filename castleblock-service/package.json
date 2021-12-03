@@ -13,8 +13,8 @@
     "genSelfSignedCerts": "openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -subj '/CN=localhost' -nodes",
     "genHelmChart": "kompose convert -c -f docker-compose.yml; mv docker-compose helm-chart",
     "lint": "eslint src/",
-    "test": "mocha src/**/*.test.js --",
-    "coverage": "nyc npm run test"
+    "test": "mocha src/**/*.test.js -c test-settings.json --",
+    "coverage": "nyc npm run test --"
   },
   "nodemonConfig": {
     "ignore": [
@@ -56,7 +56,8 @@
   "devDependencies": {
     "@babel/core": "^7.15.0",
     "@babel/node": "^7.14.9",
-    "@babel/preset-env": "^7.15.0",
+    "@babel/polyfill": "^7.12.1",
+    "@babel/preset-env": "^7.16.4",
     "assert": "^2.0.0",
     "eslint": "^8.3.0",
     "mocha": "^9.1.3",
