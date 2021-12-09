@@ -21,6 +21,19 @@ function createApiRoutes(apiPath) {
   functions.map((func) => {
     // Create a route for this function
     console.log("func", func);
+    routes.push({
+      method: "GET",
+      path: `/api/${func}`,
+      handler: async (request, h) => {
+        // const funcPath = Path.join(apiPath, func);
+        // const funcModule = require(funcPath);
+        // const func = funcModule.default || funcModule;
+        // console.log("func", func);
+        // const result = await func(request, h);
+        const result = "HELLO WORLD";
+        return result;
+      },
+    });
   });
 }
 
@@ -45,9 +58,7 @@ function loadDynamicRoutes() {
   });
 }
 
-loadDynamicRoutes();
-
-export default [
+const routes = [
   {
     method: "GET",
     path: "/",
@@ -394,3 +405,7 @@ export default [
     },
   },
 ];
+
+loadDynamicRoutes();
+
+export default routes;
