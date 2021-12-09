@@ -12,6 +12,19 @@ import schemas from "./schemas.js";
 
 import adhoc from "./adhoc.js";
 
+function loadDynamicRoutes() {
+  utils.getDirectories(settings.assetPath).map((app) => {
+    console.log("a", app);
+    utils.getDirectories(Path.join(settings.assetPath, app)).map((version) => {
+      console.log("v", version);
+      if (fs.existsSync(Path.join(app, version, "api"))) {
+        console.log("api exists");
+      }
+    });
+  });
+}
+
+loadDynamicRoutes();
 export default [
   {
     method: "GET",
