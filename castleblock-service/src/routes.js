@@ -71,7 +71,6 @@ export default [
       validate: {
         payload: Joi.object({
           tarball: Joi.any().meta({ swaggerType: "file" }).required(),
-          api: Joi.any().meta({ swaggerType: "file" }),
           adhoc: Joi.string().optional(),
           env: Joi.any().optional().meta({ swaggerType: "file" }),
         }).label("Deployment"),
@@ -165,23 +164,14 @@ export default [
       console.debug(info);
 
       if (req.payload.adhoc) {
-        console.log("inject hot reloading!");
         // Inject hot-reloading client and refresh any connected clients for this app..
         adhoc.updateClients(appPath);
         try {
           const path = Path.join(destination, "index.html");
-          console.log("path", path);
-
-          console.log("checking for files in", destination);
-
-          const files = fs.readdirSync(destination);
-          console.log("files", files);
-
           adhoc.injectHotReloadClient(path);
-          console.log("successfully injected");
         } catch (e) {
           console.log(
-            "something went wrong with the hot reloading injection",
+            "Something went wrong with the hot reloading injection",
             e
           );
         }
