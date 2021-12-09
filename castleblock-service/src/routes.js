@@ -5,6 +5,7 @@ import Boom from "@hapi/boom";
 import Joi from "joi";
 import Path from "path";
 import slugify from "slugify";
+import glob from "fast-glob";
 
 import utils from "./utils.js";
 import settings from "./settings.js";
@@ -12,19 +13,40 @@ import schemas from "./schemas.js";
 
 import adhoc from "./adhoc.js";
 
+function createApiRoutes(apiPath) {
+  console.log("creating api routes", apiPath);
+  const functions = glob.sync("**/*.js", { cwd: apiPath });
+  console.log("functions", functions);
+
+  functions.map((func) => {
+    // Create a route for this function
+    console.log("func", func);
+  });
+}
+
 function loadDynamicRoutes() {
   utils.getDirectories(settings.assetPath).map((app) => {
     console.log("a", app);
     utils.getDirectories(Path.join(settings.assetPath, app)).map((version) => {
       console.log("v", version);
-      if (fs.existsSync(Path.join(app, version, "api"))) {
-        console.log("api exists");
+      const appPath = Path.join(settings.assetPath, app, version);
+      const apiPath = Path.join(appPath, "api");
+      console.log("appPath", appPath);
+      console.log("apiPath", apiPath);
+      if (fs.existsSync(appPath)) {
+        const files = fs.readdirSync(appPath);
+        console.log("files", files);
+      }
+      if (fs.existsSync(apiPath)) {
+        console.log("api exists", apiPath);
+        createApiRoutes(apiPath);
       }
     });
   });
 }
 
 loadDynamicRoutes();
+
 export default [
   {
     method: "GET",
@@ -126,19 +148,10 @@ export default [
       utils.createPath(destination, true);
 
       // Extract tarball
-      console.debug("Starting Extraction...");
       await new Promise((resolve, reject) => {
         stream2
           .pipe(tarFS.extract(destination))
-          .on("data", (data) => {
-            console.log("data", data);
-          })
-          .on("finish", () => {
-            console.log("extraction has ACTUALLY ended");
-            const files = fs.readdirSync(destination);
-            console.log("files", files);
-            resolve();
-          })
+          .on("finish", resolve)
           .on("error", reject);
       });
 

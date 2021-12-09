@@ -1,0 +1,17 @@
+{
+  "debug": true,
+  "protocol": "http",
+  "host": "localhost",
+  "port": 3000,
+  "statusMonitorEnable": true,
+  "swaggerDocsEnable": true,
+  "assetPath": "./assets",
+  "homepage": "castleblock-ui",
+  "basePath": "ui",
+  "jwt": {
+    "secret": "Em5NfVhFhakjPC3Q+mjL+kwoVUoy2JpPHOMaI0IzQYzjfQYIBFt9dXA8v5EsM0NGlIhXxgrWCiAuSgPtSdQ2/75KX3yhNSxviTr9OqC6x8VpYdRPioqj3X1sF1tur/UYPmBtY2fW+SgZu8z0rhHcuorBza/MQ2gUbfBnxuvMwh8gNGrpnSRRCIPtu+g5l3Cm5+VE3R6UlUnqe7lHnB4z25uSKACIc+xDHh7kM7n/PyJw6x4yJxxxKHw5E1VPILwQlPpi82u3Xlv1Y2isVqaCMa1zOVly3Y3Orhvbw1ZyKeRYjVp9VXVS7ohbM2TSFvveSA5PBfW7aIp579OV6vWJ4w==",
+    "maxAgeSec": 14400,
+    "timeSkewSec": 15
+  },
+  "initialAdmins": []
+}
