@@ -288,6 +288,8 @@ async function deploy(adhoc) {
   let headers = form.getHeaders();
   headers = appendToken(headers);
 
+  cli.info(`headers`, headers);
+
   axios
     .post(`${options.url}/deployment`, form, {
       headers: headers,
@@ -297,6 +299,7 @@ async function deploy(adhoc) {
       cli.info(`URL: ${response.data.url}`);
     })
     .catch((error) => {
+      console.log("error", error);
       if (getError(error) == "Token maximum age exceeded") {
         cli.info(`Get a new token: ${options.url}/login`);
       }
@@ -321,6 +324,10 @@ function watch() {
     }"\n      Build Command: "${options.build}"`
   );
 
+  console.log("options.src", options.src);
+  const files = fs.readdirSync(options.src);
+  console.log("watched files", files);
+
   chokidar
     .watch(options.src, {
       ignoreInitial: true,
@@ -334,6 +341,7 @@ function watch() {
       await deploy(adhocVersion);
       cli.info(event, path);
     });
+
   process.on("SIGINT", async function () {
     cli.info("Caught interrupt signal, stopping now.");
     await remove(adhocURL);

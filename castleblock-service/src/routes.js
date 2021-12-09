@@ -71,6 +71,7 @@ export default [
       validate: {
         payload: Joi.object({
           tarball: Joi.any().meta({ swaggerType: "file" }).required(),
+          api: Joi.any().meta({ swaggerType: "file" }),
           adhoc: Joi.string().optional(),
           env: Joi.any().optional().meta({ swaggerType: "file" }),
         }).label("Deployment"),
@@ -80,9 +81,10 @@ export default [
       },
     },
     handler: async (req) => {
-      const stream1 = new ReadableStreamClone(req.payload.tarball);
-      const stream2 = new ReadableStreamClone(req.payload.tarball);
-      const stream3 = new ReadableStreamClone(req.payload.tarball);
+      const tarball = req.payload.tarball;
+      const stream1 = new ReadableStreamClone(tarball);
+      const stream2 = new ReadableStreamClone(tarball);
+      const stream3 = new ReadableStreamClone(tarball);
 
       //Fetch manifest from package
       let manifest;
@@ -105,13 +107,28 @@ export default [
         req.payload.adhoc ? req.payload.adhoc : manifest.version
       );
 
+      console.log("appPath", appPath);
+
       //Create directory for deployment
       const destination = Path.join(`${settings.assetPath}`, appPath);
       utils.createPath(destination, true);
 
       // Extract tarball
-      console.debug("Starting Extraction");
-      stream2.pipe(tarFS.extract(destination));
+      console.debug("Starting Extraction...");
+      await new Promise((resolve, reject) => {
+        stream2
+          .pipe(tarFS.extract(destination))
+          .on("data", (data) => {
+            console.log("data", data);
+          })
+          .on("finish", () => {
+            console.log("extraction has ACTUALLY ended");
+            const files = fs.readdirSync(destination);
+            console.log("files", files);
+            resolve();
+          })
+          .on("error", reject);
+      });
 
       //Save original tar file to disk for archive
       utils.writeStream(
@@ -148,9 +165,26 @@ export default [
       console.debug(info);
 
       if (req.payload.adhoc) {
+        console.log("inject hot reloading!");
         // Inject hot-reloading client and refresh any connected clients for this app..
         adhoc.updateClients(appPath);
-        adhoc.injectHotReloadClient(Path.join(destination, "index.html"));
+        try {
+          const path = Path.join(destination, "index.html");
+          console.log("path", path);
+
+          console.log("checking for files in", destination);
+
+          const files = fs.readdirSync(destination);
+          console.log("files", files);
+
+          adhoc.injectHotReloadClient(path);
+          console.log("successfully injected");
+        } catch (e) {
+          console.log(
+            "something went wrong with the hot reloading injection",
+            e
+          );
+        }
       }
 
       return {
