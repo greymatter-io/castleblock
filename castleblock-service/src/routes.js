@@ -6,6 +6,7 @@ import Joi from "joi";
 import Path from "path";
 import slugify from "slugify";
 import glob from "fast-glob";
+import child_process from "child_process";
 
 import utils from "./utils.js";
 import settings from "./settings.js";
@@ -417,11 +418,25 @@ const routes = [
       const appPath = Path.join(settings.assetPath, appName, version);
       const apiPath = Path.join(appPath, "api");
 
+      const funcPath = Path.join(apiPath, end) + ".js";
+      const fileExists = fs.existsSync(funcPath);
       console.log("apiPath", apiPath);
-      const fileExists = fs.existsSync(Path.join(apiPath, end) + ".js");
+      console.log("funcPath", funcPath);
       console.log("fileExists", fileExists);
 
       // Run the file, gotta pass in the request and get back the result
+      // node -e 'require("./db").init()'
+      //`npx babel-node -e 'const func = require("${funcPath}"); func.default(${request});`,
+      child_process.execSync(
+        `npx babel-node -e 'import func from "./${funcPath}"; func();'`,
+        (err, stdout, stderr) => {
+          if (err) {
+            console.error("e", err);
+            return;
+          }
+          console.log("stdout", stdout);
+        }
+      );
 
       return {
         statusCode: 200,
