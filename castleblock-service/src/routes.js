@@ -20,10 +20,14 @@ function createApiRoutes(apiPath) {
 
   functions.map((func) => {
     // Create a route for this function
+    // need to strip off file extension
     console.log("func", func);
+    const endpoint = func.split(".")[0];
+    console.log("endpoint", endpoint);
+
     routes.push({
       method: "GET",
-      path: `/api/${func}`,
+      path: `/dynamicapi/${endpoint}`,
       handler: async (request, h) => {
         // const funcPath = Path.join(apiPath, func);
         // const funcModule = require(funcPath);
@@ -404,8 +408,30 @@ const routes = [
       tags: ["api"],
     },
   },
+  {
+    method: "GET",
+    path: `/${settings.basePath}/{appName}/{version}/api/{end*}`,
+    handler: (request, h) => {
+      const { appName, version, end } = request.params;
+      console.log("lets dynamically handle an api request", end);
+      const appPath = Path.join(settings.assetPath, appName, version);
+      const apiPath = Path.join(appPath, "api");
+
+      console.log("apiPath", apiPath);
+      const fileExists = fs.existsSync(Path.join(apiPath, end) + ".js");
+      console.log("fileExists", fileExists);
+
+      // Run the file, gotta pass in the request and get back the result
+
+      return {
+        statusCode: 200,
+        status: "OK",
+        message: `${request.params.end}`,
+      };
+    },
+  },
 ];
 
-loadDynamicRoutes();
+// loadDynamicRoutes();
 
 export default routes;
