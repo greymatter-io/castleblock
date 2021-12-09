@@ -34,7 +34,10 @@ const settingsSchema = Joi.object({
     .description("Enables status monitor page at /status"),
   swaggerDocsEnable: Joi.boolean()
     .default(true)
-    .description("Enables swagger API documentation page at /documentation"),
+    .description("Enables swagger API documentation page at /api"),
+  serviceBaseURLPath: Joi.string()
+    .default("/")
+    .description("The base URL path for the deployed CastleBlock service. Required if behind a reverse proxy."),
   assetPath: Joi.string()
     .default("./assets")
     .description("Directory path where the webapp assets are stored on disk."),
