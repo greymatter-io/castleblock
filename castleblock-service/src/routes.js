@@ -7,6 +7,7 @@ import Path from "path";
 import slugify from "slugify";
 import glob from "fast-glob";
 import dotenv from "dotenv";
+import url from "url";
 
 import utils from "./utils.js";
 import settings from "./settings.js";
@@ -252,13 +253,18 @@ const routes = [
               return {
                 name: deployment,
                 versions: utils.versions(deployment, settings.assetPath),
-                path: Path.join(settings.appsPath, deployment),
+                path: Path.join(
+                  settings.basePath,
+                  settings.appsPath,
+                  deployment
+                ).replace(/([^:]\/)\/+/g, "$1"),
                 latestManifest: Path.join(
+                  settings.basePath,
                   `${settings.appsPath}`,
                   `${deployment}`,
                   `${utils.latestVersion(deployment, settings.assetPath)}`,
                   "manifest.json"
-                ),
+                ).replace(/([^:]\/)\/+/g, "$1"),
               };
             }
           }
@@ -288,14 +294,14 @@ const routes = [
                   settings.basePath,
                   settings.appsPath,
                   deployment
-                ),
+                ).replace(/([^:]\/)\/+/g, "$1"),
                 latestManifest: Path.join(
                   settings.basePath,
                   settings.appsPath,
                   deployment,
                   utils.latestVersion(deployment, settings.assetPath),
                   "manifest.json"
-                ),
+                ).replace(/([^:]\/)\/+/g, "$1"),
               };
             }
           }
@@ -373,7 +379,7 @@ const routes = [
   },
   {
     method: ["GET", "POST"],
-    path: `/${settings.basePath}/{appName}/{version}/api/{end*}`,
+    path: `/{appName}/{version}/api/{end*}`,
     handler: async (request, h) => {
       const { appName, version, end } = request.params;
       console.log("lets dynamically handle an api request", end);

@@ -22,7 +22,7 @@ const init = async () => {
   await setupPlugins(server);
 
   routes.forEach((route) => {
-    server.route(route);
+    server.route(route, { prefix: settings.basePath });
   });
 
   await server.start();
