@@ -43,8 +43,9 @@ const routes = [
       let htmlFile = fs.readFileSync(homepagePath);
       return utils.injectBasePath(
         htmlFile,
-        `/${Path.join(
+        `${Path.join(
           settings.basePath,
+          settings.appsPath,
           settings.homepage,
           utils.latestVersion(settings.homepage, settings.assetPath)
         )}/`
@@ -173,7 +174,7 @@ const routes = [
       return {
         appPath: appPath,
         url: `http://${settings.host}:${settings.port}/${Path.join(
-          settings.basePath,
+          settings.appsPath,
           appPath
         )}`,
       };
@@ -196,7 +197,7 @@ const routes = [
   },
   {
     method: "DELETE",
-    path: `/${settings.basePath}/{name}/{version}/`,
+    path: `/${settings.appsPath}/{name}/{version}/`,
     handler: (req) => {
       console.debug("REMOVEING", req.params.name, req.params.version);
       adhoc.removeClients(req.params.name, req.params.version);
@@ -251,9 +252,9 @@ const routes = [
               return {
                 name: deployment,
                 versions: utils.versions(deployment, settings.assetPath),
-                path: `/${settings.basePath}/${deployment}`,
+                path: Path.join(settings.appsPath, deployment),
                 latestManifest: Path.join(
-                  `${settings.basePath}`,
+                  `${settings.appsPath}`,
                   `${deployment}`,
                   `${utils.latestVersion(deployment, settings.assetPath)}`,
                   "manifest.json"
@@ -283,11 +284,16 @@ const routes = [
               return {
                 name: deployment,
                 versions: utils.versions(deployment, settings.assetPath),
-                path: `/${settings.basePath}/${deployment}`,
+                path: Path.join(
+                  settings.basePath,
+                  settings.appsPath,
+                  deployment
+                ),
                 latestManifest: Path.join(
-                  `${settings.basePath}`,
-                  `${deployment}`,
-                  `${utils.latestVersion(deployment, settings.assetPath)}`,
+                  settings.basePath,
+                  settings.appsPath,
+                  deployment,
+                  utils.latestVersion(deployment, settings.assetPath),
                   "manifest.json"
                 ),
               };
@@ -305,7 +311,7 @@ const routes = [
   },
   {
     method: "GET",
-    path: `/${settings.basePath}/{file*}`,
+    path: `/${settings.appsPath}/{file*}`,
     handler: {
       directory: {
         path: Path.normalize(`${settings.assetPath}`),
@@ -322,7 +328,7 @@ const routes = [
 
   {
     method: ["GET", "DELETE"],
-    path: `/${settings.basePath}/{appName}/{version}`,
+    path: `/${settings.appsPath}/{appName}/{version}`,
     handler: (req, h) => {
       return h.redirect(`${req.path}/`).permanent();
     },
@@ -330,7 +336,7 @@ const routes = [
 
   {
     method: "GET",
-    path: `/${settings.basePath}/{appName}/{version}/{end*}`,
+    path: `/${settings.appsPath}/{appName}/{version}/{end*}`,
     handler: (request, h) => {
       const v =
         request.params.version == "latest"
@@ -339,7 +345,7 @@ const routes = [
 
       let pathToFile = request.path
         .substring(1)
-        .replace(settings.basePath, settings.assetPath)
+        .replace(settings.appsPath, settings.assetPath)
         .replace("latest", v);
 
       //if a directory is requested append index.html
@@ -347,7 +353,12 @@ const routes = [
         let htmlFile = fs.readFileSync(pathToFile + "index.html");
         return utils.injectBasePath(
           htmlFile,
-          `/${Path.join(settings.basePath, request.params.appName, v)}/`
+          `${Path.join(
+            settings.basePath,
+            settings.appsPath,
+            request.params.appName,
+            v
+          )}/`
         );
       }
 
@@ -356,7 +367,7 @@ const routes = [
       });
     },
     options: {
-      description: `Fetch ${settings.basePath} assets for the latest version of the deployment`,
+      description: `Fetch ${settings.appsPath} assets for the latest version of the deployment`,
       tags: ["api"],
     },
   },

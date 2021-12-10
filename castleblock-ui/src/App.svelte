@@ -8,13 +8,13 @@ import GettingStarted from "./GettingStarted.svelte";
 
 let packages = new Promise((resolve, reject) => {
   return axios
-    .get(`${window.location.origin}/apps`)
+    .get(`${window.location.href}apps`)
     .then((results) => resolve(results.data));
 });
 
 let webcomponents = new Promise((resolve, reject) => {
   return axios
-    .get(`${window.location.origin}/webcomponents`)
+    .get(`${window.location.href}webcomponents`)
     .then((results) => resolve(results.data));
 });
 let hash = window.location.hash;
@@ -55,7 +55,7 @@ onMount(() => {
       <a href="https://github.com/greymatter-io/castleblock#readme">Docs</a>
     </div>
     <div class="navbar-item">
-      <a href="/api">API</a>
+      <a href="{window.location.href}api">API</a>
     </div>
     <div class="navbar-item">
       <div class="buttons">

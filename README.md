@@ -18,7 +18,7 @@ With the `castleblock watch` command developers can do development work in the c
 - Deployment versioning using [Semantic Versioning](https://semver.org/)
 - [Environmental Variable Injection](./castleblock-cli#environmental-variable-injection)
 - [Ad hoc deployments](./castleblock-cli#ad-hoc-deployments)
-- Dynamic Swagger Documentation <http://localhost:3000/documentation>
+- Dynamic Swagger Documentation <http://localhost:3000/api>
 - [manifest.json](./castleblock-cli#manifest.json) files are used to display app information in the CastleBlock UI
 - [OAuth](https://github.com/greymatter-io/castleblock/tree/master/castleblock-service#authentication) support for many oauth [providers](https://hapi.dev/module/bell/providers) for user authentication.
 - [JWT](https://github.com/greymatter-io/castleblock/tree/master/castleblock-service#issuing-jwt-tokens) for authorization

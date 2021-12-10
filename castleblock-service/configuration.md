@@ -16,8 +16,10 @@
 
 - **`statusMonitorEnable`** (type: boolean) : Enables status monitor page at /status
   (default: `true`)
-- **`swaggerDocsEnable`** (type: boolean) : Enables swagger API documentation page at /documentation
+- **`swaggerDocsEnable`** (type: boolean) : Enables swagger API documentation page at /api
   (default: `true`)
+- **`serviceBaseURLPath`** (type: string) : The base URL path for the deployed CastleBlock service. Required if behind a reverse proxy.
+  (default: `"/"`)
 - **`assetPath`** (type: string) : Directory path where the webapp assets are stored on disk.
   (default: `./assets`)
 - **`homepage`** (type: string) : The app that should be displayed as the landing page for the service.

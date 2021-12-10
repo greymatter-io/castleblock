@@ -6,7 +6,7 @@ export let pack = {};
 onMount(() => {
   if (pack.latestManifest) {
     axios
-      .get(`${window.location.origin}/${pack.latestManifest}`)
+      .get(`${window.location.href}${pack.latestManifest}`)
       .then((results) => {
         title = results.data.name;
         description = results.data.description;
@@ -27,7 +27,7 @@ export let icons;
           <img
             class="image is-96x96"
             alt="logo"
-            src="{`${window.location.origin}${pack.path}/latest/${
+            src="{`${window.location.href}${pack.path}/latest/${
               icons.reverse()[icons.length - 1].src
             }`}" />
         </div>
@@ -36,7 +36,7 @@ export let icons;
         <p class="title is-5">
           <a
             target="_blank"
-            href="{`${window.location.origin}${pack.path}/latest/`}"
+            href="{`${window.location.href}${pack.path}/latest/`}"
             >{title || pack.name}</a>
         </p>
         {#if description}
@@ -65,7 +65,7 @@ export let icons;
           {#each pack.versions.reverse() as version, i}
             <a
               target="_blank"
-              href="{`${window.location.origin}${pack.path}/${version}/`}"
+              href="{`${window.location.href}${pack.path}/${version}/`}"
               class="dropdown-item">
               {pack.name} - {version}
               {i == 0 ? "(latest)" : ""}
