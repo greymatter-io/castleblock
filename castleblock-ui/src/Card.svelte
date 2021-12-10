@@ -6,7 +6,7 @@ export let pack = {};
 onMount(() => {
   if (pack.latestManifest) {
     axios
-      .get(`${window.location.href}${pack.latestManifest.slice(1)}`)
+      .get(`${window.location.href}${pack.latestManifest}`)
       .then((results) => {
         title = results.data.name;
         description = results.data.description;
