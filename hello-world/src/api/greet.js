@@ -5,7 +5,7 @@ async function handler(request, h, env) {
       resolve({
         statusCode: 200,
         body: JSON.stringify({
-          message: `Hello, ${name}! Your API Key is ${env.API_KEY}`,
+          message: `Hello, ${name || "world"}!`,
         }),
       });
     }, 1000);
