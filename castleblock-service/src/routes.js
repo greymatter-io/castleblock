@@ -412,7 +412,7 @@ const routes = [
   {
     method: "GET",
     path: `/${settings.basePath}/{appName}/{version}/api/{end*}`,
-    handler: (request, h) => {
+    handler: async (request, h) => {
       const { appName, version, end } = request.params;
       console.log("lets dynamically handle an api request", end);
       const appPath = Path.join(settings.assetPath, appName, version);
@@ -423,21 +423,30 @@ const routes = [
       console.log("apiPath", apiPath);
       console.log("funcPath", funcPath);
       console.log("fileExists", fileExists);
+      console.log("loading");
+      const func = await import(funcPath);
+      console.log("func", func);
+      await func.default();
+      console.log("running", func.default());
 
       // Run the file, gotta pass in the request and get back the result
       // node -e 'require("./db").init()'
       //`npx babel-node -e 'const func = require("${funcPath}"); func.default(${request});`,
-      child_process.execSync(
-        `npx babel-node -e 'import func from "./${funcPath}"; func();'`,
-        (err, stdout, stderr) => {
-          if (err) {
-            console.error("e", err);
-            return;
-          }
-          console.log("stdout", stdout);
-        }
-      );
 
+      /*
+      const out = await new Promise((resolve, reject) => {
+        child_process.exec(`node ${funcPath}`, (error, stdout, stderr) => {
+          console.log(`stdout: ${stdout}`);
+          console.log(`stderr: ${stderr}`);
+          if (error !== null) {
+            console.log(`exec error: ${error}`);
+            reject(error);
+          }
+          resolve(stdout);
+        });
+      });
+
+      */
       return {
         statusCode: 200,
         status: "OK",
