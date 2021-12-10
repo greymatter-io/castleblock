@@ -4,5 +4,5 @@
   "name": "Greet the world",
   "description": "Get a rest endpoint that allows you to greet the world",
   "webcomponent": false,
-  "icons": [{ "src": "./my-app-icon.png" }]
+  "icons": [{ "src": "./world.png" }]
 }
