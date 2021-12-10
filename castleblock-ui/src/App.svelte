@@ -8,13 +8,13 @@ import GettingStarted from "./GettingStarted.svelte";
 
 let packages = new Promise((resolve, reject) => {
   return axios
-    .get(`${window.location.origin}/apps`)
+    .get(`${window.location.href}apps`)
     .then((results) => resolve(results.data));
 });
 
 let webcomponents = new Promise((resolve, reject) => {
   return axios
-    .get(`${window.location.origin}/webcomponents`)
+    .get(`${window.location.href}webcomponents`)
     .then((results) => resolve(results.data));
 });
 let hash = window.location.hash;

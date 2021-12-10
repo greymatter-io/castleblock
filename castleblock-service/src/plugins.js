@@ -12,8 +12,9 @@ import utils from "./utils.js";
 import settings from "./settings.js";
 export default async function setupPlugins(server) {
   await server.register([Inert, H2o2, Vision, susie]);
-  if (!settings.serviceBaseURLPath.endsWith("/")) {
-    settings.serviceBaseURLPath += "/"
+  let basePath = settings.basePath
+  if (!basePath.endsWith("/")) {
+    basePath += "/"
   }
   if (settings.swaggerDocsEnable) {
     await server.register([
@@ -27,10 +28,10 @@ export default async function setupPlugins(server) {
             description: "CastleBlock is a Web Hosting as a Service platform.",
           },
           grouping: "tags",
-          jsonPath: settings.serviceBaseURLPath + "swagger.json",
-          jsonRoutePath: "/swaggerui/swagger.json",
-          swaggerUIPath: settings.serviceBaseURLPath,
-          routesBasePath: "/swaggerui/"
+          jsonPath: basePath + "swagger.json",
+          jsonRoutePath: "/swagger.json",
+          swaggerUIPath: basePath,
+          routesBasePath: "/"
         },
       },
     ]);

@@ -41,8 +41,9 @@ export default [
       let htmlFile = fs.readFileSync(homepagePath);
       return utils.injectBasePath(
         htmlFile,
-        `/${Path.join(
+        `${Path.join(
           settings.basePath,
+          settings.appsPath,
           settings.homepage,
           utils.latestVersion(settings.homepage, settings.assetPath)
         )}/`
@@ -156,7 +157,7 @@ export default [
       return {
         appPath: appPath,
         url: `http://${settings.host}:${settings.port}/${Path.join(
-          settings.basePath,
+          settings.appsPath,
           appPath
         )}`,
       };
@@ -179,7 +180,7 @@ export default [
   },
   {
     method: "DELETE",
-    path: `/${settings.basePath}/{name}/{version}/`,
+    path: `/${settings.appsPath}/{name}/{version}/`,
     handler: (req) => {
       console.debug("REMOVEING", req.params.name, req.params.version);
       adhoc.removeClients(req.params.name, req.params.version);
@@ -234,9 +235,9 @@ export default [
               return {
                 name: deployment,
                 versions: utils.versions(deployment, settings.assetPath),
-                path: `/${settings.basePath}/${deployment}`,
+                path: Path.join(settings.appsPath, deployment),
                 latestManifest: Path.join(
-                  `${settings.basePath}`,
+                  `${settings.appsPath}`,
                   `${deployment}`,
                   `${utils.latestVersion(deployment, settings.assetPath)}`,
                   "manifest.json"
@@ -266,11 +267,12 @@ export default [
               return {
                 name: deployment,
                 versions: utils.versions(deployment, settings.assetPath),
-                path: `/${settings.basePath}/${deployment}`,
+                path: Path.join(settings.basePath, settings.appsPath, deployment),
                 latestManifest: Path.join(
-                  `${settings.basePath}`,
-                  `${deployment}`,
-                  `${utils.latestVersion(deployment, settings.assetPath)}`,
+                  settings.basePath,
+                  settings.appsPath,
+                  deployment,
+                  utils.latestVersion(deployment, settings.assetPath),
                   "manifest.json"
                 ),
               };
@@ -288,7 +290,7 @@ export default [
   },
   {
     method: "GET",
-    path: `/${settings.basePath}/{file*}`,
+    path: `/${settings.appsPath}/{file*}`,
     handler: {
       directory: {
         path: Path.normalize(`${settings.assetPath}`),
@@ -305,7 +307,7 @@ export default [
 
   {
     method: ["GET", "DELETE"],
-    path: `/${settings.basePath}/{appName}/{version}`,
+    path: `/${settings.appsPath}/{appName}/{version}`,
     handler: (req, h) => {
       return h.redirect(`${req.path}/`).permanent();
     },
@@ -313,7 +315,7 @@ export default [
 
   {
     method: "GET",
-    path: `/${settings.basePath}/{appName}/{version}/{end*}`,
+    path: `/${settings.appsPath}/{appName}/{version}/{end*}`,
     handler: (request, h) => {
       const v =
         request.params.version == "latest"
@@ -322,7 +324,7 @@ export default [
 
       let pathToFile = request.path
         .substring(1)
-        .replace(settings.basePath, settings.assetPath)
+        .replace(settings.appsPath, settings.assetPath)
         .replace("latest", v);
 
       //if a directory is requested append index.html
@@ -330,7 +332,7 @@ export default [
         let htmlFile = fs.readFileSync(pathToFile + "index.html");
         return utils.injectBasePath(
           htmlFile,
-          `/${Path.join(settings.basePath, request.params.appName, v)}/`
+          `${Path.join(settings.basePath, settings.appsPath, request.params.appName, v)}/`
         );
       }
 
@@ -339,7 +341,7 @@ export default [
       });
     },
     options: {
-      description: `Fetch ${settings.basePath} assets for the latest version of the deployment`,
+      description: `Fetch ${settings.appsPath} assets for the latest version of the deployment`,
       tags: ["api"],
     },
   },

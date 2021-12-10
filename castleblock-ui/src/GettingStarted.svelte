@@ -42,7 +42,7 @@
     </pre>
           </li>
           <li>
-            Get a <a href="{window.location.origin}/token">token</a>.
+            Get a <a href="{window.location.href}token">token</a>.
           </li>
           <li>
             Deploy your app with castleblock

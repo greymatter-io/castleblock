@@ -35,9 +35,6 @@ const settingsSchema = Joi.object({
   swaggerDocsEnable: Joi.boolean()
     .default(true)
     .description("Enables swagger API documentation page at /api"),
-  serviceBaseURLPath: Joi.string()
-    .default("/")
-    .description("The base URL path for the deployed CastleBlock service. Required if behind a reverse proxy."),
   assetPath: Joi.string()
     .default("./assets")
     .description("Directory path where the webapp assets are stored on disk."),
@@ -47,8 +44,11 @@ const settingsSchema = Joi.object({
       "The app that should be displayed as the landing page for the service."
     ),
   basePath: Joi.string()
+    .default("/")
+    .description("The base relative path for the CastleBlock service. Required if behind a reverse proxy."),
+  appsPath: Joi.string()
     .default("ui")
-    .description("URL basepath where all apps are hosted under"),
+    .description("The relative path to where all apps are hosted under."),
   jwt: Joi.object({
     secret: Joi.string()
       .description("HS256 or HS512 Secret Key. Default is randomly generated.")
