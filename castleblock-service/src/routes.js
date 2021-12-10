@@ -14,55 +14,6 @@ import schemas from "./schemas.js";
 
 import adhoc from "./adhoc.js";
 
-function createApiRoutes(apiPath) {
-  console.log("creating api routes", apiPath);
-  const functions = glob.sync("**/*.js", { cwd: apiPath });
-  console.log("functions", functions);
-
-  functions.map((func) => {
-    // Create a route for this function
-    // need to strip off file extension
-    console.log("func", func);
-    const endpoint = func.split(".")[0];
-    console.log("endpoint", endpoint);
-
-    routes.push({
-      method: "GET",
-      path: `/dynamicapi/${endpoint}`,
-      handler: async (request, h) => {
-        // const funcPath = Path.join(apiPath, func);
-        // const funcModule = require(funcPath);
-        // const func = funcModule.default || funcModule;
-        // console.log("func", func);
-        // const result = await func(request, h);
-        const result = "HELLO WORLD";
-        return result;
-      },
-    });
-  });
-}
-
-function loadDynamicRoutes() {
-  utils.getDirectories(settings.assetPath).map((app) => {
-    console.log("a", app);
-    utils.getDirectories(Path.join(settings.assetPath, app)).map((version) => {
-      console.log("v", version);
-      const appPath = Path.join(settings.assetPath, app, version);
-      const apiPath = Path.join(appPath, "api");
-      console.log("appPath", appPath);
-      console.log("apiPath", apiPath);
-      if (fs.existsSync(appPath)) {
-        const files = fs.readdirSync(appPath);
-        console.log("files", files);
-      }
-      if (fs.existsSync(apiPath)) {
-        console.log("api exists", apiPath);
-        createApiRoutes(apiPath);
-      }
-    });
-  });
-}
-
 const routes = [
   {
     method: "GET",
@@ -478,7 +429,5 @@ const routes = [
     },
   },
 ];
-
-// loadDynamicRoutes();
 
 export default routes;
