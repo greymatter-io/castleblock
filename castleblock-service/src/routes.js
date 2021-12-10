@@ -6,7 +6,7 @@ import Joi from "joi";
 import Path from "path";
 import slugify from "slugify";
 import glob from "fast-glob";
-import child_process from "child_process";
+import dotenv from "dotenv";
 
 import utils from "./utils.js";
 import settings from "./settings.js";
@@ -410,7 +410,7 @@ const routes = [
     },
   },
   {
-    method: "GET",
+    method: ["GET", "POST"],
     path: `/${settings.basePath}/{appName}/{version}/api/{end*}`,
     handler: async (request, h) => {
       const { appName, version, end } = request.params;
@@ -423,30 +423,53 @@ const routes = [
       console.log("apiPath", apiPath);
       console.log("funcPath", funcPath);
       console.log("fileExists", fileExists);
-      console.log("loading");
-      const func = await import(funcPath);
-      console.log("func", func);
-      await func.default();
-      console.log("running", func.default());
+      console.log("loading", funcPath);
+
+      try {
+        const func = require("../" + funcPath);
+        console.log("func?", func);
+        let response;
+        const env = dotenv.parse(
+          fs.readFileSync(Path.join(apiPath, ".env"), "utf8")
+        );
+
+        if (typeof func.default === "function") {
+          response = await func.default(request, h, env);
+        } else {
+          response = await func(request, h, env);
+        }
+        console.log("response?", response);
+        return response;
+      } catch (e) {
+        console.log("error", e);
+      }
+
+      // const func = await import(funcPath);
+      // console.log("func", func);
+      // await func.default();
+      // console.log("running", func.default());
 
       // Run the file, gotta pass in the request and get back the result
       // node -e 'require("./db").init()'
       //`npx babel-node -e 'const func = require("${funcPath}"); func.default(${request});`,
 
-      /*
-      const out = await new Promise((resolve, reject) => {
-        child_process.exec(`node ${funcPath}`, (error, stdout, stderr) => {
-          console.log(`stdout: ${stdout}`);
-          console.log(`stderr: ${stderr}`);
-          if (error !== null) {
-            console.log(`exec error: ${error}`);
-            reject(error);
-          }
-          resolve(stdout);
-        });
-      });
+      // await new Promise((resolve, reject) => {
+      //   child_process.exec(
+      //     `node -e 'require("./${funcPath}")(${JSON.stringify(
+      //       request
+      //     )}, ${h})'`,
+      //     (error, stdout, stderr) => {
+      //       console.log(`stdout: ${stdout}`);
+      //       console.log(`stderr: ${stderr}`);
+      //       if (error !== null) {
+      //         console.log(`exec error: ${error}`);
+      //         reject(error);
+      //       }
+      //       resolve(stdout);
+      //     }
+      //   );
+      // });
 
-      */
       return {
         statusCode: 200,
         status: "OK",

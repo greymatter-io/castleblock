@@ -1,4 +1,7 @@
 export default function handler(request, response) {
-	  const { name } = request.query;
-	  res.end(`Goodbye ${name}!`);
+  const { name } = request.query;
+  return {
+    statusCode: 200,
+    body: `Goodbye, ${name}!`,
+  };
 }
