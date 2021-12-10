@@ -235,7 +235,7 @@ export default [
               return {
                 name: deployment,
                 versions: utils.versions(deployment, settings.assetPath),
-                path: Path.join(settings.appsPath, deployment),
+                path: Path.join("/", settings.appsPath, deployment),
                 latestManifest: Path.join(
                   `${settings.appsPath}`,
                   `${deployment}`,
@@ -267,7 +267,11 @@ export default [
               return {
                 name: deployment,
                 versions: utils.versions(deployment, settings.assetPath),
-                path: Path.join(settings.basePath, settings.appsPath, deployment),
+                path: Path.join(
+                  settings.basePath,
+                  settings.appsPath,
+                  deployment
+                ),
                 latestManifest: Path.join(
                   settings.basePath,
                   settings.appsPath,
@@ -332,7 +336,12 @@ export default [
         let htmlFile = fs.readFileSync(pathToFile + "index.html");
         return utils.injectBasePath(
           htmlFile,
-          `${Path.join(settings.basePath, settings.appsPath, request.params.appName, v)}/`
+          `${Path.join(
+            settings.basePath,
+            settings.appsPath,
+            request.params.appName,
+            v
+          )}/`
         );
       }
 
