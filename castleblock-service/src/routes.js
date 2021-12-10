@@ -235,7 +235,7 @@ export default [
               return {
                 name: deployment,
                 versions: utils.versions(deployment, settings.assetPath),
-                path: Path.join("/", settings.appsPath, deployment),
+                path: Path.join(settings.appsPath, deployment),
                 latestManifest: Path.join(
                   `${settings.appsPath}`,
                   `${deployment}`,
