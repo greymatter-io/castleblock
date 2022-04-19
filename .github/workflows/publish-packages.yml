@@ -19,6 +19,9 @@ jobs:
           context: ./castleblock-service/
           contextName: Dockerfile
           containerRegistry: true
+          tag: |
+            latest
+            $VERSION
       - name: Print Image URL
         run: echo ${{ steps.publish.outputs.imageURL }}
   npm-publish:
