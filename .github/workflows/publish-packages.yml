@@ -42,8 +42,13 @@ jobs:
           diff-search: true
           assume-same-version: old
           static-checking: localIsNew
-      - name: Version update detected
+      - name: Publish to npmjs.com
         if: steps.check.outputs.changed == 'true'
         run: npm publish ./castleblock-cli/
         env:
           NODE_AUTH_TOKEN: ${{secrets.NODE_AUTH_TOKEN}}
+      - name: Publish to github
+        if: steps.check.outputs.changed == 'true'
+        run: npm publish --registry=https://npm.pkg.github.com ./castleblock-cli/
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
